@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Registros Diarios">
+<meta name="theme-color" content="#f7f6f3">
+<link rel="manifest" href="data:application/json,{
+  %22name%22:%22Gestor de Registros Diarios%22,
+  %22short_name%22:%22Registros%22,
+  %22start_url%22:%22.%22,
+  %22display%22:%22standalone%22,
+  %22background_color%22:%22%23f7f6f3%22,
+  %22theme_color%22:%22%23f7f6f3%22,
+  %22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231a1916'/%3E%3Ctext y='.9em' font-size='70' x='12'%3E📋%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22any%22,%22type%22:%22image/svg+xml%22}]
+}">
+<title>Gestor de Registros Diarios</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface2: #f0ede8;
+    --border: #e0dbd2;
+    --border2: #c8c2b8;
+    --text: #1a1916;
+    --text2: #6b6560;
+    --text3: #9e9890;
+    --green: #2d6a4f;
+    --green-bg: #eaf4ee;
+    --green-border: #b7dfc7;
+    --red: #a33030;
+    --red-bg: #fdf0f0;
+    --red-border: #f0c0c0;
+    --amber: #8a5a00;
+    --amber-bg: #fdf6e3;
+    --amber-border: #f0d890;
+    --blue: #1a4f8a;
+    --blue-bg: #eef4fc;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); font-family: -apple-system, 'Helvetica Neue', sans-serif; color: var(--text); font-size: 14px; line-height: 1.5; }
+  .layout { max-width: 860px; margin: 0 auto; padding: 32px 20px; }
+  .header { margin-bottom: 28px; }
+  .header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 4px; }
+  .header p { color: var(--text2); font-size: 13px; }
+  .db-bar { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 24px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border2); flex-shrink: 0; transition: background .3s; }
+  .dot.active { background: var(--green); }
+  .db-bar span { font-size: 13px; color: var(--text2); flex: 1; }
+  .db-actions { display: flex; gap: 8px; }
+  .btn-ghost { font-size: 12px; padding: 5px 10px; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: transparent; color: var(--text2); cursor: pointer; }
+  .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+  .btn-ghost.danger { border-color: var(--red-border); color: var(--red); }
+  .btn-ghost.danger:hover { background: var(--red-bg); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+  .card-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text3); margin-bottom: 12px; }
+  .upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .uzone { border: 1px dashed var(--border2); border-radius: var(--radius-sm); padding: 12px; cursor: pointer; transition: all .15s; text-align: center; min-height: 68px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
+  .uzone:hover { border-color: var(--blue); background: var(--blue-bg); }
+  .uzone.done { border-style: solid; border-color: var(--green-border); background: var(--green-bg); }
+  .uzone.done:hover { border-color: var(--green); }
+  .uz-label { font-size: 12px; font-weight: 600; color: var(--text); }
+  .uz-sub { font-size: 11px; color: var(--text3); }
+  .uz-ok { font-size: 11px; color: var(--green); font-weight: 500; }
+  input[type=file] { display: none; }
+  .btn-load { width: 100%; margin-top: 12px; padding: 9px; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text); font-size: 13px; font-weight: 500; cursor: pointer; display: none; }
+  .btn-load:hover { background: var(--border); }
+  .btn-primary { width: 100%; padding: 11px; border: 1px solid var(--text); border-radius: var(--radius-sm); background: var(--text); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: .01em; }
+  .btn-primary:hover { opacity: .88; }
+  .btn-primary:disabled { opacity: .35; cursor: not-allowed; }
+  .results { display: none; margin-top: 16px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; }
+  .stat-val { font-size: 26px; font-weight: 600; letter-spacing: -1px; color: var(--text); }
+  .stat-val.green { color: var(--green); }
+  .stat-val.red { color: var(--red); }
+  .stat-val.amber { color: var(--amber); }
+  .stat-lbl { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; margin-top: 2px; }
+  .toolbar { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; flex-wrap: wrap; }
+  .tabs { display: flex; gap: 4px; }
+  .tab { font-size: 12px; padding: 5px 12px; border: 1px solid var(--border); border-radius: 20px; cursor: pointer; background: var(--surface); color: var(--text2); }
+  .tab:hover { border-color: var(--border2); color: var(--text); }
+  .tab.active { background: var(--text); color: #fff; border-color: var(--text); }
+  .filter-select { font-size: 12px; padding: 5px 10px; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); cursor: pointer; }
+  .tbl-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; max-height: 300px; overflow-y: auto; margin-bottom: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
+  th { background: var(--surface2); padding: 8px 10px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); border-bottom: 1px solid var(--border); position: sticky; top: 0; }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  tr.dup td { background: var(--red-bg); }
+  tr.ndup td { background: var(--amber-bg); }
+  .badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .b-ok { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .b-dup { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  .b-ndup { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+  .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text3); margin-bottom: 10px; }
+  .dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .btn-dl { padding: 10px; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-size: 13px; font-weight: 500; cursor: pointer; text-align: center; }
+  .btn-dl:hover { background: var(--surface2); }
+  .btn-dl .dl-count { font-size: 11px; color: var(--text3); display: block; margin-top: 2px; }
+  .btn-save { width: 100%; padding: 11px; border: 1px solid var(--green-border); border-radius: var(--radius-sm); background: var(--green-bg); color: var(--green); font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 8px; }
+  .btn-save:hover { background: #d4eddf; }
+  .reporte-box { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; margin-top: 12px; }
+  .reporte-box p { font-size: 12px; color: var(--text3); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .05em; font-weight: 600; }
+  .reporte-text { font-size: 15px; color: var(--text); line-height: 1.6; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 8px; white-space: pre-wrap; }
+  .btn-copy { width: 100%; padding: 9px; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-size: 13px; font-weight: 500; cursor: pointer; }
+  .btn-copy:hover { background: var(--surface2); }
+  .empty-msg { text-align: center; padding: 28px; color: var(--text3); font-size: 13px; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 100; }
+  .toast.show { opacity: 1; }
+  @media (max-width: 600px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .upload-grid { grid-template-columns: 1fr; }
+    .dl-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <div class="header">
+    <h1>Gestor de registros diarios</h1>
+    <p>ALF · FGR · SPC — Detección de duplicados y entrega diaria</p>
+  </div>
+
+  <div class="db-bar">
+    <div class="dot" id="db-dot"></div>
+    <span id="db-text">Base vacía — carga el histórico la primera vez</span>
+    <div class="db-actions">
+      <button class="btn-ghost" onclick="exportBase()">Exportar base</button>
+      <button class="btn-ghost" onclick="importBase()">Importar base</button>
+      <button class="btn-ghost danger" onclick="resetBase()">Limpiar base</button>
+    </div>
+  </div>
+  <div id="backup-bar" style="display:none;align-items:center;gap:10px;border:1px solid var(--amber-border);background:var(--amber-bg);border-radius:var(--radius);padding:10px 16px;margin-bottom:12px">
+    <span style="font-size:13px;color:var(--amber);flex:1"><span id="backup-msg"></span> <span id="backup-days" style="opacity:.7;font-size:12px"></span></span>
+    <button class="btn-ghost" onclick="exportBase()" style="border-color:var(--amber-border);color:var(--amber)">Exportar ahora</button>
+  </div>
+  <div id="install-bar" style="display:none;align-items:center;gap:10px;background:var(--blue-bg);border:1px solid #b5d4f4;border-radius:var(--radius);padding:10px 16px;margin-bottom:12px">
+    <span style="font-size:13px;color:var(--blue);flex:1">Instala esta herramienta como app en tu Mac o iPhone</span>
+    <button class="btn-ghost" onclick="installApp()" style="border-color:#b5d4f4;color:var(--blue)">Instalar app</button>
+    <button class="btn-ghost" onclick="document.getElementById('install-bar').style.display='none'">✕</button>
+  </div>
+  <input type="file" id="f-import-base" accept=".json" onchange="doImportBase(this)">
+
+  <div class="card">
+    <p class="card-title">Histórico inicial (solo la primera vez)</p>
+    <div class="upload-grid">
+      <div class="uzone" id="zh-alf" onclick="document.getElementById('fh-alf').click()">
+        <span class="uz-label">ALF histórico</span>
+        <span class="uz-sub">.xls / .xlsx</span>
+        <span class="uz-ok" id="sh-alf" style="display:none"></span>
+      </div>
+      <div class="uzone" id="zh-fgr" onclick="document.getElementById('fh-fgr').click()">
+        <span class="uz-label">FGR histórico</span>
+        <span class="uz-sub">.xls / .xlsx</span>
+        <span class="uz-ok" id="sh-fgr" style="display:none"></span>
+      </div>
+      <div class="uzone" id="zh-spc" onclick="document.getElementById('fh-spc').click()">
+        <span class="uz-label">SPC histórico</span>
+        <span class="uz-sub">.xls / .xlsx</span>
+        <span class="uz-ok" id="sh-spc" style="display:none"></span>
+      </div>
+    </div>
+    <input type="file" id="fh-alf" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'alf')">
+    <input type="file" id="fh-fgr" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'fgr')">
+    <input type="file" id="fh-spc" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'spc')">
+    <button class="btn-load" id="btn-load-hist" onclick="loadHist()">Cargar histórico a la base</button>
+  </div>
+
+  <div class="card">
+    <p class="card-title">Registros de hoy</p>
+    <div class="upload-grid">
+      <div class="uzone" id="zn-alf" onclick="document.getElementById('fn-alf').click()">
+        <span class="uz-label">ALF — hoy</span>
+        <span class="uz-sub">.xlsx de hoy</span>
+        <span class="uz-ok" id="sn-alf" style="display:none"></span>
+      </div>
+      <div class="uzone" id="zn-fgr" onclick="document.getElementById('fn-fgr').click()">
+        <span class="uz-label">FGR — hoy</span>
+        <span class="uz-sub">.xlsx de hoy</span>
+        <span class="uz-ok" id="sn-fgr" style="display:none"></span>
+      </div>
+      <div class="uzone" id="zn-spc" onclick="document.getElementById('fn-spc').click()">
+        <span class="uz-label">SPC — hoy</span>
+        <span class="uz-sub">.xlsx de hoy</span>
+        <span class="uz-ok" id="sn-spc" style="display:none"></span>
+      </div>
+    </div>
+    <input type="file" id="fn-alf" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'alf')">
+    <input type="file" id="fn-fgr" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'fgr')">
+    <input type="file" id="fn-spc" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'spc')">
+  </div>
+
+  <button class="btn-primary" id="btn-run" onclick="run()" disabled>Analizar registros</button>
+
+  <div class="results" id="results">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px" id="ultimos-row"></div>
+    <div class="stats" id="stats-row"></div>
+
+    <div class="card" style="padding:16px">
+      <div class="toolbar">
+        <div class="tabs" id="tabs-row"></div>
+        <select class="filter-select" id="filter-status" onchange="renderTable()">
+          <option value="all">Todos</option>
+          <option value="ok">Solo nuevos únicos</option>
+          <option value="dup">Solo duplicados en base</option>
+          <option value="ndup">Solo duplicados entre hoy</option>
+        </select>
+      </div>
+      <div class="tbl-wrap"><div id="tbl-container"></div></div>
+    </div>
+
+    <div class="card">
+      <p class="section-label">Descargar registros únicos de hoy</p>
+      <button class="btn-primary" onclick="downloadAll()" style="margin-bottom:8px">Descargar los 3 archivos de un solo clic</button>
+      <div class="dl-grid" id="dl-grid"></div>
+      <button class="btn-save" onclick="saveToBase()">Guardar registros únicos en la base → listo para mañana</button>
+
+      <div class="reporte-box">
+        <p>Reporte para WhatsApp</p>
+        <div class="reporte-text" id="reporte-text"></div>
+        <button class="btn-copy" onclick="copyReporte()">Copiar reporte</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCHEMAS = {
+  ALF: ['created_time','ad_name','first_name','phone_number','describe_brevemente_tu_situación'],
+  FGR: ['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_fraude_sufriste?_explícanos_brevemente'],
+  SPC: ['created_time','ad_name','full_name','phone_number','¿qué_sucedió_exactamente?__describe_brevemente_lo_que_ocurrió_en_tu_caso'],
+};
+const NAME_COL = {ALF:'first_name', FGR:'full_name', SPC:'full_name'};
+const DESC_COL = {
+  ALF:'describe_brevemente_tu_situación',
+  FGR:'¿qué_tipo_de_fraude_sufriste?_explícanos_brevemente',
+  SPC:'¿qué_sucedió_exactamente?__describe_brevemente_lo_que_ocurrió_en_tu_caso'
+};
+
+const histFiles={}, newFiles={}, newRaw={};
+let allResults=[], activeTab='all';
+
+function normalize(p){
+  if(!p) return '';
+  return String(p).replace(/^p:/i,'').replace(/\D/g,'').replace(/^521/,'52').slice(-10);
+}
+
+function getBase(){ try{ return JSON.parse(localStorage.getItem('leads_base')||'[]'); }catch(e){ return []; } }
+function setBase(arr){ localStorage.setItem('leads_base', JSON.stringify(arr)); }
+
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+
+function installApp(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(){ deferredPrompt=null; });
+  } else {
+    alert('Para instalar en iPhone: abre esta página en Safari → botón compartir → "Agregar a pantalla de inicio"');
+  }
+}
+
+function checkBackupReminder(){
+  const last=localStorage.getItem('leads_last_backup');
+  const bar=document.getElementById('backup-bar');
+  if(!bar) return;
+  if(!last){
+    bar.style.display='flex';
+    bar.querySelector('#backup-msg').textContent='Nunca has exportado la base — te recomendamos hacerlo hoy';
+    bar.style.borderColor='var(--red-border)';
+    bar.style.background='var(--red-bg)';
+    bar.querySelector('#backup-days').textContent='';
+    return;
+  }
+  const days=Math.floor((Date.now()-parseInt(last))/(1000*60*60*24));
+  if(days>=7){
+    bar.style.display='flex';
+    bar.querySelector('#backup-msg').textContent='Lleva '+days+' días sin exportar la base';
+    bar.querySelector('#backup-days').textContent='Último respaldo: '+new Date(parseInt(last)).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
+    bar.style.borderColor='var(--amber-border)';
+    bar.style.background='var(--amber-bg)';
+  } else {
+    bar.style.display='none';
+  }
+}
+
+function updateDbInfo(){
+  const b=getBase();
+  const dot=document.getElementById('db-dot');
+  const txt=document.getElementById('db-text');
+  if(b.length){
+    dot.classList.add('active');
+    const src={};
+    b.forEach(r=>{ src[r._source]=(src[r._source]||0)+1; });
+    const parts=Object.entries(src).map(([k,v])=>`${k}: ${v}`).join(' · ');
+    txt.textContent=`Base activa — ${b.length} registros totales (${parts})`;
+  } else {
+    dot.classList.remove('active');
+    txt.textContent='Base vacía — carga el histórico la primera vez';
+  }
+}
+
+async function parseFile(file){
+  const buf=await file.arrayBuffer();
+  const wb=XLSX.read(buf,{type:'array',cellDates:true});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  return XLSX.utils.sheet_to_json(ws,{defval:''});
+}
+
+function handleHist(input,key){
+  if(!input.files[0]) return;
+  histFiles[key]=input.files[0];
+  document.getElementById('zh-'+key).classList.add('done');
+  const s=document.getElementById('sh-'+key);
+  s.style.display='block'; s.textContent='✓ '+input.files[0].name;
+  const btn=document.getElementById('btn-load-hist');
+  btn.style.display='block'; btn.disabled=false; btn.textContent='Cargar histórico a la base';
+}
+
+function handleNew(input,key){
+  newFiles[key]=input.files[0];
+  document.getElementById('zn-'+key).classList.add('done');
+  const s=document.getElementById('sn-'+key);
+  s.style.display='block'; s.textContent='✓ '+input.files[0].name;
+  document.getElementById('btn-run').disabled=!['alf','fgr','spc'].some(k=>newFiles[k]);
+}
+
+async function loadHist(){
+  const btn=document.getElementById('btn-load-hist');
+  btn.textContent='Cargando...'; btn.disabled=true;
+  const base=getBase();
+  const phones=new Set(base.map(r=>normalize(r.phone_number||'')));
+  const labels={alf:'ALF',fgr:'FGR',spc:'SPC'};
+  let added=0;
+  for(const [key,label] of Object.entries(labels)){
+    if(!histFiles[key]) continue;
+    const rows=await parseFile(histFiles[key]);
+    for(const row of rows){
+      // soporta maestro CSV (solo phone_number) y archivos completos de Facebook
+      const phone=row.phone_number||row.telefono||row.phone||'';
+      const n=normalize(phone);
+      if(n && !phones.has(n)){
+        phones.add(n);
+        const src=row.fuente||row._source||label;
+        base.push({phone_number:phone, _source:src});
+        added++;
+      }
+    }
+  }
+  setBase(base); updateDbInfo();
+  btn.textContent=`✓ ${added} registros cargados`; btn.disabled=false;
+  toast(`Histórico cargado: ${added} registros`);
+}
+
+async function run(){
+  const btn=document.getElementById('btn-run');
+  btn.disabled=true; btn.textContent='Procesando...';
+  const base=getBase();
+  const basePhones=new Set(base.map(r=>normalize(r.phone_number||'')));
+  const labels={alf:'ALF',fgr:'FGR',spc:'SPC'};
+  const todayRows=[];
+  for(const [key,label] of Object.entries(labels)){
+    if(!newFiles[key]) continue;
+    const rows=await parseFile(newFiles[key]);
+    newRaw[label]=rows;
+    rows.forEach(row=>todayRows.push({...row,_source:label}));
+  }
+  const seenToday=new Map();
+  todayRows.forEach(row=>{
+    const n=normalize(row.phone_number||'');
+    if(!n) return;
+    if(!seenToday.has(n)) seenToday.set(n,[]);
+    seenToday.get(n).push(row);
+  });
+  allResults=todayRows.map(row=>{
+    const n=normalize(row.phone_number||'');
+    let status='ok';
+    if(n && basePhones.has(n)) status='dup';
+    else if(n && seenToday.get(n)?.length>1) status='ndup';
+    const src=row._source;
+    return {
+      _status:status, _source:src, _phone_norm:n,
+      fecha:(function(){
+        const d=new Date(row.created_time||'');
+        if(isNaN(d)) return String(row.created_time||'').slice(0,10);
+        return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+      })(),
+      nombre:row[NAME_COL[src]]||row.first_name||row.full_name||'',
+      telefono:row.phone_number||'',
+      anuncio:row.ad_name||'',
+      descripcion:row[DESC_COL[src]]||'',
+      _raw:row,
+    };
+  });
+
+  const total=allResults.length;
+  const dups=allResults.filter(r=>r._status==='dup').length;
+  const ndups=allResults.filter(r=>r._status==='ndup').length;
+  const clean=allResults.filter(r=>r._status==='ok').length;
+
+  document.getElementById('stats-row').innerHTML=`
+    <div class="stat"><div class="stat-val">${total}</div><div class="stat-lbl">Total hoy</div></div>
+    <div class="stat"><div class="stat-val red">${dups}</div><div class="stat-lbl">En base</div></div>
+    <div class="stat"><div class="stat-val amber">${ndups}</div><div class="stat-lbl">Dup entre hoy</div></div>
+    <div class="stat"><div class="stat-val green">${clean}</div><div class="stat-lbl">Únicos nuevos</div></div>
+  `;
+
+  const sources=[...new Set(allResults.map(r=>r._source))];
+  document.getElementById('tabs-row').innerHTML=
+    `<div class="tab active" onclick="setTab('all',this)">Todas</div>`+
+    sources.map(s=>`<div class="tab" onclick="setTab('${s}',this)">${s}</div>`).join('');
+
+  // download buttons with counts
+  const dlGrid=document.getElementById('dl-grid');
+  dlGrid.innerHTML=['ALF','FGR','SPC'].map(src=>{
+    const cnt=allResults.filter(r=>r._source===src&&r._status==='ok').length;
+    return `<button class="btn-dl" onclick="downloadPage('${src}')">
+      Descargar ${src}
+      <span class="dl-count">${cnt} registros únicos</span>
+    </button>`;
+  }).join('');
+
+  // reporte
+  const today=new Date().toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
+  const alfC=allResults.filter(r=>r._source==='ALF'&&r._status==='ok').length;
+  const fgrC=allResults.filter(r=>r._source==='FGR'&&r._status==='ok').length;
+  const spcC=allResults.filter(r=>r._source==='SPC'&&r._status==='ok').length;
+  const descartados=dups+ndups;
+  document.getElementById('reporte-text').textContent=
+    `Reporte ${today}\nALF: ${alfC} registros\nFGR: ${fgrC} registros\nSPC: ${spcC} registros\nTotal: ${clean} registros\nDuplicados descartados: ${descartados}`;
+
+  const srcLabels=['ALF','FGR','SPC'];
+  let ultimosHTML='';
+  for(const src of srcLabels){
+    const srcRows=allResults.filter(r=>r._source===src);
+    if(!srcRows.length) continue;
+    const last=srcRows.reduce((a,b)=>new Date(a._raw.created_time)>new Date(b._raw.created_time)?a:b);
+    const d=new Date(last._raw.created_time);
+    const fecha=!isNaN(d)?d.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}):'';
+    ultimosHTML+='<div style="flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:4px">'+src+' — último registro</div><div style="font-size:13px;font-weight:600;color:var(--text)">'+(last.nombre||'—')+'</div><div style="font-size:12px;color:var(--text2)">'+fecha+'</div></div>';
+  }
+  document.getElementById('ultimos-row').innerHTML=ultimosHTML;
+  document.getElementById('results').style.display='block';
+  renderTable();
+  btn.textContent='Analizar registros'; btn.disabled=false;
+}
+
+function setTab(t,el){
+  activeTab=t;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+
+function renderTable(){
+  const filter=document.getElementById('filter-status').value;
+  let rows=allResults;
+  if(activeTab!=='all') rows=rows.filter(r=>r._source===activeTab);
+  if(filter!=='all') rows=rows.filter(r=>r._status===filter);
+  if(!rows.length){
+    document.getElementById('tbl-container').innerHTML='<div class="empty-msg">No hay registros con ese filtro.</div>';
+    return;
+  }
+  const bmap={
+    dup:'<span class="badge b-dup">dup base</span>',
+    ndup:'<span class="badge b-ndup">dup hoy</span>',
+    ok:'<span class="badge b-ok">nuevo</span>'
+  };
+  const trs=rows.map(r=>`<tr class="${r._status==='dup'?'dup':r._status==='ndup'?'ndup':''}">
+    <td style="width:145px">${r.fecha}</td>
+    <td style="width:46px">${r._source}</td>
+    <td style="width:140px">${r.nombre}</td>
+    <td style="width:110px">${r.telefono}</td>
+    <td style="width:95px">${bmap[r._status]}</td>
+    <td>${r.descripcion}</td>
+  </tr>`).join('');
+  document.getElementById('tbl-container').innerHTML=`<table>
+    <thead><tr>
+      <th style="width:145px">Fecha</th>
+      <th style="width:46px">Pág</th>
+      <th style="width:140px">Nombre</th>
+      <th style="width:110px">Teléfono</th>
+      <th style="width:95px">Estado</th>
+      <th>Descripción</th>
+    </tr></thead><tbody>${trs}</tbody>
+  </table>`;
+}
+
+function downloadAll(){
+  const sources=['ALF','FGR','SPC'];
+  let downloaded=0;
+  for(const src of sources){
+    const rows=allResults.filter(r=>r._source===src&&r._status==='ok');
+    if(!rows.length) continue;
+    setTimeout(function(s){ downloadPage(s); }, downloaded*800, src);
+    downloaded++;
+  }
+  if(!downloaded){ alert('No hay registros únicos para descargar.'); }
+}
+
+function downloadPage(src){
+  const cols=SCHEMAS[src];
+  const rows=allResults.filter(r=>r._source===src&&r._status==='ok').map(r=>r._raw);
+  if(!rows.length){ alert('No hay registros únicos de '+src+' hoy.'); return; }
+  const clean=rows.map(r=>{ 
+    const o={}; 
+    cols.forEach(c=>{
+      if(c==='created_time' && r[c]){
+        const d=new Date(r[c]);
+        if(!isNaN(d)) o[c]=d.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});
+        else o[c]=String(r[c]).slice(0,10);
+      } else {
+        o[c]=r[c]!==undefined?r[c]:'';
+      }
+    }); 
+    return o; 
+  });
+  const ws=XLSX.utils.json_to_sheet(clean,{header:cols});
+  ws['!cols']=[{wch:22},{wch:10},{wch:28},{wch:16},{wch:60}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,src);
+  const today=new Date().toISOString().slice(0,10);
+  const wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  const blob=new Blob([wbout],{type:'application/octet-stream'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=src+'_'+today+'.xlsx';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },1000);
+  toast(src+' descargado');
+}
+
+function saveToBase(){
+  const unique=allResults.filter(r=>r._status==='ok');
+  if(!unique.length){ alert('No hay registros únicos para guardar.'); return; }
+  const base=getBase();
+  const phones=new Set(base.map(r=>normalize(r.phone_number||'')));
+  let added=0;
+  for(const r of unique){
+    const n=normalize(r.telefono);
+    if(n&&!phones.has(n)){ phones.add(n); base.push({...r._raw,_source:r._source}); added++; }
+  }
+  setBase(base); updateDbInfo();
+  toast(`✓ ${added} registros guardados en la base`);
+}
+
+function copyReporte(){
+  const txt=document.getElementById('reporte-text').textContent;
+  navigator.clipboard.writeText(txt).then(()=>toast('Reporte copiado')).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=txt; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('Reporte copiado');
+  });
+}
+
+function exportBase(){
+  const base=getBase();
+  if(!base.length){ alert('La base está vacía.'); return; }
+  const blob=new Blob([JSON.stringify(base,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='base_registros.json';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },1000);
+  localStorage.setItem('leads_last_backup', Date.now().toString());
+  checkBackupReminder();
+  toast('Base exportada');
+}
+
+function importBase(){ document.getElementById('f-import-base').click(); }
+
+function doImportBase(input){
+  const f=input.files[0]; if(!f) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!Array.isArray(data)) throw new Error();
+      setBase(data); updateDbInfo();
+      toast(`Base importada: ${data.length} registros`);
+    }catch(err){ alert('Archivo inválido.'); }
+  };
+  reader.readAsText(f);
+}
+
+function resetBase(){
+  if(!confirm('¿Segura que quieres limpiar toda la base? Esta acción no se puede deshacer.')) return;
+  localStorage.removeItem('leads_base');
+  updateDbInfo();
+  toast('Base limpiada');
+}
+
+updateDbInfo();
+checkBackupReminder();
+
+// PWA install
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();
+  deferredPrompt=e;
+  document.getElementById('install-bar').style.display='flex';
+});
+window.addEventListener('appinstalled',function(){
+  document.getElementById('install-bar').style.display='none';
+  toast('App instalada correctamente');
+});
+
+// Service worker para funcionamiento offline
+if('serviceWorker' in navigator){
+  const swCode=`
+    const CACHE='registros-v1';
+    const FILES=['/'];
+    self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES))));
+    self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
+  `;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(function(){});
+}
+</script>
+</body>
+</html>
