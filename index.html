@@ -101,7 +101,7 @@ tr.ndup td{background:var(--amber-bg)}
 <div class="layout">
   <div class="header">
     <h1>Gestor de registros diarios</h1>
-    <span class="ver">v1.3</span>
+    <span class="ver">v1.4</span>
   </div>
   <div class="nav-tabs">
     <div class="nav-tab active" onclick="switchView('diario',this)">Diario</div>
@@ -321,7 +321,7 @@ async function loadHist(){
     for(const row of rows){
       const phone=row.phone_number||row.telefono||row.phone||'';
       const n=normalize(phone);
-      if(n&&!phones.has(n)){phones.add(n);base.push({phone_number:phone,_source:row.fuente||row._source||label});added++;}
+      if(n&&!phones.has(n)){phones.add(n);base.push({...row,phone_number:phone,_source:row.fuente||row._source||label});added++;}
     }
   }
   setBase(base);updateDbInfo();btn.textContent='✓ '+added+' registros cargados';btn.disabled=false;
