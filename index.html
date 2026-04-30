@@ -501,7 +501,7 @@ function renderBase(){
   let base=getBase();
   if(srcFilter!=='all')base=base.filter(r=>r._source===srcFilter);
   if(query)base=base.filter(r=>{
-    const name=(r.first_name||r.full_name||'').toLowerCase();
+    const name=(r.first_name||r.full_name||r['full_name']||r['first_name']||Object.values(r).filter(v=>typeof v==='string'&&v.length>2&&v.length<60&&isNaN(v)).join(' ')||'').toLowerCase();
     const phone=normalize(r.phone_number||'');
     return name.includes(query)||phone.includes(query.replace(/\D/g,''));
   });
