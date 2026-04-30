@@ -421,8 +421,8 @@ async function run(){
   // download buttons with counts
   const dlGrid=document.getElementById('dl-grid');
   dlGrid.innerHTML=['ALF','FGR','SPC'].map(src=>{
-    const cnt=allResults.filter(r=>r._source===src&&r._status==='ok').length;
-    return `<button class="btn-dl" onclick="downloadPage('${src}')">
+    const cnt=allResults.filter(r=>r._source===src&&(r._status==='ok'||r._keep)).length;
+    return `<button class="btn-dl" data-src="${src}" onclick="downloadPage('${src}')">
       Descargar ${src}
       <span class="dl-count">${cnt} registros únicos</span>
     </button>`;
@@ -494,6 +494,29 @@ function renderTable(){
   </table>`;
 }
 
+function toggleKeep(idx, cb){
+  allResults[idx]._keep=cb.checked;
+  // if checking this one, uncheck others with same phone
+  const phone=allResults[idx]._phone_norm;
+  if(cb.checked){
+    allResults.forEach((r,i)=>{
+      if(i!==idx && r._phone_norm===phone && r._status==='ndup'){
+        r._keep=false;
+      }
+    });
+  }
+  renderTable();
+  // update dl counts
+  const dlGrid=document.getElementById('dl-grid');
+  if(dlGrid){
+    ['ALF','FGR','SPC'].forEach(src=>{
+      const cnt=allResults.filter(r=>r._source===src&&(r._status==='ok'||r._keep)).length;
+      const btn=dlGrid.querySelector(`[data-src="${src}"]`);
+      if(btn) btn.querySelector('.dl-count').textContent=cnt+' registros únicos';
+    });
+  }
+}
+
 function downloadAll(){
   const sources=['ALF','FGR','SPC'];
   let downloaded=0;
@@ -508,7 +531,7 @@ function downloadAll(){
 
 function downloadPage(src){
   const cols=SCHEMAS[src];
-  const rows=allResults.filter(r=>r._source===src&&r._status==='ok').map(r=>r._raw);
+  const rows=allResults.filter(r=>r._source===src&&(r._status==='ok'||r._keep)).map(r=>r._raw);
   if(!rows.length){ alert('No hay registros únicos de '+src+' hoy.'); return; }
   const clean=rows.map(r=>{ 
     const o={}; 
@@ -539,7 +562,7 @@ function downloadPage(src){
 }
 
 function saveToBase(){
-  const unique=allResults.filter(r=>r._status==='ok');
+  const unique=allResults.filter(r=>r._status==='ok'||r._keep);
   if(!unique.length){ alert('No hay registros únicos para guardar.'); return; }
   const base=getBase();
   const phones=new Set(base.map(r=>normalize(r.phone_number||'')));
