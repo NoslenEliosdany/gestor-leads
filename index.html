@@ -108,11 +108,10 @@ tr.ndup td{background:var(--amber-bg)}
     <div class="nav-tab" onclick="switchView('base',this)">Base de datos</div>
   </div>
 
-  <!-- DIARIO -->
   <div class="view active" id="view-diario">
     <div class="db-bar">
       <div class="dot" id="db-dot"></div>
-      <span class="db-bar-text" id="db-text">Base vacía</span>
+      <span class="db-bar-text" id="db-text">Base vacia</span>
       <div class="db-actions">
         <button class="btn-ghost" onclick="exportBase()">Exportar</button>
         <button class="btn-ghost" onclick="importBase()">Importar</button>
@@ -128,24 +127,24 @@ tr.ndup td{background:var(--amber-bg)}
     <div class="ultimos-row" id="ultimos-guardados"></div>
 
     <div class="card">
-      <p class="card-title">Histórico inicial (solo la primera vez)</p>
+      <p class="card-title">Historico inicial (solo la primera vez)</p>
       <div class="upload-grid">
-        <div class="uzone" id="zh-alf" onclick="document.getElementById('fh-alf').click()"><span class="uz-label">ALF histórico</span><span class="uz-sub">.xls / .xlsx</span><span class="uz-ok" id="sh-alf" style="display:none"></span></div>
-        <div class="uzone" id="zh-fgr" onclick="document.getElementById('fh-fgr').click()"><span class="uz-label">FGR histórico</span><span class="uz-sub">.xls / .xlsx</span><span class="uz-ok" id="sh-fgr" style="display:none"></span></div>
-        <div class="uzone" id="zh-spc" onclick="document.getElementById('fh-spc').click()"><span class="uz-label">SPC histórico</span><span class="uz-sub">.xls / .xlsx</span><span class="uz-ok" id="sh-spc" style="display:none"></span></div>
+        <div class="uzone" id="zh-alf" onclick="document.getElementById('fh-alf').click()"><span class="uz-label">ALF historico</span><span class="uz-sub">.xls / .xlsx</span><span class="uz-ok" id="sh-alf" style="display:none"></span></div>
+        <div class="uzone" id="zh-fgr" onclick="document.getElementById('fh-fgr').click()"><span class="uz-label">FGR historico</span><span class="uz-sub">.xls / .xlsx</span><span class="uz-ok" id="sh-fgr" style="display:none"></span></div>
+        <div class="uzone" id="zh-spc" onclick="document.getElementById('fh-spc').click()"><span class="uz-label">SPC historico</span><span class="uz-sub">.xls / .xlsx</span><span class="uz-ok" id="sh-spc" style="display:none"></span></div>
       </div>
       <input type="file" id="fh-alf" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'alf')">
       <input type="file" id="fh-fgr" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'fgr')">
       <input type="file" id="fh-spc" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'spc')">
-      <button class="btn-load" id="btn-load-hist" onclick="loadHist()">Cargar histórico a la base</button>
+      <button class="btn-load" id="btn-load-hist" onclick="loadHist()">Cargar historico a la base</button>
     </div>
 
     <div class="card">
       <p class="card-title">Registros de hoy</p>
       <div class="upload-grid">
-        <div class="uzone" id="zn-alf" onclick="document.getElementById('fn-alf').click()"><span class="uz-label">ALF — hoy</span><span class="uz-sub">.xlsx de hoy</span><span class="uz-ok" id="sn-alf" style="display:none"></span></div>
-        <div class="uzone" id="zn-fgr" onclick="document.getElementById('fn-fgr').click()"><span class="uz-label">FGR — hoy</span><span class="uz-sub">.xlsx de hoy</span><span class="uz-ok" id="sn-fgr" style="display:none"></span></div>
-        <div class="uzone" id="zn-spc" onclick="document.getElementById('fn-spc').click()"><span class="uz-label">SPC — hoy</span><span class="uz-sub">.xlsx de hoy</span><span class="uz-ok" id="sn-spc" style="display:none"></span></div>
+        <div class="uzone" id="zn-alf" onclick="document.getElementById('fn-alf').click()"><span class="uz-label">ALF - hoy</span><span class="uz-sub">.xlsx de hoy</span><span class="uz-ok" id="sn-alf" style="display:none"></span></div>
+        <div class="uzone" id="zn-fgr" onclick="document.getElementById('fn-fgr').click()"><span class="uz-label">FGR - hoy</span><span class="uz-sub">.xlsx de hoy</span><span class="uz-ok" id="sn-fgr" style="display:none"></span></div>
+        <div class="uzone" id="zn-spc" onclick="document.getElementById('fn-spc').click()"><span class="uz-label">SPC - hoy</span><span class="uz-sub">.xlsx de hoy</span><span class="uz-ok" id="sn-spc" style="display:none"></span></div>
       </div>
       <input type="file" id="fn-alf" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'alf')">
       <input type="file" id="fn-fgr" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'fgr')">
@@ -158,12 +157,12 @@ tr.ndup td{background:var(--amber-bg)}
       <div class="ultimos-row" id="ultimos-hoy"></div>
       <div class="stats" id="stats-row"></div>
       <div class="card" style="padding:14px">
-        <div class="hint-bar" id="hint-ndup" style="display:none">Registros amarillos = duplicados entre páginas del mismo día. Marca ☑ el que quieres conservar y entregar.</div>
+        <div class="hint-bar" id="hint-ndup" style="display:none">Registros amarillos = duplicados entre paginas del mismo dia. Marca el que quieres conservar y entregar.</div>
         <div class="toolbar">
           <div class="tabs" id="tabs-row"></div>
           <select class="filter-sel" id="filter-status" onchange="renderTable()">
             <option value="all">Todos</option>
-            <option value="ok">Solo nuevos únicos</option>
+            <option value="ok">Solo nuevos unicos</option>
             <option value="dup">Solo duplicados en base</option>
             <option value="ndup">Solo duplicados entre hoy</option>
           </select>
@@ -171,10 +170,10 @@ tr.ndup td{background:var(--amber-bg)}
         <div class="tbl-wrap"><div id="tbl-container"></div></div>
       </div>
       <div class="card">
-        <p class="section-lbl">Descargar registros únicos de hoy</p>
+        <p class="section-lbl">Descargar registros unicos de hoy</p>
         <button class="btn-primary" onclick="downloadAll()" style="margin-bottom:8px">Descargar los 3 archivos de un clic</button>
         <div class="dl-grid" id="dl-grid"></div>
-        <button class="btn-save" onclick="saveToBase()">Guardar registros únicos en la base → listo para mañana</button>
+        <button class="btn-save" onclick="saveToBase()">Guardar registros unicos en la base</button>
         <div class="reporte-box">
           <p class="reporte-lbl">Reporte para WhatsApp</p>
           <div class="reporte-text" id="reporte-text"></div>
@@ -184,14 +183,13 @@ tr.ndup td{background:var(--amber-bg)}
     </div>
   </div>
 
-  <!-- BASE DE DATOS -->
   <div class="view" id="view-base">
     <div class="card">
       <p class="card-title">Buscar en la base de datos</p>
       <div class="search-row">
-        <input type="text" id="search-input" placeholder="Buscar por nombre o teléfono..." oninput="renderBase()">
+        <input type="text" id="search-input" placeholder="Buscar por nombre o telefono..." oninput="renderBase()">
         <select id="base-filter-src" onchange="renderBase()">
-          <option value="all">Todas las páginas</option>
+          <option value="all">Todas las paginas</option>
           <option value="ALF">ALF</option>
           <option value="FGR">FGR</option>
           <option value="SPC">SPC</option>
@@ -207,210 +205,226 @@ tr.ndup td{background:var(--amber-bg)}
 <div class="toast" id="toast"></div>
 
 <script>
-const SCHEMAS={
-  ALF:['created_time','ad_name','first_name','phone_number','describe_brevemente_tu_situación'],
-  FGR:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_fraude_sufriste?_explícanos_brevemente'],
-  SPC:['created_time','ad_name','full_name','phone_number','¿qué_sucedió_exactamente?__describe_brevemente_lo_que_ocurrió_en_tu_caso'],
+var SCHEMAS={
+  ALF:['created_time','ad_name','first_name','phone_number','describe_brevemente_tu_situacion'],
+  FGR:['created_time','ad_name','full_name','phone_number','que_tipo_de_fraude_sufriste'],
+  SPC:['created_time','ad_name','full_name','phone_number','que_sucedio_exactamente']
 };
-const NAME_COL={ALF:'first_name',FGR:'full_name',SPC:'full_name'};
-const DESC_COL={
-  ALF:'describe_brevemente_tu_situación',
-  FGR:'¿qué_tipo_de_fraude_sufriste?_explícanos_brevemente',
-  SPC:'¿qué_sucedió_exactamente?__describe_brevemente_lo_que_ocurrió_en_tu_caso'
-};
-const histFiles={},newFiles={};
-let allResults=[],activeTab='all';
+var NAME_COL={ALF:'first_name',FGR:'full_name',SPC:'full_name'};
+var histFiles={},newFiles={};
+var allResults=[],activeTab='all';
 
 function normalize(p){if(!p)return'';return String(p).replace(/^p:/i,'').replace(/\D/g,'').replace(/^521/,'52').slice(-10);}
 function getBase(){try{return JSON.parse(localStorage.getItem('leads_base')||'[]')}catch(e){return[]}}
 function setBase(a){localStorage.setItem('leads_base',JSON.stringify(a))}
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500)}
 
 function switchView(name,el){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
+  document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active')});
   document.getElementById('view-'+name).classList.add('active');
   el.classList.add('active');
   if(name==='base')renderBase();
 }
 
-function fmtDate(val){const d=new Date(val||'');if(isNaN(d))return String(val||'').slice(0,10);return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});}
-function fmtDateShort(val){const d=new Date(val||'');if(isNaN(d))return'—';return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});}
+function fmtDate(val){var d=new Date(val||'');if(isNaN(d))return String(val||'').slice(0,10);return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});}
+function fmtDateShort(val){var d=new Date(val||'');if(isNaN(d))return'-';return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});}
 
 function updateDbInfo(){
-  const b=getBase();
-  const dot=document.getElementById('db-dot');
-  const txt=document.getElementById('db-text');
+  var b=getBase();
+  var dot=document.getElementById('db-dot');
+  var txt=document.getElementById('db-text');
   if(b.length){
     dot.classList.add('active');
-    const src={};b.forEach(r=>{src[r._source]=(src[r._source]||0)+1;});
-    txt.textContent='Base activa — '+b.length+' registros ('+Object.entries(src).map(([k,v])=>k+': '+v).join(' · ')+')';
+    var src={};b.forEach(function(r){src[r._source]=(src[r._source]||0)+1;});
+    txt.textContent='Base activa - '+b.length+' registros ('+Object.entries(src).map(function(e){return e[0]+': '+e[1]}).join(' | ')+')';
   } else {
     dot.classList.remove('active');
-    txt.textContent='Base vacía — carga el histórico la primera vez';
+    txt.textContent='Base vacia - carga el historico la primera vez';
   }
   renderUltimosGuardados();
 }
 
 function renderUltimosGuardados(){
-  const b=getBase();
-  const container=document.getElementById('ultimos-guardados');
+  var b=getBase();
+  var container=document.getElementById('ultimos-guardados');
   if(!b.length){container.innerHTML='';return;}
-  let html='';
-  for(const src of['ALF','FGR','SPC']){
-    const rows=b.filter(r=>r._source===src);
-    if(!rows.length)continue;
-    const last=rows.reduce((a,c)=>{return new Date(c.created_time||c._date||0)>new Date(a.created_time||a._date||0)?c:a;});
-    const name=last.first_name||last.full_name||'—';
-    const fecha=fmtDate(last.created_time||last._date);
-    html+='<div class="ultimo-card"><div class="ultimo-lbl">'+src+' — último guardado</div><div class="ultimo-name">'+name+'</div><div class="ultimo-date">'+fecha+'</div></div>';
-  }
+  var html='';
+  ['ALF','FGR','SPC'].forEach(function(src){
+    var rows=b.filter(function(r){return r._source===src});
+    if(!rows.length)return;
+    var last=rows.reduce(function(a,c){return new Date(c.created_time||c._date||0)>new Date(a.created_time||a._date||0)?c:a});
+    var name=last.first_name||last.full_name||'-';
+    var fecha=fmtDate(last.created_time||last._date);
+    html+='<div class="ultimo-card"><div class="ultimo-lbl">'+src+' - ultimo guardado</div><div class="ultimo-name">'+name+'</div><div class="ultimo-date">'+fecha+'</div></div>';
+  });
   container.innerHTML=html;
 }
 
 function checkBackupReminder(){
-  const last=localStorage.getItem('leads_last_backup');
-  const bar=document.getElementById('backup-bar');
+  var last=localStorage.getItem('leads_last_backup');
+  var bar=document.getElementById('backup-bar');
   if(!last){
     bar.style.display='flex';bar.style.borderColor='var(--red-border)';bar.style.background='var(--red-bg)';
-    document.getElementById('backup-msg').textContent='Nunca has exportado la base — te recomendamos hacerlo hoy';
+    document.getElementById('backup-msg').textContent='Nunca has exportado la base';
     document.getElementById('backup-days').textContent='';
-    document.getElementById('backup-btn').style.cssText='border-color:var(--red-border);color:var(--red)';
     return;
   }
-  const days=Math.floor((Date.now()-parseInt(last))/(1000*60*60*24));
+  var days=Math.floor((Date.now()-parseInt(last))/(1000*60*60*24));
   if(days>=7){
     bar.style.display='flex';bar.style.borderColor='var(--amber-border)';bar.style.background='var(--amber-bg)';
-    document.getElementById('backup-msg').textContent='Llevas '+days+' días sin exportar la base';
-    document.getElementById('backup-days').textContent='Último: '+new Date(parseInt(last)).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
-    document.getElementById('backup-btn').style.cssText='border-color:var(--amber-border);color:var(--amber)';
+    document.getElementById('backup-msg').textContent='Llevas '+days+' dias sin exportar la base';
+    document.getElementById('backup-days').textContent='Ultimo: '+new Date(parseInt(last)).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
   } else {
     bar.style.display='none';
   }
 }
 
-async function parseFile(file){
-  const buf=await file.arrayBuffer();
-  const wb=XLSX.read(buf,{type:'array',cellDates:true});
-  const ws=wb.Sheets[wb.SheetNames[0]];
-  return XLSX.utils.sheet_to_json(ws,{defval:''});
+function parseFile(file){
+  return file.arrayBuffer().then(function(buf){
+    var wb=XLSX.read(buf,{type:'array',cellDates:true});
+    var ws=wb.Sheets[wb.SheetNames[0]];
+    return XLSX.utils.sheet_to_json(ws,{defval:''});
+  });
 }
 
 function handleHist(input,key){
   if(!input.files[0])return;
   histFiles[key]=input.files[0];
   document.getElementById('zh-'+key).classList.add('done');
-  const s=document.getElementById('sh-'+key);s.style.display='block';s.textContent='✓ '+input.files[0].name;
-  const btn=document.getElementById('btn-load-hist');btn.style.display='block';btn.disabled=false;btn.textContent='Cargar histórico a la base';
+  var s=document.getElementById('sh-'+key);s.style.display='block';s.textContent='OK '+input.files[0].name;
+  var btn=document.getElementById('btn-load-hist');btn.style.display='block';btn.disabled=false;btn.textContent='Cargar historico a la base';
 }
 
 function handleNew(input,key){
   newFiles[key]=input.files[0];
   document.getElementById('zn-'+key).classList.add('done');
-  const s=document.getElementById('sn-'+key);s.style.display='block';s.textContent='✓ '+input.files[0].name;
-  document.getElementById('btn-run').disabled=!['alf','fgr','spc'].some(k=>newFiles[k]);
+  var s=document.getElementById('sn-'+key);s.style.display='block';s.textContent='OK '+input.files[0].name;
+  document.getElementById('btn-run').disabled=!['alf','fgr','spc'].some(function(k){return newFiles[k]});
 }
 
-async function loadHist(){
-  const btn=document.getElementById('btn-load-hist');btn.textContent='Cargando...';btn.disabled=true;
-  const base=getBase();const phones=new Set(base.map(r=>normalize(r.phone_number||'')));
-  const labels={alf:'ALF',fgr:'FGR',spc:'SPC'};let added=0;
-  for(const[key,label]of Object.entries(labels)){
-    if(!histFiles[key])continue;
-    const rows=await parseFile(histFiles[key]);
-    for(const row of rows){
-      const phone=row.phone_number||row.telefono||row.phone||'';
-      const n=normalize(phone);
-      if(n&&!phones.has(n)){phones.add(n);base.push({...row,phone_number:phone,_source:row.fuente||row._source||label});added++;}
+function loadHist(){
+  var btn=document.getElementById('btn-load-hist');btn.textContent='Cargando...';btn.disabled=true;
+  var base=getBase();var phones=new Set(base.map(function(r){return normalize(r.phone_number||'')}));
+  var labels={alf:'ALF',fgr:'FGR',spc:'SPC'};var added=0;
+  var keys=Object.keys(labels);var idx=0;
+  function next(){
+    if(idx>=keys.length){
+      setBase(base);updateDbInfo();
+      btn.textContent='OK '+added+' registros cargados';btn.disabled=false;
+      toast('Historico cargado: '+added+' registros');
+      return;
     }
+    var key=keys[idx];var label=labels[key];idx++;
+    if(!histFiles[key]){next();return;}
+    parseFile(histFiles[key]).then(function(rows){
+      rows.forEach(function(row){
+        var phone=row.phone_number||row.telefono||row.phone||'';
+        var n=normalize(phone);
+        if(n&&!phones.has(n)){phones.add(n);base.push(Object.assign({},row,{phone_number:phone,_source:row.fuente||row._source||label}));added++;}
+      });
+      next();
+    });
   }
-  setBase(base);updateDbInfo();btn.textContent='✓ '+added+' registros cargados';btn.disabled=false;
-  toast('Histórico cargado: '+added+' registros');
+  next();
 }
 
-async function run(){
-  const btn=document.getElementById('btn-run');btn.disabled=true;btn.textContent='Procesando...';
-  const base=getBase();const basePhones=new Set(base.map(r=>normalize(r.phone_number||'')));
-  const labels={alf:'ALF',fgr:'FGR',spc:'SPC'};const todayRows=[];
-  for(const[key,label]of Object.entries(labels)){
-    if(!newFiles[key])continue;
-    const rows=await parseFile(newFiles[key]);
-    rows.forEach(row=>todayRows.push({...row,_source:label}));
+function run(){
+  var btn=document.getElementById('btn-run');btn.disabled=true;btn.textContent='Procesando...';
+  var base=getBase();var basePhones=new Set(base.map(function(r){return normalize(r.phone_number||'')}));
+  var labels={alf:'ALF',fgr:'FGR',spc:'SPC'};var todayRows=[];
+  var keys=Object.keys(labels);var idx=0;
+  function next(){
+    if(idx>=keys.length){process();return;}
+    var key=keys[idx];var label=labels[key];idx++;
+    if(!newFiles[key]){next();return;}
+    parseFile(newFiles[key]).then(function(rows){
+      rows.forEach(function(row){todayRows.push(Object.assign({},row,{_source:label}))});
+      next();
+    });
   }
-  const seenToday=new Map();
-  todayRows.forEach(row=>{const n=normalize(row.phone_number||'');if(!n)return;if(!seenToday.has(n))seenToday.set(n,[]);seenToday.get(n).push(row);});
-  allResults=todayRows.map(row=>{
-    const n=normalize(row.phone_number||'');
-    let status='ok';
-    if(n&&basePhones.has(n))status='dup';
-    else if(n&&seenToday.get(n)?.length>1)status='ndup';
-    const src=row._source;
-    return{_status:status,_source:src,_phone_norm:n,_keep:false,
-      fecha:fmtDate(row.created_time),
-      nombre:row[NAME_COL[src]]||row.first_name||row.full_name||'',
-      telefono:row.phone_number||'',
-      descripcion:row[DESC_COL[src]]||'',
-      _raw:row};
-  });
+  function process(){
+    var seenToday=new Map();
+    todayRows.forEach(function(row){
+      var n=normalize(row.phone_number||'');if(!n)return;
+      if(!seenToday.has(n))seenToday.set(n,[]);
+      seenToday.get(n).push(row);
+    });
+    allResults=todayRows.map(function(row){
+      var n=normalize(row.phone_number||'');
+      var status='ok';
+      if(n&&basePhones.has(n))status='dup';
+      else if(n&&seenToday.get(n)&&seenToday.get(n).length>1)status='ndup';
+      var src=row._source;
+      var nameCol=NAME_COL[src]||'full_name';
+      return{_status:status,_source:src,_phone_norm:n,_keep:false,
+        fecha:fmtDate(row.created_time),
+        nombre:row[nameCol]||row.first_name||row.full_name||'',
+        telefono:row.phone_number||'',
+        descripcion:row[Object.keys(row).find(function(k){return k.indexOf('describe')>-1||k.indexOf('fraude')>-1||k.indexOf('sucedio')>-1})||'']||'',
+        _raw:row};
+    });
 
-  const total=allResults.length;
-  const dups=allResults.filter(r=>r._status==='dup').length;
-  const ndups=allResults.filter(r=>r._status==='ndup').length;
-  const clean=allResults.filter(r=>r._status==='ok').length;
+    var total=allResults.length;
+    var dups=allResults.filter(function(r){return r._status==='dup'}).length;
+    var ndups=allResults.filter(function(r){return r._status==='ndup'}).length;
+    var clean=allResults.filter(function(r){return r._status==='ok'}).length;
 
-  document.getElementById('hint-ndup').style.display=ndups>0?'block':'none';
-  document.getElementById('stats-row').innerHTML=
-    '<div class="stat"><div class="stat-val">'+total+'</div><div class="stat-lbl">Total hoy</div></div>'+
-    '<div class="stat"><div class="stat-val red">'+dups+'</div><div class="stat-lbl">En base</div></div>'+
-    '<div class="stat"><div class="stat-val amber">'+ndups+'</div><div class="stat-lbl">Dup entre hoy</div></div>'+
-    '<div class="stat"><div class="stat-val green">'+clean+'</div><div class="stat-lbl">Únicos nuevos</div></div>';
+    document.getElementById('hint-ndup').style.display=ndups>0?'block':'none';
+    document.getElementById('stats-row').innerHTML=
+      '<div class="stat"><div class="stat-val">'+total+'</div><div class="stat-lbl">Total hoy</div></div>'+
+      '<div class="stat"><div class="stat-val red">'+dups+'</div><div class="stat-lbl">En base</div></div>'+
+      '<div class="stat"><div class="stat-val amber">'+ndups+'</div><div class="stat-lbl">Dup entre hoy</div></div>'+
+      '<div class="stat"><div class="stat-val green">'+clean+'</div><div class="stat-lbl">Unicos nuevos</div></div>';
 
-  const sources=[...new Set(allResults.map(r=>r._source))];
-  document.getElementById('tabs-row').innerHTML='<div class="tab active" onclick="setTab(\'all\',this)">Todas</div>'+sources.map(s=>'<div class="tab" onclick="setTab(\''+s+'\',this)">'+s+'</div>').join('');
+    var sources=[...new Set(allResults.map(function(r){return r._source}))];
+    document.getElementById('tabs-row').innerHTML='<div class="tab active" onclick="setTab(\'all\',this)">Todas</div>'+sources.map(function(s){return'<div class="tab" onclick="setTab(\''+s+'\',this)">'+s+'</div>'}).join('');
 
-  updateDlGrid();
+    updateDlGrid();
 
-  let ultimosHoy='';
-  for(const src of['ALF','FGR','SPC']){
-    const srcRows=allResults.filter(r=>r._source===src);if(!srcRows.length)continue;
-    const last=srcRows.reduce((a,b)=>new Date(a._raw.created_time)>new Date(b._raw.created_time)?a:b);
-    const d=new Date(last._raw.created_time);
-    const fecha=!isNaN(d)?d.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}):'';
-    ultimosHoy+='<div class="ultimo-card"><div class="ultimo-lbl">'+src+' — último de hoy</div><div class="ultimo-name">'+(last.nombre||'—')+'</div><div class="ultimo-date">'+fecha+'</div></div>';
+    var ultimosHoy='';
+    ['ALF','FGR','SPC'].forEach(function(src){
+      var srcRows=allResults.filter(function(r){return r._source===src});if(!srcRows.length)return;
+      var last=srcRows.reduce(function(a,b){return new Date(a._raw.created_time)>new Date(b._raw.created_time)?a:b});
+      var d=new Date(last._raw.created_time);
+      var fecha=!isNaN(d)?d.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}):'';
+      ultimosHoy+='<div class="ultimo-card"><div class="ultimo-lbl">'+src+' - ultimo de hoy</div><div class="ultimo-name">'+(last.nombre||'-')+'</div><div class="ultimo-date">'+fecha+'</div></div>';
+    });
+    document.getElementById('ultimos-hoy').innerHTML=ultimosHoy;
+
+    var today=new Date().toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
+    var alfC=allResults.filter(function(r){return r._source==='ALF'&&r._status==='ok'}).length;
+    var fgrC=allResults.filter(function(r){return r._source==='FGR'&&r._status==='ok'}).length;
+    var spcC=allResults.filter(function(r){return r._source==='SPC'&&r._status==='ok'}).length;
+    document.getElementById('reporte-text').textContent='Reporte '+today+'\nALF: '+alfC+' registros\nFGR: '+fgrC+' registros\nSPC: '+spcC+' registros\nTotal: '+clean+' registros\nDuplicados descartados: '+(dups+ndups);
+
+    document.getElementById('results').style.display='block';
+    renderTable();
+    btn.textContent='Analizar registros';btn.disabled=false;
   }
-  document.getElementById('ultimos-hoy').innerHTML=ultimosHoy;
-
-  const today=new Date().toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
-  const alfC=allResults.filter(r=>r._source==='ALF'&&r._status==='ok').length;
-  const fgrC=allResults.filter(r=>r._source==='FGR'&&r._status==='ok').length;
-  const spcC=allResults.filter(r=>r._source==='SPC'&&r._status==='ok').length;
-  document.getElementById('reporte-text').textContent='Reporte '+today+'\nALF: '+alfC+' registros\nFGR: '+fgrC+' registros\nSPC: '+spcC+' registros\nTotal: '+clean+' registros\nDuplicados descartados: '+(dups+ndups);
-
-  document.getElementById('results').style.display='block';
-  renderTable();
-  btn.textContent='Analizar registros';btn.disabled=false;
+  next();
 }
 
 function updateDlGrid(){
-  const g=document.getElementById('dl-grid');if(!g)return;
-  g.innerHTML=['ALF','FGR','SPC'].map(src=>{
-    const cnt=allResults.filter(r=>r._source===src&&(r._status==='ok'||r._keep)).length;
-    return'<button class="btn-dl" data-src="'+src+'" onclick="downloadPage(\''+src+'\')">Descargar '+src+'<span class="dl-count">'+cnt+' registros únicos</span></button>';
+  var g=document.getElementById('dl-grid');if(!g)return;
+  g.innerHTML=['ALF','FGR','SPC'].map(function(src){
+    var cnt=allResults.filter(function(r){return r._source===src&&(r._status==='ok'||r._keep)}).length;
+    return'<button class="btn-dl" onclick="downloadPage(\''+src+'\')">Descargar '+src+'<span class="dl-count">'+cnt+' registros unicos</span></button>';
   }).join('');
 }
 
-function setTab(t,el){activeTab=t;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');renderTable();}
+function setTab(t,el){activeTab=t;document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});el.classList.add('active');renderTable();}
 
 function renderTable(){
-  const filter=document.getElementById('filter-status').value;
-  let rows=allResults;
-  if(activeTab!=='all')rows=rows.filter(r=>r._source===activeTab);
-  if(filter!=='all')rows=rows.filter(r=>r._status===filter);
+  var filter=document.getElementById('filter-status').value;
+  var rows=allResults;
+  if(activeTab!=='all')rows=rows.filter(function(r){return r._source===activeTab});
+  if(filter!=='all')rows=rows.filter(function(r){return r._status===filter});
   if(!rows.length){document.getElementById('tbl-container').innerHTML='<div class="empty-msg">No hay registros con ese filtro.</div>';return;}
-  const bmap={dup:'<span class="badge b-dup">dup base</span>',ndup:'<span class="badge b-ndup">dup hoy</span>',ok:'<span class="badge b-ok">nuevo</span>'};
-  const trs=rows.map(r=>{
-    const idx=allResults.indexOf(r);
-    const chk=r._status==='ndup'?'<input type="checkbox" '+(r._keep?'checked':'')+' onchange="toggleKeep('+idx+',this)" style="cursor:pointer;width:14px;height:14px">':r._status==='ok'?'<span style="color:var(--green);font-size:13px">✓</span>':'<span style="color:var(--border2);font-size:13px">—</span>';
+  var bmap={dup:'<span class="badge b-dup">dup base</span>',ndup:'<span class="badge b-ndup">dup hoy</span>',ok:'<span class="badge b-ok">nuevo</span>'};
+  var trs=rows.map(function(r){
+    var idx=allResults.indexOf(r);
+    var chk=r._status==='ndup'?'<input type="checkbox" '+(r._keep?'checked':'')+' onchange="toggleKeep('+idx+',this)" style="cursor:pointer;width:14px;height:14px">':r._status==='ok'?'<span style="color:var(--green)">OK</span>':'<span style="color:var(--border2)">-</span>';
     return'<tr class="'+(r._status==='dup'?'dup':r._status==='ndup'&&!r._keep?'ndup':'')+'">'+
       '<td style="width:32px;text-align:center">'+chk+'</td>'+
       '<td style="width:138px">'+r.fecha+'</td>'+
@@ -421,62 +435,71 @@ function renderTable(){
       '<td>'+r.descripcion+'</td></tr>';
   }).join('');
   document.getElementById('tbl-container').innerHTML='<table><thead><tr>'+
-    '<th style="width:32px"></th><th style="width:138px">Fecha</th><th style="width:44px">Pág</th>'+
-    '<th style="width:130px">Nombre</th><th style="width:108px">Teléfono</th><th style="width:88px">Estado</th><th>Descripción</th>'+
+    '<th style="width:32px"></th><th style="width:138px">Fecha</th><th style="width:44px">Pag</th>'+
+    '<th style="width:130px">Nombre</th><th style="width:108px">Telefono</th><th style="width:88px">Estado</th><th>Descripcion</th>'+
     '</tr></thead><tbody>'+trs+'</tbody></table>';
 }
 
 function toggleKeep(idx,cb){
   allResults[idx]._keep=cb.checked;
-  const phone=allResults[idx]._phone_norm;
-  if(cb.checked)allResults.forEach((r,i)=>{if(i!==idx&&r._phone_norm===phone&&r._status==='ndup')r._keep=false;});
+  var phone=allResults[idx]._phone_norm;
+  if(cb.checked)allResults.forEach(function(r,i){if(i!==idx&&r._phone_norm===phone&&r._status==='ndup')r._keep=false;});
   renderTable();updateDlGrid();
 }
 
 function downloadAll(){
-  let n=0;
-  for(const src of['ALF','FGR','SPC']){
-    if(!allResults.filter(r=>r._source===src&&(r._status==='ok'||r._keep)).length)continue;
+  var n=0;
+  ['ALF','FGR','SPC'].forEach(function(src){
+    if(!allResults.filter(function(r){return r._source===src&&(r._status==='ok'||r._keep)}).length)return;
     setTimeout(function(s){downloadPage(s);},n*800,src);n++;
-  }
-  if(!n)alert('No hay registros únicos para descargar.');
+  });
+  if(!n)alert('No hay registros unicos para descargar.');
 }
 
 function downloadPage(src){
-  const cols=SCHEMAS[src];
-  const rows=allResults.filter(r=>r._source===src&&(r._status==='ok'||r._keep)).map(r=>r._raw);
-  if(!rows.length){alert('No hay registros únicos de '+src+'.');return;}
-  const clean=rows.map(r=>{const o={};cols.forEach(c=>{if(c==='created_time'&&r[c]){const d=new Date(r[c]);o[c]=!isNaN(d)?d.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}):String(r[c]).slice(0,10);}else{o[c]=r[c]!==undefined?r[c]:'';}});return o;});
-  const ws=XLSX.utils.json_to_sheet(clean,{header:cols});ws['!cols']=[{wch:14},{wch:10},{wch:28},{wch:16},{wch:60}];
-  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,src);
-  const wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
-  const blob=new Blob([wbout],{type:'application/octet-stream'});
-  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  var rows=allResults.filter(function(r){return r._source===src&&(r._status==='ok'||r._keep)}).map(function(r){return r._raw});
+  if(!rows.length){alert('No hay registros unicos de '+src+'.');return;}
+  var cols=Object.keys(rows[0]).filter(function(k){return !k.startsWith('_')});
+  var clean=rows.map(function(r){
+    var o={};cols.forEach(function(c){
+      if(c==='created_time'&&r[c]){var d=new Date(r[c]);o[c]=!isNaN(d)?d.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}):String(r[c]).slice(0,10);}
+      else{o[c]=r[c]!==undefined?r[c]:'';}
+    });return o;
+  });
+  var ws=XLSX.utils.json_to_sheet(clean,{header:cols});
+  var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,src);
+  var wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  var blob=new Blob([wbout],{type:'application/octet-stream'});
+  var url=URL.createObjectURL(blob);var a=document.createElement('a');
   a.href=url;a.download=src+'_'+new Date().toISOString().slice(0,10)+'.xlsx';
-  document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
   toast(src+' descargado');
 }
 
 function saveToBase(){
-  const unique=allResults.filter(r=>r._status==='ok'||r._keep);
-  if(!unique.length){alert('No hay registros únicos para guardar.');return;}
-  const base=getBase();const phones=new Set(base.map(r=>normalize(r.phone_number||'')));
-  let added=0;
-  for(const r of unique){const n=normalize(r.telefono);if(n&&!phones.has(n)){phones.add(n);base.push({...r._raw,_source:r._source});added++;}}
-  setBase(base);updateDbInfo();toast('✓ '+added+' registros guardados en la base');
+  var unique=allResults.filter(function(r){return r._status==='ok'||r._keep});
+  if(!unique.length){alert('No hay registros unicos para guardar.');return;}
+  var base=getBase();var phones=new Set(base.map(function(r){return normalize(r.phone_number||'')}));
+  var added=0;
+  unique.forEach(function(r){
+    var n=normalize(r.telefono);
+    if(n&&!phones.has(n)){phones.add(n);base.push(Object.assign({},r._raw,{_source:r._source}));added++;}
+  });
+  setBase(base);updateDbInfo();toast(added+' registros guardados en la base');
 }
 
 function copyReporte(){
-  const txt=document.getElementById('reporte-text').textContent;
-  navigator.clipboard.writeText(txt).then(()=>toast('Reporte copiado')).catch(()=>{
-    const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Reporte copiado');
+  var txt=document.getElementById('reporte-text').textContent;
+  navigator.clipboard.writeText(txt).then(function(){toast('Reporte copiado')}).catch(function(){
+    var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Reporte copiado');
   });
 }
 
 function exportBase(){
-  const base=getBase();if(!base.length){alert('La base está vacía.');return;}
-  const blob=new Blob([JSON.stringify(base,null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  var base=getBase();if(!base.length){alert('La base esta vacia.');return;}
+  var blob=new Blob([JSON.stringify(base,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);var a=document.createElement('a');
   a.href=url;a.download='base_registros.json';document.body.appendChild(a);a.click();
   setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
   localStorage.setItem('leads_last_backup',Date.now().toString());checkBackupReminder();toast('Base exportada');
@@ -484,34 +507,37 @@ function exportBase(){
 
 function importBase(){document.getElementById('f-import-base').click();}
 function doImportBase(input){
-  const f=input.files[0];if(!f)return;
-  const reader=new FileReader();
-  reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw new Error();setBase(data);updateDbInfo();toast('Base importada: '+data.length+' registros');}catch(err){alert('Archivo inválido.');}};
+  var f=input.files[0];if(!f)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{var data=JSON.parse(e.target.result);if(!Array.isArray(data))throw new Error();setBase(data);updateDbInfo();toast('Base importada: '+data.length+' registros');}
+    catch(err){alert('Archivo invalido.');}
+  };
   reader.readAsText(f);
 }
 
 function resetBase(){
-  if(!confirm('¿Segura que quieres limpiar toda la base? Esta acción no se puede deshacer.'))return;
+  if(!confirm('Segura que quieres limpiar toda la base? Esta accion no se puede deshacer.'))return;
   localStorage.removeItem('leads_base');updateDbInfo();toast('Base limpiada');
 }
 
 function renderBase(){
-  const query=(document.getElementById('search-input').value||'').toLowerCase().trim();
-  const srcFilter=document.getElementById('base-filter-src').value;
-  let base=getBase();
-  if(srcFilter!=='all')base=base.filter(r=>r._source===srcFilter);
-  if(query)base=base.filter(r=>{
-    const name=(r.first_name||r.full_name||r['full_name']||r['first_name']||Object.values(r).filter(v=>typeof v==='string'&&v.length>2&&v.length<60&&isNaN(v)).join(' ')||'').toLowerCase();
-    const phone=normalize(r.phone_number||'');
+  var query=(document.getElementById('search-input').value||'').toLowerCase().trim();
+  var srcFilter=document.getElementById('base-filter-src').value;
+  var base=getBase();
+  if(srcFilter!=='all')base=base.filter(function(r){return r._source===srcFilter});
+  if(query)base=base.filter(function(r){
+    var name=(r.first_name||r.full_name||'').toLowerCase();
+    var phone=normalize(r.phone_number||'');
     return name.includes(query)||phone.includes(query.replace(/\D/g,''));
   });
   document.getElementById('base-count').textContent=base.length+' registros encontrados'+(base.length>500?' (mostrando primeros 500)':'');
   if(!base.length){document.getElementById('base-tbl').innerHTML='<div class="empty-msg">No hay registros.</div>';return;}
-  const trs=base.slice(0,500).map(r=>{
-    const name=r.first_name||r.full_name||'—';
+  var trs=base.slice(0,500).map(function(r){
+    var name=r.first_name||r.full_name||'-';
     return'<tr><td style="width:100px">'+fmtDateShort(r.created_time||r._date)+'</td><td style="width:46px">'+(r._source||'')+'</td><td style="width:160px">'+name+'</td><td>'+(r.phone_number||'')+'</td></tr>';
   }).join('');
-  document.getElementById('base-tbl').innerHTML='<table><thead><tr><th style="width:100px">Fecha</th><th style="width:46px">Pág</th><th style="width:160px">Nombre</th><th>Teléfono</th></tr></thead><tbody>'+trs+'</tbody></table>';
+  document.getElementById('base-tbl').innerHTML='<table><thead><tr><th style="width:100px">Fecha</th><th style="width:46px">Pag</th><th style="width:160px">Nombre</th><th>Telefono</th></tr></thead><tbody>'+trs+'</tbody></table>';
 }
 
 updateDbInfo();
