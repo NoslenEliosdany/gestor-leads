@@ -206,9 +206,9 @@ tr.ndup td{background:var(--amber-bg)}
 
 <script>
 var SCHEMAS={
-  ALF:['created_time','ad_name','first_name','phone_number','describe_brevemente_tu_situacion'],
-  FGR:['created_time','ad_name','full_name','phone_number','que_tipo_de_fraude_sufriste'],
-  SPC:['created_time','ad_name','full_name','phone_number','que_sucedio_exactamente']
+  ALF:['created_time','ad_name','first_name','phone_number','describe_brevemente_tu_situación'],
+  FGR:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_fraude_sufriste?_explícanos_brevemente'],
+  SPC:['created_time','ad_name','full_name','phone_number','¿qué_sucedió_exactamente?__describe_brevemente_lo_que_ocurrió_en_tu_caso']
 };
 var NAME_COL={ALF:'first_name',FGR:'full_name',SPC:'full_name'};
 var histFiles={},newFiles={};
@@ -459,7 +459,7 @@ function downloadAll(){
 function downloadPage(src){
   var rows=allResults.filter(function(r){return r._source===src&&(r._status==='ok'||r._keep)}).map(function(r){return r._raw});
   if(!rows.length){alert('No hay registros unicos de '+src+'.');return;}
-  var cols=Object.keys(rows[0]).filter(function(k){return !k.startsWith('_')});
+  var cols=SCHEMAS[src]||Object.keys(rows[0]).filter(function(k){return !k.startsWith('_')});
   var clean=rows.map(function(r){
     var o={};cols.forEach(function(c){
       if(c==='created_time'&&r[c]){var d=new Date(r[c]);o[c]=!isNaN(d)?d.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}):String(r[c]).slice(0,10);}
