@@ -457,10 +457,10 @@ function renderStats(accounts,threshold){
   var saldoTotal=accounts.reduce(function(s,a){return s+(parseFloat(String(a.saldo||0).replace(/,/g,""))||0)},0);
   var bajas=accounts.filter(function(a){return a.saldo&&(parseFloat(String(a.saldo||0).replace(/,/g,""))||0)<threshold}).length;
   document.getElementById('stats-cuentas').innerHTML=
-    '<div class="stat" style="cursor:pointer" onclick="filterAccountsByEstado('all')" title="Ver todas"><div class="stat-val gold">'+accounts.length+'</div><div class="stat-lbl">Páginas totales</div></div>'+
-    '<div class="stat" style="cursor:pointer;background:var(--green-bg)" onclick="filterAccountsByEstado('activa')" title="Ver activas"><div class="stat-val green">'+activas+'</div><div class="stat-lbl">Activas</div></div>'+
-    '<div class="stat" style="cursor:pointer" onclick="filterAccountsByEstado('pendiente')" title="Ver pendientes"><div class="stat-val amber">'+pendientes+'</div><div class="stat-lbl">Pendientes</div></div>'+
-    '<div class="stat" style="cursor:pointer;'+(bajas>0?'background:var(--red-bg)':'')+'" onclick="filterAccountsByEstado('saldo-bajo')" title="Ver saldo bajo"><div class="stat-val '+(bajas>0?'red':'green')+'">'+bajas+'</div><div class="stat-lbl">Saldo bajo</div></div>';
+    '<div class="stat" style="cursor:pointer" onclick="filterAccountsByEstado(&quot;all&quot;)" title="Ver todas"><div class="stat-val gold">'+accounts.length+'</div><div class="stat-lbl">Páginas totales</div></div>'+
+    '<div class="stat" style="cursor:pointer;background:var(--green-bg)" onclick="filterAccountsByEstado(&quot;activa&quot;)" title="Ver activas"><div class="stat-val green">'+activas+'</div><div class="stat-lbl">Activas</div></div>'+
+    '<div class="stat" style="cursor:pointer" onclick="filterAccountsByEstado(&quot;pendiente&quot;)" title="Ver pendientes"><div class="stat-val amber">'+pendientes+'</div><div class="stat-lbl">Pendientes</div></div>'+
+    '<div class="stat" style="cursor:pointer;'+(bajas>0?'background:var(--red-bg)':'')+'" onclick="filterAccountsByEstado(&quot;saldo-bajo&quot;)" title="Ver saldo bajo"><div class="stat-val '+(bajas>0?'red':'green')+'">'+bajas+'</div><div class="stat-lbl">Saldo bajo</div></div>';
 }
 
 var currentFilter='all';
