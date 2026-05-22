@@ -535,13 +535,15 @@ function renderChecklist(){
   var data=getChecklist();
   document.getElementById('checklist-container').innerHTML=CHECKLIST_ITEMS.map(function(item,i){
     var checked=data.items[i]||false;
-    return'<label class="check-item'+(checked?' done':'')+'" onclick="toggleCheck('+i+')">'+
-      '<input type="checkbox" '+(checked?'checked':'')+' style="width:14px;height:14px;accent-color:var(--green);pointer-events:none">'+
-      '<span>'+item+'</span></label>';
+    return'<div class="check-item'+(checked?' done':'')+'">'+
+      '<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleCheck('+i+',this)" style="width:14px;height:14px;accent-color:var(--green);cursor:pointer">'+
+      '<span onclick="toggleCheck('+i+',null)">'+item+'</span></div>';
   }).join('');
 }
-function toggleCheck(i){
-  var data=getChecklist();data.items[i]=!data.items[i];saveChecklist(data);renderChecklist();
+function toggleCheck(i,cb){
+  var data=getChecklist();
+  data.items[i]=cb?cb.checked:!data.items[i];
+  saveChecklist(data);renderChecklist();
 }
 function resetChecklist(){
   saveChecklist({date:new Date().toDateString(),items:{}});renderChecklist();toast('Checklist reseteado');
