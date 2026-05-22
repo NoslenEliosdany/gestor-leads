@@ -196,16 +196,16 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
     <div class="tbl-wrap">
       <table id="accounts-table">
         <thead><tr>
-          <th style="width:180px">Página</th>
-          <th style="width:130px">Correo</th>
-          <th style="width:90px">Contraseña</th>
-          <th style="width:110px">Ad ID</th>
-          <th style="width:110px">Saldo MXN</th>
-          <th style="width:75px">Presup/día</th>
-          <th style="width:75px">Gasto mes</th>
-          <th style="width:55px">2FA</th>
-          <th style="width:100px">Estado</th>
-          <th style="width:80px">Links</th>
+          <th style="width:170px">Página</th>
+          <th style="width:100px">Cuenta FB</th>
+          <th style="width:120px">Correo</th>
+          <th style="width:85px">Contraseña</th>
+          <th style="width:100px">Ad ID</th>
+          <th style="width:100px">Saldo MXN</th>
+          <th style="width:70px">Presup/día</th>
+          <th style="width:50px">2FA</th>
+          <th style="width:95px">Estado</th>
+          <th style="width:75px">Links</th>
         </tr></thead>
         <tbody id="accounts-body"></tbody>
       </table>
@@ -357,15 +357,15 @@ var ALL_SRCS = ['ALF','FGR','SPC','AVF','SSN','SNCF'];
 var LABELS = {alf:'ALF',fgr:'FGR',spc:'SPC',avf:'AVF',ssn:'SSN',sncf:'SNCF'};
 
 var DEFAULT_ACCOUNTS = [
-  {id:1,pagina:'Asesoría Legal en Fraude',abbr:'ALF',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,gastoMes:'',presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
-  {id:2,pagina:'Fiscalía General República',abbr:'FGR',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,gastoMes:'',presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
-  {id:3,pagina:'Seguridad y Protección Ciudadana',abbr:'SPC',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,gastoMes:'',presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
-  {id:4,pagina:'Asesoría para Víctimas de Fraude',abbr:'AVF',correo:'bachuno98@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,gastoMes:'',presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
-  {id:5,pagina:'Secretaría de Seguridad Nacional',abbr:'SSN',correo:'admintorres01@gmail.com',password:'',adId:'999544542732383',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,gastoMes:'',presupuestoDiario:'',notas:'',fbUrl:'https://adsmanager.facebook.com/manage/?act=999544542732383'},
-  {id:6,pagina:'Asesoría Jurídica Nacional',abbr:'AJN',correo:'admintorres02@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,gastoMes:'',presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
-  {id:7,pagina:'Consultoría Legal',abbr:'CL',correo:'admintorres03@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,gastoMes:'',presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
-  {id:8,pagina:'Instituto Nacional de Asesoría Legal',abbr:'INAL',correo:'admintorres04@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,gastoMes:'',presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
-  {id:9,pagina:'Secretaría Nacional contra el Fraude',abbr:'SNCF',correo:'admintorres05@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,gastoMes:'',presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'}
+  {id:1,pagina:'Asesoría Legal en Fraude',abbr:'ALF',fbCuenta:'Bach Uri',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
+  {id:2,pagina:'Fiscalía General República',abbr:'FGR',fbCuenta:'Bach Uri',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
+  {id:3,pagina:'Seguridad y Protección Ciudadana',abbr:'SPC',fbCuenta:'Bach Uri',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
+  {id:4,pagina:'Asesoría para Víctimas de Fraude',abbr:'AVF',fbCuenta:'Bach Uriuno',correo:'bachuno98@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
+  {id:5,pagina:'Secretaría de Seguridad Nacional',abbr:'SSN',fbCuenta:'Carlos Torres',correo:'admintorres01@gmail.com',password:'',adId:'999544542732383',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://adsmanager.facebook.com/manage/?act=999544542732383'},
+  {id:6,pagina:'Asesoría Jurídica Nacional',abbr:'AJN',fbCuenta:'Ana Torres',correo:'admintorres02@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
+  {id:7,pagina:'Consultoría Legal',abbr:'CL',fbCuenta:'Luis Torres',correo:'admintorres03@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
+  {id:8,pagina:'Instituto Nacional de Asesoría Legal',abbr:'INAL',fbCuenta:'María Torres',correo:'admintorres04@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
+  {id:9,pagina:'Secretaría Nacional contra el Fraude',abbr:'SNCF',fbCuenta:'Pedro Torres',correo:'admintorres05@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'}
 ];
 
 var CHECKLIST_ITEMS = [
@@ -411,7 +411,7 @@ function renderAccounts(){
   var threshold=getThreshold();
   var tbody=document.getElementById('accounts-body');
   tbody.innerHTML=accounts.map(function(a,i){
-    var saldoNum=parseFloat(a.saldo)||0;
+    var saldoNum=parseFloat(String(a.saldo||0).replace(/,/g,""))||0;
     var saldoColor=!a.saldo?'var(--text3)':saldoNum<threshold?'var(--red)':'var(--green)';
     var saldoFechaStr=a.saldoFecha?'<div style="font-size:9px;color:var(--text3);margin-top:1px">'+a.saldoFecha+'</div>':'';
     var estadoBtns=['activa','pausada','pendiente'].map(function(e){
@@ -453,21 +453,61 @@ function toggleDospasos(i){
 
 function renderStats(accounts,threshold){
   var activas=accounts.filter(function(a){return a.estado==='activa'}).length;
-  var saldoTotal=accounts.reduce(function(s,a){return s+(parseFloat(a.saldo)||0)},0);
-  var bajas=accounts.filter(function(a){return a.saldo&&parseFloat(a.saldo)<threshold}).length;
+  var pendientes=accounts.filter(function(a){return a.estado==='pendiente'}).length;
+  var saldoTotal=accounts.reduce(function(s,a){return s+(parseFloat(String(a.saldo||0).replace(/,/g,""))||0)},0);
+  var bajas=accounts.filter(function(a){return a.saldo&&(parseFloat(String(a.saldo||0).replace(/,/g,""))||0)<threshold}).length;
   document.getElementById('stats-cuentas').innerHTML=
-    '<div class="stat"><div class="stat-val gold">'+accounts.length+'</div><div class="stat-lbl">Páginas totales</div></div>'+
-    '<div class="stat"><div class="stat-val green">'+activas+'</div><div class="stat-lbl">Activas</div></div>'+
-    '<div class="stat"><div class="stat-val" style="font-size:20px">$'+saldoTotal.toLocaleString('es-MX')+'</div><div class="stat-lbl">Saldo total MXN</div></div>'+
-    '<div class="stat"><div class="stat-val '+(bajas>0?'red':'green')+'">'+bajas+'</div><div class="stat-lbl">Saldo bajo</div></div>';
+    '<div class="stat" style="cursor:pointer" onclick="filterAccountsByEstado('all')" title="Ver todas"><div class="stat-val gold">'+accounts.length+'</div><div class="stat-lbl">Páginas totales</div></div>'+
+    '<div class="stat" style="cursor:pointer;background:var(--green-bg)" onclick="filterAccountsByEstado('activa')" title="Ver activas"><div class="stat-val green">'+activas+'</div><div class="stat-lbl">Activas</div></div>'+
+    '<div class="stat" style="cursor:pointer" onclick="filterAccountsByEstado('pendiente')" title="Ver pendientes"><div class="stat-val amber">'+pendientes+'</div><div class="stat-lbl">Pendientes</div></div>'+
+    '<div class="stat" style="cursor:pointer;'+(bajas>0?'background:var(--red-bg)':'')+'" onclick="filterAccountsByEstado('saldo-bajo')" title="Ver saldo bajo"><div class="stat-val '+(bajas>0?'red':'green')+'">'+bajas+'</div><div class="stat-lbl">Saldo bajo</div></div>';
+}
+
+var currentFilter='all';
+function filterAccountsByEstado(estado){
+  currentFilter=estado;
+  var accounts=getAccounts();
+  var threshold=getThreshold();
+  var tbody=document.getElementById('accounts-body');
+  var rows=tbody.querySelectorAll('tr');
+  rows.forEach(function(row,i){
+    if(estado==='all'){row.style.display='';}
+    else if(estado==='activa'){row.style.display=accounts[i]&&accounts[i].estado==='activa'?'':'none';}
+    else if(estado==='pendiente'){row.style.display=accounts[i]&&accounts[i].estado==='pendiente'?'':'none';}
+    else if(estado==='pausada'){row.style.display=accounts[i]&&accounts[i].estado==='pausada'?'':'none';}
+    else if(estado==='saldo-bajo'){
+      var saldo=parseFloat(String((accounts[i]&&accounts[i].saldo)||0).replace(/,/g,""))||0;
+      row.style.display=(accounts[i]&&accounts[i].saldo&&saldo<threshold)?'':'none';
+    }
+  });
+  toast('Filtro: '+estado);
 }
 
 function renderAlerts(){
   var accounts=getAccounts();var threshold=getThreshold();
-  var bajas=accounts.filter(function(a){return a.saldo&&parseFloat(a.saldo)<threshold});
+  var bajas=accounts.filter(function(a){return a.saldo&&(parseFloat(String(a.saldo).replace(/,/g,""))||0)<threshold});
   document.getElementById('alerts-container').innerHTML=bajas.map(function(a){
     return'<div class="alert-bar red">⚠️ <strong>'+a.pagina+'</strong> — saldo bajo: $'+a.saldo+' MXN</div>';
   }).join('');
+}
+
+function fullBackup(){
+  var backup={
+    fecha: new Date().toISOString(),
+    version: '1.0',
+    accounts: getAccounts(),
+    leads_base: getBase(),
+    notas: localStorage.getItem('gl_notas')||'',
+    threshold: localStorage.getItem('gl_threshold')||'300',
+  };
+  var blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);var a=document.createElement('a');
+  var fecha=new Date().toISOString().slice(0,10);
+  a.href=url;a.download='respaldo_completo_'+fecha+'.json';
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url)},1000);
+  localStorage.setItem('leads_last_backup',Date.now().toString());
+  toast('Respaldo completo guardado');
 }
 
 function exportData(){
@@ -805,8 +845,11 @@ function renderBase(){
   if(query)base=base.filter(function(r){
     var src=r._source||'ALF';
     var name=getNameFromRow(r,src).toLowerCase();
-    var phone=normalize(getPhoneFromRow(r,src)||r.phone_number||'');
-    return name.includes(query)||phone.includes(query.replace(/\D/g,''));
+    // also search in all string fields for name
+    var allText=Object.values(r).filter(function(v){return typeof v==='string'&&v.length>1&&v.length<80}).join(' ').toLowerCase();
+    var phone=normalize(getPhoneFromRow(r,src)||r.phone_number||r['número_de_teléfono']||'');
+    var queryClean=query.replace(/\D/g,'');
+    return name.includes(query)||allText.includes(query)||(queryClean&&phone.includes(queryClean));
   });
   document.getElementById('base-count').textContent=base.length+' registros encontrados'+(base.length>500?' (mostrando primeros 500)':'');
   if(!base.length){document.getElementById('base-tbl').innerHTML='<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No hay registros.</div>';return}
