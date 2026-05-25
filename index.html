@@ -3,9 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Panel de Registros">
-<meta name="theme-color" content="#3A0F17">
 <title>Panel de Registros</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -24,31 +21,25 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--cream);font-family:-apple-system,'Helvetica Neue',sans-serif;color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
-/* HEADER */
 .hdr{background:var(--vino-dark);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--gold)}
 .hdr-logo{display:flex;align-items:center;gap:10px}
 .hdr-seal{width:34px;height:34px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px}
-.hdr-title{font-size:15px;font-weight:600;color:var(--cream);letter-spacing:.02em}
+.hdr-title{font-size:15px;font-weight:600;color:var(--cream)}
 .hdr-sub{font-size:10px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase}
 .hdr-date{font-size:11px;color:var(--gold-light);opacity:.8}
-/* NAV */
 .nav{background:var(--vino);padding:0 28px;display:flex;border-bottom:1px solid rgba(201,168,76,.2)}
 .nav-tab{font-size:13px;font-weight:500;padding:10px 18px;cursor:pointer;color:rgba(245,240,232,.6);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
 .nav-tab:hover{color:var(--cream)}
 .nav-tab.active{color:var(--gold-light);border-bottom-color:var(--gold)}
-/* LAYOUT */
 .layout{max-width:1060px;margin:0 auto;padding:24px 20px}
 .view{display:none}.view.active{display:block}
-/* CARDS */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
 .card-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:12px}
-/* STATS */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;box-shadow:var(--shadow)}
 .stat-val{font-size:24px;font-weight:700;color:var(--text);letter-spacing:-1px}
 .stat-val.gold{color:var(--gold)}.stat-val.green{color:var(--green)}.stat-val.red{color:var(--red)}.stat-val.amber{color:var(--amber)}
 .stat-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
-/* TABLE */
 .tbl-wrap{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;overflow-x:auto;margin-bottom:14px}
 .tbl-wrap.scrollable{max-height:320px;overflow-y:auto}
 table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
@@ -57,8 +48,6 @@ td{padding:6px 10px;border-bottom:1px solid var(--border);color:var(--text);over
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--surface2)}
 tr.dup td{background:var(--red-bg)}
-tr.ndup td{background:var(--amber-bg)}
-/* BADGES */
 .badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
 .b-ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
 .b-dup{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
@@ -67,24 +56,19 @@ tr.ndup td{background:var(--amber-bg)}
 .b-pausada{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
 .b-pendiente{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
 .page-abbr{display:inline-block;font-size:9px;font-weight:600;padding:2px 6px;border-radius:20px;background:var(--vino-dark);color:var(--gold-light);margin-left:5px}
-/* BUTTONS */
 .btn-primary{background:var(--vino);color:var(--cream);border:none;border-radius:var(--radius-sm);padding:9px 18px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s;width:100%}
 .btn-primary:hover{background:var(--vino-light)}
 .btn-primary:disabled{opacity:.35;cursor:not-allowed}
 .btn-ghost{font-size:12px;padding:5px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
 .btn-ghost:hover{background:var(--surface2);color:var(--text)}
 .btn-ghost.danger{border-color:var(--red-border);color:var(--red)}
-.btn-ghost.danger:hover{background:var(--red-bg)}
 .btn-save{width:100%;padding:10px;border:1px solid var(--green-border);border-radius:var(--radius-sm);background:var(--green-bg);color:var(--green);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px}
-.btn-save:hover{background:#d4eddf}
 .btn-dl{padding:9px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;text-align:center}
 .btn-dl:hover{background:var(--surface2)}
 .dl-count{font-size:10px;color:var(--text3);display:block;margin-top:2px}
 .btn-link{font-size:11px;padding:3px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text2);cursor:pointer;text-decoration:none;display:inline-block}
 .btn-link:hover{background:var(--surface2)}
-/* UPLOAD ZONES */
 .upload-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.upload-grid.six{grid-template-columns:repeat(3,1fr)}
 .uzone{border:1px dashed var(--border2);border-radius:var(--radius-sm);padding:11px;cursor:pointer;text-align:center;min-height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all .15s}
 .uzone:hover{border-color:var(--blue);background:var(--blue-bg)}
 .uzone.done{border-style:solid;border-color:var(--green-border);background:var(--green-bg)}
@@ -93,54 +77,53 @@ tr.ndup td{background:var(--amber-bg)}
 .uz-ok{font-size:10px;color:var(--green);font-weight:500;display:none}
 input[type=file]{display:none}
 input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:inherit}
-input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--gold)}
 .editable{background:transparent;border:none;border-bottom:1px dashed var(--border);font-family:inherit;font-size:12px;color:var(--text);width:100%;padding:2px 4px;outline:none}
 .editable:focus{border-bottom-color:var(--gold);background:var(--amber-bg)}
-/* CHECKLIST */
 .checklist{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
-.check-item{display:flex;align-items:center;gap:8px;cursor:pointer;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);transition:all .15s}
+.check-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2)}
 .check-item.done{background:var(--green-bg);border-color:var(--green-border)}
-.check-item span{font-size:13px}
+.check-item span{font-size:13px;cursor:pointer}
 .check-item.done span{text-decoration:line-through;color:var(--green)}
-/* TABS */
 .tabs{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}
 .tab{font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:20px;cursor:pointer;background:var(--surface);color:var(--text2)}
 .tab.active{background:var(--vino);color:var(--cream);border-color:var(--vino)}
-/* FILTER */
 .filter-sel{font-size:12px;padding:5px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);cursor:pointer;font-family:inherit}
-/* ALERT BARS */
 .alert-bar{display:flex;align-items:center;gap:10px;border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:10px;font-size:13px}
 .alert-bar.red{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
-.alert-bar.amber{background:var(--amber-bg);border:1px solid var(--amber-border);color:var(--amber)}
-.alert-bar.blue{background:var(--blue-bg);border:1px solid #B5D4F4;color:var(--blue)}
-/* DB BAR */
 .db-bar{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:background .3s}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);flex-shrink:0}
 .dot.active{background:var(--green)}
-/* ULTIMO CARD */
 .ultimos-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .ultimo-card{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px}
 .ultimo-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:2px}
 .ultimo-name{font-size:12px;font-weight:600;color:var(--text)}
 .ultimo-date{font-size:10px;color:var(--text2)}
-/* REPORTE */
 .reporte-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px}
 .reporte-text{font-size:13px;color:var(--text);line-height:1.7;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;white-space:pre-wrap}
-/* THRESHOLD */
 .threshold-row{display:flex;align-items:center;gap:10px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--amber)}
-/* SEARCH */
 .search-row{display:flex;gap:8px;margin-bottom:10px}
 .search-row input{flex:1}
 .search-row select{font-size:12px;padding:6px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:inherit}
-/* HINT BAR */
 .hint-bar{font-size:12px;color:var(--amber);background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px}
-/* TOAST */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--vino-dark);color:var(--gold-light);padding:10px 22px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;border:1px solid var(--gold)}
 .toast.show{opacity:1}
 .saldo-input{background:transparent;border:none;border-bottom:1px dashed var(--border);font-family:inherit;font-size:13px;font-weight:600;width:80px;padding:2px 4px;outline:none;color:var(--green)}
-.saldo-input:focus{border-bottom-color:var(--gold)}
 .divider{border:none;border-top:1px solid var(--border);margin:14px 0}
-@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}.upload-grid,.upload-grid.six{grid-template-columns:1fr}.checklist{grid-template-columns:1fr}}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300}
+.modal-panel{display:none;position:fixed;top:0;right:0;width:400px;height:100vh;background:var(--surface);z-index:301;box-shadow:-4px 0 24px rgba(0,0,0,.15);overflow-y:auto}
+.modal-header{background:var(--vino-dark);padding:16px 20px;border-bottom:2px solid var(--gold);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1}
+.modal-section{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:12px}
+.modal-section-title{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px;font-weight:600}
+.modal-field{margin-bottom:10px}
+.modal-field label{display:block;font-size:10px;color:var(--text3);margin-bottom:3px}
+.modal-field input{width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;background:var(--surface)}
+.modal-field input:focus{outline:none;border-color:var(--gold)}
+.estado-btn{flex:1;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;font-size:12px;font-weight:600;background:var(--surface);color:var(--text2)}
+.estado-btn.active-activa{background:var(--vino);color:var(--cream);border-color:var(--vino)}
+.estado-btn.active-pausada{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border)}
+.estado-btn.active-pendiente{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}.upload-grid{grid-template-columns:1fr}.checklist{grid-template-columns:1fr}.modal-panel{width:100%}}
 </style>
 </head>
 <body>
@@ -160,22 +143,19 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
   <div class="nav-tab active" onclick="switchView('cuentas',this)">Cuentas</div>
   <div class="nav-tab" onclick="switchView('registros',this)">Registros Diarios</div>
   <div class="nav-tab" onclick="switchView('base',this)">Base de Datos</div>
+  <div class="nav-tab" onclick="switchView('finanzas',this)">📊 Finanzas</div>
 </div>
 
-<!-- ===== CUENTAS ===== -->
+<!-- CUENTAS -->
 <div class="view active" id="view-cuentas">
 <div class="layout">
-
   <div class="stats" id="stats-cuentas"></div>
   <div id="alerts-container"></div>
-
   <div class="threshold-row">
     ⚠️ Alertar cuando saldo baje de
     <input type="number" id="threshold-input" value="300" onchange="saveThreshold()" style="width:80px;padding:5px 8px;border:1px solid var(--amber-border);border-radius:var(--radius-sm);font-size:13px;font-weight:600;color:var(--amber);background:var(--surface)">
     MXN por cuenta
   </div>
-
-  <!-- CHECKLIST -->
   <div class="card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
       <p class="card-title" style="margin:0">Checklist diario</p>
@@ -183,12 +163,11 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
     </div>
     <div class="checklist" id="checklist-container"></div>
   </div>
-
-  <!-- CUENTAS TABLE -->
   <div class="card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <p class="card-title" style="margin:0">Cuentas y páginas</p>
+      <p class="card-title" style="margin:0">Cuentas y páginas <span style="font-size:10px;color:var(--text3);font-weight:400;margin-left:6px">— Click en una fila para ver detalles</span></p>
       <div style="display:flex;gap:8px">
+        <button class="btn-ghost" style="border-color:var(--gold);color:var(--amber)" onclick="fullBackup()">💾 Respaldo</button>
         <button class="btn-ghost" onclick="exportData()">Exportar</button>
         <button class="btn-ghost" onclick="importData()">Importar</button>
       </div>
@@ -196,16 +175,13 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
     <div class="tbl-wrap">
       <table id="accounts-table">
         <thead><tr>
-          <th style="width:170px">Página</th>
-          <th style="width:100px">Cuenta FB</th>
-          <th style="width:120px">Correo</th>
-          <th style="width:85px">Contraseña</th>
-          <th style="width:100px">Ad ID</th>
-          <th style="width:100px">Saldo MXN</th>
-          <th style="width:70px">Presup/día</th>
-          <th style="width:50px">2FA</th>
-          <th style="width:95px">Estado</th>
-          <th style="width:75px">Links</th>
+          <th style="width:200px">Página</th>
+          <th style="width:120px">Cuenta FB</th>
+          <th style="width:130px">Saldo MXN</th>
+          <th style="width:100px">Días restantes</th>
+          <th style="width:55px">2FA</th>
+          <th style="width:100px">Estado</th>
+          <th style="width:65px">Links</th>
         </tr></thead>
         <tbody id="accounts-body"></tbody>
       </table>
@@ -214,14 +190,12 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
     <p class="card-title">Notas del día</p>
     <textarea id="notas-dia" style="width:100%;height:70px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px;font-family:inherit;font-size:13px;resize:vertical;outline:none" placeholder="Pendientes, recordatorios..." oninput="saveNotas()"></textarea>
   </div>
-
 </div>
 </div>
 
-<!-- ===== REGISTROS DIARIOS ===== -->
+<!-- REGISTROS -->
 <div class="view" id="view-registros">
 <div class="layout">
-
   <div class="db-bar">
     <div class="dot" id="db-dot"></div>
     <span style="font-size:13px;color:var(--text2);flex:1" id="db-text">Base vacía</span>
@@ -231,21 +205,17 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
       <button class="btn-ghost danger" onclick="resetBase()">Limpiar</button>
     </div>
   </div>
-
-  <div id="backup-bar"></div>
   <div class="ultimos-row" id="ultimos-guardados"></div>
-
-  <!-- HISTORICOS -->
   <div class="card">
     <p class="card-title">Histórico inicial (solo la primera vez)</p>
-    <div class="upload-grid six">
-      <div class="uzone" id="zh-alf" onclick="document.getElementById('fh-alf').click()"><span class="uz-label">Asesoría Legal en Fraude</span><span class="uz-sub">ALF · .xls/.xlsx</span><span class="uz-ok" id="sh-alf"></span></div>
-      <div class="uzone" id="zh-fgr" onclick="document.getElementById('fh-fgr').click()"><span class="uz-label">Fiscalía General República</span><span class="uz-sub">FGR · .xls/.xlsx</span><span class="uz-ok" id="sh-fgr"></span></div>
-      <div class="uzone" id="zh-spc" onclick="document.getElementById('fh-spc').click()"><span class="uz-label">Seguridad y Protección Ciudadana</span><span class="uz-sub">SPC · .xls/.xlsx</span><span class="uz-ok" id="sh-spc"></span></div>
-      <div class="uzone" id="zh-avf" onclick="document.getElementById('fh-avf').click()"><span class="uz-label">Asesoría Víctimas de Fraude</span><span class="uz-sub">AVF · .xls/.xlsx</span><span class="uz-ok" id="sh-avf"></span></div>
-      <div class="uzone" id="zh-ssn" onclick="document.getElementById('fh-ssn').click()"><span class="uz-label">Secretaría Seguridad Nacional</span><span class="uz-sub">SSN · .xls/.xlsx</span><span class="uz-ok" id="sh-ssn"></span></div>
-      <div class="uzone" id="zh-sncf" onclick="document.getElementById('fh-sncf').click()"><span class="uz-label">Sec. Nacional contra el Fraude</span><span class="uz-sub">SNCF · .xls/.xlsx</span><span class="uz-ok" id="sh-sncf"></span></div>
-      <div class="uzone" id="zh-ajn" onclick="document.getElementById('fh-ajn').click()"><span class="uz-label">Asesoría Jurídica Nacional</span><span class="uz-sub">AJN · .xls/.xlsx</span><span class="uz-ok" id="sh-ajn"></span></div>
+    <div class="upload-grid">
+      <div class="uzone" id="zh-alf" onclick="document.getElementById('fh-alf').click()"><span class="uz-label">Asesoría Legal en Fraude</span><span class="uz-sub">ALF</span><span class="uz-ok" id="sh-alf"></span></div>
+      <div class="uzone" id="zh-fgr" onclick="document.getElementById('fh-fgr').click()"><span class="uz-label">Fiscalía General República</span><span class="uz-sub">FGR</span><span class="uz-ok" id="sh-fgr"></span></div>
+      <div class="uzone" id="zh-spc" onclick="document.getElementById('fh-spc').click()"><span class="uz-label">Seguridad y Protección Ciudadana</span><span class="uz-sub">SPC</span><span class="uz-ok" id="sh-spc"></span></div>
+      <div class="uzone" id="zh-avf" onclick="document.getElementById('fh-avf').click()"><span class="uz-label">Asesoría Víctimas de Fraude</span><span class="uz-sub">AVF</span><span class="uz-ok" id="sh-avf"></span></div>
+      <div class="uzone" id="zh-ssn" onclick="document.getElementById('fh-ssn').click()"><span class="uz-label">Secretaría Seguridad Nacional</span><span class="uz-sub">SSN</span><span class="uz-ok" id="sh-ssn"></span></div>
+      <div class="uzone" id="zh-sncf" onclick="document.getElementById('fh-sncf').click()"><span class="uz-label">Sec. Nacional contra el Fraude</span><span class="uz-sub">SNCF</span><span class="uz-ok" id="sh-sncf"></span></div>
+      <div class="uzone" id="zh-ajn" onclick="document.getElementById('fh-ajn').click()"><span class="uz-label">Asesoría Jurídica Nacional</span><span class="uz-sub">AJN</span><span class="uz-ok" id="sh-ajn"></span></div>
     </div>
     <input type="file" id="fh-alf" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'alf')">
     <input type="file" id="fh-fgr" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'fgr')">
@@ -256,11 +226,9 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
     <input type="file" id="fh-ajn" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'ajn')">
     <button id="btn-load-hist" onclick="loadHist()" style="display:none;width:100%;margin-top:10px;padding:9px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer">Cargar histórico a la base</button>
   </div>
-
-  <!-- REGISTROS HOY -->
   <div class="card">
     <p class="card-title">Registros de hoy</p>
-    <div class="upload-grid six">
+    <div class="upload-grid">
       <div class="uzone" id="zn-alf" onclick="document.getElementById('fn-alf').click()"><span class="uz-label">Asesoría Legal en Fraude</span><span class="uz-sub">ALF · hoy</span><span class="uz-ok" id="sn-alf"></span></div>
       <div class="uzone" id="zn-fgr" onclick="document.getElementById('fn-fgr').click()"><span class="uz-label">Fiscalía General República</span><span class="uz-sub">FGR · hoy</span><span class="uz-ok" id="sn-fgr"></span></div>
       <div class="uzone" id="zn-spc" onclick="document.getElementById('fn-spc').click()"><span class="uz-label">Seguridad y Protección Ciudadana</span><span class="uz-sub">SPC · hoy</span><span class="uz-ok" id="sn-spc"></span></div>
@@ -277,13 +245,10 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
     <input type="file" id="fn-sncf" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'sncf')">
     <input type="file" id="fn-ajn" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'ajn')">
   </div>
-
   <button class="btn-primary" id="btn-run" onclick="run()" disabled style="margin-bottom:16px;padding:11px;font-size:14px">Analizar registros</button>
-
   <div id="results" style="display:none">
     <div class="ultimos-row" id="ultimos-hoy"></div>
     <div class="stats" id="stats-row"></div>
-
     <div class="card" style="padding:14px">
       <div id="hint-ndup" class="hint-bar" style="display:none">Registros amarillos = duplicados entre páginas del mismo día. Marca ☑ el que quieres conservar.</div>
       <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap">
@@ -297,7 +262,6 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
       </div>
       <div class="tbl-wrap scrollable"><div id="tbl-container"></div></div>
     </div>
-
     <div class="card">
       <p class="card-title">Descargar registros únicos de hoy</p>
       <button class="btn-primary" onclick="downloadAll()" style="margin-bottom:8px">Descargar todos los archivos de un clic</button>
@@ -310,11 +274,10 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
       </div>
     </div>
   </div>
-
 </div>
 </div>
 
-<!-- ===== BASE DE DATOS ===== -->
+<!-- BASE -->
 <div class="view" id="view-base">
 <div class="layout">
   <div class="card">
@@ -338,57 +301,61 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
 </div>
 </div>
 
+<!-- FINANZAS -->
+<div class="view" id="view-finanzas">
+<div class="layout">
+  <div id="finanzas-cards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px"></div>
+  <div class="card">
+    <p class="card-title" style="margin-bottom:14px">Saldo actual por página</p>
+    <div id="finanzas-bars"></div>
+  </div>
+</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal()"></div>
+<div class="modal-panel" id="modal-panel">
+  <div class="modal-header">
+    <div>
+      <div id="modal-title" style="font-size:15px;font-weight:600;color:var(--cream)"></div>
+      <div id="modal-abbr" style="font-size:11px;color:var(--gold);margin-top:2px"></div>
+    </div>
+    <button onclick="closeModal()" style="background:transparent;border:none;color:var(--cream);font-size:20px;cursor:pointer">✕</button>
+  </div>
+  <div id="modal-body" style="padding:20px"></div>
+</div>
+
 <input type="file" id="f-import-base" accept=".json" onchange="doImportBase(this)" style="display:none">
 <input type="file" id="f-import-data" accept=".json" onchange="doImportData(this)" style="display:none">
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== CONFIG =====
 var SCHEMAS = {
-  ALF: {cols:['created_time','ad_name','first_name','phone_number','describe_brevemente_tu_situación'], name:'first_name', phone:'phone_number', desc:'describe_brevemente_tu_situación'},
-  FGR: {cols:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_fraude_sufriste?_explícanos_brevemente'], name:'full_name', phone:'phone_number', desc:'¿qué_tipo_de_fraude_sufriste?_explícanos_brevemente'},
-  SPC: {cols:['created_time','ad_name','full_name','phone_number','¿qué_sucedió_exactamente?__describe_brevemente_lo_que_ocurrió_en_tu_caso'], name:'full_name', phone:'phone_number', desc:'¿qué_sucedió_exactamente?__describe_brevemente_lo_que_ocurrió_en_tu_caso'},
-  AVF: {cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿qué_tipo_de_fraude_sufriste?_descríbelo_brevemente'], name:'nombre_completo', phone:'número_de_teléfono', desc:'¿qué_tipo_de_fraude_sufriste?_descríbelo_brevemente'},
-  SSN: {cols:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_delito_o_fraude_sufriste?_descríbelo_brevemente.'], name:'full_name', phone:'phone_number', desc:'¿qué_tipo_de_delito_o_fraude_sufriste?_descríbelo_brevemente.'},
-  SNCF: {cols:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'], name:'full_name', phone:'phone_number', desc:'¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'},
-  AJN: {cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿cuál_es_tu_situación_legal_o_financiera?_descríbela_brevemente.'], name:'nombre_completo', phone:'número_de_teléfono', desc:'¿cuál_es_tu_situación_legal_o_financiera?_descríbela_brevemente.'}
+  ALF:{cols:['created_time','ad_name','first_name','phone_number','describe_brevemente_tu_situación'],name:'first_name',phone:'phone_number',desc:'describe_brevemente_tu_situación'},
+  FGR:{cols:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_fraude_sufriste?_explícanos_brevemente'],name:'full_name',phone:'phone_number',desc:'¿qué_tipo_de_fraude_sufriste?_explícanos_brevemente'},
+  SPC:{cols:['created_time','ad_name','full_name','phone_number','¿qué_sucedió_exactamente?__describe_brevemente_lo_que_ocurrió_en_tu_caso'],name:'full_name',phone:'phone_number',desc:'¿qué_sucedió_exactamente?__describe_brevemente_lo_que_ocurrió_en_tu_caso'},
+  AVF:{cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿qué_tipo_de_fraude_sufriste?_descríbelo_brevemente'],name:'nombre_completo',phone:'número_de_teléfono',desc:'¿qué_tipo_de_fraude_sufriste?_descríbelo_brevemente'},
+  SSN:{cols:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_delito_o_fraude_sufriste?_descríbelo_brevemente.'],name:'full_name',phone:'phone_number',desc:'¿qué_tipo_de_delito_o_fraude_sufriste?_descríbelo_brevemente.'},
+  SNCF:{cols:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'],name:'full_name',phone:'phone_number',desc:'¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'},
+  AJN:{cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿cuál_es_tu_situación_legal_o_financiera?_descríbela_brevemente.'],name:'nombre_completo',phone:'número_de_teléfono',desc:'¿cuál_es_tu_situación_legal_o_financiera?_descríbela_brevemente.'}
 };
-
-var FULL_NAMES = {
-  ALF:'Asesoria_Legal_en_Fraude', FGR:'Fiscalia_General_Republica', SPC:'Seguridad_y_Proteccion_Ciudadana',
-  AVF:'Asesoria_para_Victimas_de_Fraude', SSN:'Secretaria_de_Seguridad_Nacional', SNCF:'Secretaria_Nacional_contra_el_Fraude',
-  AJN:'Asesoria_Juridica_Nacional'
-};
-
-var ALL_SRCS = ['ALF','FGR','SPC','AVF','SSN','SNCF','AJN'];
-var LABELS = {alf:'ALF',fgr:'FGR',spc:'SPC',avf:'AVF',ssn:'SSN',sncf:'SNCF',ajn:'AJN'};
-
-var DEFAULT_ACCOUNTS = [
-  {id:1,pagina:'Asesoría Legal en Fraude',abbr:'ALF',fbCuenta:'Bach Uri',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
-  {id:2,pagina:'Fiscalía General República',abbr:'FGR',fbCuenta:'Bach Uri',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
-  {id:3,pagina:'Seguridad y Protección Ciudadana',abbr:'SPC',fbCuenta:'Bach Uri',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
-  {id:4,pagina:'Asesoría para Víctimas de Fraude',abbr:'AVF',fbCuenta:'Bach Uriuno',correo:'bachuno98@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
-  {id:5,pagina:'Secretaría de Seguridad Nacional',abbr:'SSN',fbCuenta:'Carlos Torres',correo:'admintorres01@gmail.com',password:'',adId:'999544542732383',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://adsmanager.facebook.com/manage/?act=999544542732383'},
-  {id:6,pagina:'Asesoría Jurídica Nacional',abbr:'AJN',fbCuenta:'Ana Torres',correo:'admintorres02@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
-  {id:7,pagina:'Consultoría Legal',abbr:'CL',fbCuenta:'Luis Torres',correo:'admintorres03@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
-  {id:8,pagina:'Instituto Nacional de Asesoría Legal',abbr:'INAL',fbCuenta:'María Torres',correo:'admintorres04@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
-  {id:9,pagina:'Secretaría Nacional contra el Fraude',abbr:'SNCF',fbCuenta:'Pedro Torres',correo:'admintorres05@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'}
+var FULL_NAMES={ALF:'Asesoria_Legal_en_Fraude',FGR:'Fiscalia_General_Republica',SPC:'Seguridad_y_Proteccion_Ciudadana',AVF:'Asesoria_para_Victimas_de_Fraude',SSN:'Secretaria_de_Seguridad_Nacional',SNCF:'Secretaria_Nacional_contra_el_Fraude',AJN:'Asesoria_Juridica_Nacional'};
+var ALL_SRCS=['ALF','FGR','SPC','AVF','SSN','SNCF','AJN'];
+var LABELS={alf:'ALF',fgr:'FGR',spc:'SPC',avf:'AVF',ssn:'SSN',sncf:'SNCF',ajn:'AJN'};
+var DEFAULT_ACCOUNTS=[
+  {id:1,pagina:'Asesoría Legal en Fraude',abbr:'ALF',fbCuenta:'Bach Uri',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:2,pagina:'Fiscalía General República',abbr:'FGR',fbCuenta:'Bach Uri',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:3,pagina:'Seguridad y Protección Ciudadana',abbr:'SPC',fbCuenta:'Bach Uri',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:4,pagina:'Asesoría para Víctimas de Fraude',abbr:'AVF',fbCuenta:'Bach Uriuno',correo:'bachuno98@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:5,pagina:'Secretaría de Seguridad Nacional',abbr:'SSN',fbCuenta:'Carlos Torres',correo:'admintorres01@gmail.com',password:'',adId:'999544542732383',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:6,pagina:'Asesoría Jurídica Nacional',abbr:'AJN',fbCuenta:'Ana Torres',correo:'admintorres02@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:7,pagina:'Consultoría Legal',abbr:'CL',fbCuenta:'Luis Torres',correo:'admintorres03@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:8,pagina:'Instituto Nacional de Asesoría Legal',abbr:'INAL',fbCuenta:'María Torres',correo:'admintorres04@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:9,pagina:'Secretaría Nacional contra el Fraude',abbr:'SNCF',fbCuenta:'Pedro Torres',correo:'admintorres05@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:''}
 ];
+var CHECKLIST_ITEMS=['Descargar registros ALF, FGR, SPC','Descargar registros AVF, SSN, SNCF','Analizar duplicados en la herramienta','Descargar archivos limpios','Mandar reporte a Amix','Revisar saldos de todas las cuentas','Revisar anuncios activos','Guardar registros en la base','Exportar base de datos','Revisar mensajes de páginas'];
 
-var CHECKLIST_ITEMS = [
-  'Descargar registros ALF, FGR, SPC',
-  'Descargar registros AVF, SSN, SNCF',
-  'Analizar duplicados en la herramienta',
-  'Descargar archivos limpios',
-  'Mandar reporte a Amix',
-  'Revisar saldos de todas las cuentas',
-  'Revisar anuncios activos',
-  'Guardar registros en la base',
-  'Exportar base de datos',
-  'Revisar mensajes de páginas'
-];
-
-// ===== UTILS =====
+// UTILS
 function normalize(p){if(!p)return'';return String(p).replace(/^p:/i,'').replace(/\D/g,'').replace(/^521/,'52').slice(-10);}
 function getBase(){try{return JSON.parse(localStorage.getItem('leads_base')||'[]')}catch(e){return[]}}
 function setBase(a){localStorage.setItem('leads_base',JSON.stringify(a))}
@@ -402,141 +369,195 @@ function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.c
 function fmtDate(val){var d=new Date(val||'');if(isNaN(d))return String(val||'').slice(0,10);return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}
 function fmtDateShort(val){var d=new Date(val||'');if(isNaN(d))return'-';return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})}
 function parseFile(file){return file.arrayBuffer().then(function(buf){var wb=XLSX.read(buf,{type:'array',cellDates:true});var ws=wb.Sheets[wb.SheetNames[0]];return XLSX.utils.sheet_to_json(ws,{defval:''})})}
+function parseSaldo(s){return parseFloat(String(s||0).replace(/,/g,''))||0}
 
-// ===== VIEW SWITCH =====
+// VIEW SWITCH
 function switchView(name,el){
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
   document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active')});
   document.getElementById('view-'+name).classList.add('active');
   el.classList.add('active');
   if(name==='base')renderBase();
+  if(name==='finanzas')renderFinanzas();
 }
 
-// ===== CUENTAS =====
+// ACCOUNTS TABLE
 function renderAccounts(){
   var accounts=getAccounts();
   var threshold=getThreshold();
-  var tbody=document.getElementById('accounts-body');
-  tbody.innerHTML=accounts.map(function(a,i){
-    var saldoNum=parseFloat(String(a.saldo||0).replace(/,/g,""))||0;
+  var rowBg={activa:'#f0faf5',pausada:'#fdf6e3',pendiente:'#fdf0f0'};
+  document.getElementById('accounts-body').innerHTML=accounts.map(function(a,i){
+    var saldoNum=parseSaldo(a.saldo);
+    var presupNum=parseSaldo(a.presupuestoDiario);
+    var dias=presupNum>0?Math.floor(saldoNum/presupNum):null;
+    var diasColor=dias===null?'var(--text3)':dias<=2?'var(--red)':dias<=5?'var(--amber)':'var(--green)';
     var saldoColor=!a.saldo?'var(--text3)':saldoNum<threshold?'var(--red)':'var(--green)';
-    var saldoFechaStr=a.saldoFecha?'<div style="font-size:9px;color:var(--text3);margin-top:1px">'+a.saldoFecha+'</div>':'';
-    var estadoBtns=['activa','pausada','pendiente'].map(function(e){
-      return'<button onclick="updateAccount('+i+',\'estado\',\''+e+'\')" style="font-size:9px;padding:2px 5px;border-radius:20px;border:1px solid;cursor:pointer;margin:1px;font-weight:600;'+
-        (a.estado===e?'background:var(--vino);color:var(--cream);border-color:var(--vino)':'background:transparent;color:var(--text3);border-color:var(--border)')+'">'+e+'</button>';
-    }).join('');
-    return'<tr>'+
-      '<td style="width:180px"><span style="font-weight:500">'+a.pagina+'</span><span class="page-abbr">'+a.abbr+'</span></td>'+
-      '<td><input class="editable" value="'+a.correo+'" onchange="updateAccount('+i+',\'correo\',this.value)" placeholder="correo"></td>'+
-      '<td><input class="editable" value="'+a.password+'" onchange="updateAccount('+i+',\'password\',this.value)" placeholder="contraseña" type="password" onclick="this.type=\'text\'" onblur="this.type=\'password\'"></td>'+
-      '<td><input class="editable" value="'+a.adId+'" onchange="updateAccount('+i+',\'adId\',this.value)" placeholder="ID"></td>'+
-      '<td><input class="saldo-input" value="'+(a.saldo||'')+'" onchange="updateSaldo('+i+',this.value)" placeholder="0" style="color:'+saldoColor+'">'+saldoFechaStr+'</td>'+
-      '<td><input class="editable" value="'+(a.presupuestoDiario||'')+'" onchange="updateAccount('+i+',\'presupuestoDiario\',this.value)" placeholder="0" style="width:65px"></td>'+
-      '<td><input class="editable" value="'+(a.gastoMes||'')+'" onchange="updateAccount('+i+',\'gastoMes\',this.value)" placeholder="0" style="width:65px"></td>'+
-      '<td style="text-align:center"><button onclick="toggleDospasos('+i+')" style="font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid;cursor:pointer;font-weight:600;'+(a.dospasos?'background:var(--green-bg);color:var(--green);border-color:var(--green-border)':'background:var(--red-bg);color:var(--red);border-color:var(--red-border)')+'">'+( a.dospasos?'SI':'NO')+'</button></td>'+
-      '<td><div style="display:flex;flex-direction:column;gap:2px">'+estadoBtns+'</div></td>'+
-      '<td><a class="btn-link" href="'+a.fbUrl+'" target="_blank">FB</a>'+(a.adId?'<a class="btn-link" href="https://adsmanager.facebook.com/manage/?act='+a.adId+'" target="_blank" style="margin-left:3px">Ads</a>':'')+'</td>'+
+    return '<tr style="background:'+rowBg[a.estado]+';cursor:pointer" onclick="openModal('+i+')">'+
+      '<td><strong>'+a.pagina+'</strong><span class="page-abbr">'+a.abbr+'</span></td>'+
+      '<td style="font-size:12px;color:var(--text2)">'+(a.fbCuenta||'—')+'</td>'+
+      '<td><span style="font-weight:700;color:'+saldoColor+'">'+(a.saldo?'$'+a.saldo:'—')+'</span>'+(a.saldoFecha?'<div style="font-size:9px;color:var(--text3)">'+a.saldoFecha+'</div>':'')+'</td>'+
+      '<td style="font-weight:600;color:'+diasColor+'">'+(dias!==null?dias+' días':'—')+'</td>'+
+      '<td style="text-align:center"><span style="font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;'+(a.dospasos?'background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)':'background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)')+'">'+( a.dospasos?'SI':'NO')+'</span></td>'+
+      '<td><span class="badge b-'+a.estado+'">'+a.estado+'</span></td>'+
+      '<td onclick="event.stopPropagation()">'+
+        '<a class="btn-link" href="https://facebook.com" target="_blank" style="display:block;text-align:center;margin-bottom:3px">FB</a>'+
+        (a.adId?'<a class="btn-link" href="https://adsmanager.facebook.com/manage/?act='+a.adId+'" target="_blank" style="display:block;text-align:center">Ads</a>':'')+
+      '</td>'+
     '</tr>';
   }).join('');
   renderStats(accounts,threshold);
   renderAlerts();
 }
 
-function updateAccount(i,field,value){
-  var accounts=getAccounts();accounts[i][field]=value;saveAccounts(accounts);
-  if(field==='estado'||field==='dospasos')renderAccounts();
-}
-
-function updateSaldo(i,value){
-  var accounts=getAccounts();accounts[i].saldo=value;
-  var now=new Date();accounts[i].saldoFecha=now.toLocaleDateString('es-MX',{day:'2-digit',month:'short'})+' '+now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
-  saveAccounts(accounts);renderAccounts();toast('Saldo actualizado');
-}
-
-function toggleDospasos(i){
-  var accounts=getAccounts();accounts[i].dospasos=!accounts[i].dospasos;saveAccounts(accounts);renderAccounts();
-  toast(accounts[i].dospasos?'2FA activado':'2FA desactivado');
-}
-
 function renderStats(accounts,threshold){
   var activas=accounts.filter(function(a){return a.estado==='activa'}).length;
   var pendientes=accounts.filter(function(a){return a.estado==='pendiente'}).length;
-  var saldoTotal=accounts.reduce(function(s,a){return s+(parseFloat(String(a.saldo||0).replace(/,/g,""))||0)},0);
-  var bajas=accounts.filter(function(a){return a.saldo&&(parseFloat(String(a.saldo||0).replace(/,/g,""))||0)<threshold}).length;
+  var saldoTotal=accounts.reduce(function(s,a){return s+parseSaldo(a.saldo)},0);
+  var bajas=accounts.filter(function(a){return a.saldo&&parseSaldo(a.saldo)<threshold}).length;
   document.getElementById('stats-cuentas').innerHTML=
-    '<div class="stat" style="cursor:pointer" onclick="filterAccountsByEstado(&quot;all&quot;)" title="Ver todas"><div class="stat-val gold">'+accounts.length+'</div><div class="stat-lbl">Páginas totales</div></div>'+
-    '<div class="stat" style="cursor:pointer;background:var(--green-bg)" onclick="filterAccountsByEstado(&quot;activa&quot;)" title="Ver activas"><div class="stat-val green">'+activas+'</div><div class="stat-lbl">Activas</div></div>'+
-    '<div class="stat" style="cursor:pointer" onclick="filterAccountsByEstado(&quot;pendiente&quot;)" title="Ver pendientes"><div class="stat-val amber">'+pendientes+'</div><div class="stat-lbl">Pendientes</div></div>'+
-    '<div class="stat" style="cursor:pointer;'+(bajas>0?'background:var(--red-bg)':'')+'" onclick="filterAccountsByEstado(&quot;saldo-bajo&quot;)" title="Ver saldo bajo"><div class="stat-val '+(bajas>0?'red':'green')+'">'+bajas+'</div><div class="stat-lbl">Saldo bajo</div></div>';
+    '<div class="stat" style="cursor:pointer" onclick="filterRows(\'all\')"><div class="stat-val gold">'+accounts.length+'</div><div class="stat-lbl">Páginas totales</div></div>'+
+    '<div class="stat" style="cursor:pointer;background:var(--green-bg)" onclick="filterRows(\'activa\')"><div class="stat-val green">'+activas+'</div><div class="stat-lbl">Activas</div></div>'+
+    '<div class="stat" style="cursor:pointer" onclick="filterRows(\'pendiente\')"><div class="stat-val amber">'+pendientes+'</div><div class="stat-lbl">Pendientes</div></div>'+
+    '<div class="stat" style="cursor:pointer;'+(bajas>0?'background:var(--red-bg)':'')+'" onclick="filterRows(\'baja\')"><div class="stat-val '+(bajas>0?'red':'green')+'">'+bajas+'</div><div class="stat-lbl">Saldo bajo</div></div>';
 }
 
-var currentFilter='all';
-function filterAccountsByEstado(estado){
-  currentFilter=estado;
-  var accounts=getAccounts();
-  var threshold=getThreshold();
-  var tbody=document.getElementById('accounts-body');
-  var rows=tbody.querySelectorAll('tr');
-  rows.forEach(function(row,i){
-    if(estado==='all'){row.style.display='';}
-    else if(estado==='activa'){row.style.display=accounts[i]&&accounts[i].estado==='activa'?'':'none';}
-    else if(estado==='pendiente'){row.style.display=accounts[i]&&accounts[i].estado==='pendiente'?'':'none';}
-    else if(estado==='pausada'){row.style.display=accounts[i]&&accounts[i].estado==='pausada'?'':'none';}
-    else if(estado==='saldo-bajo'){
-      var saldo=parseFloat(String((accounts[i]&&accounts[i].saldo)||0).replace(/,/g,""))||0;
-      row.style.display=(accounts[i]&&accounts[i].saldo&&saldo<threshold)?'':'none';
-    }
+function filterRows(type){
+  var accounts=getAccounts();var threshold=getThreshold();
+  document.querySelectorAll('#accounts-body tr').forEach(function(row,i){
+    var a=accounts[i];if(!a)return;
+    var show=type==='all'||(type==='activa'&&a.estado==='activa')||(type==='pendiente'&&a.estado==='pendiente')||(type==='baja'&&a.saldo&&parseSaldo(a.saldo)<threshold);
+    row.style.display=show?'':'none';
   });
-  toast('Filtro: '+estado);
+  toast('Filtro aplicado');
 }
 
 function renderAlerts(){
   var accounts=getAccounts();var threshold=getThreshold();
-  var bajas=accounts.filter(function(a){return a.saldo&&(parseFloat(String(a.saldo).replace(/,/g,""))||0)<threshold});
-  document.getElementById('alerts-container').innerHTML=bajas.map(function(a){
+  document.getElementById('alerts-container').innerHTML=accounts.filter(function(a){return a.saldo&&parseSaldo(a.saldo)<threshold}).map(function(a){
     return'<div class="alert-bar red">⚠️ <strong>'+a.pagina+'</strong> — saldo bajo: $'+a.saldo+' MXN</div>';
   }).join('');
 }
 
-function fullBackup(){
-  var backup={
-    fecha: new Date().toISOString(),
-    version: '1.0',
-    accounts: getAccounts(),
-    leads_base: getBase(),
-    notas: localStorage.getItem('gl_notas')||'',
-    threshold: localStorage.getItem('gl_threshold')||'300',
-  };
-  var blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
-  var url=URL.createObjectURL(blob);var a=document.createElement('a');
-  var fecha=new Date().toISOString().slice(0,10);
-  a.href=url;a.download='respaldo_completo_'+fecha+'.json';
-  document.body.appendChild(a);a.click();
-  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url)},1000);
-  localStorage.setItem('leads_last_backup',Date.now().toString());
-  toast('Respaldo completo guardado');
+// MODAL
+var currentModalIdx=-1;
+function openModal(i){
+  currentModalIdx=i;
+  var a=getAccounts()[i];
+  document.getElementById('modal-title').textContent=a.pagina;
+  document.getElementById('modal-abbr').textContent=a.abbr+' · '+(a.fbCuenta||'Sin cuenta FB');
+  renderModalBody(i);
+  document.getElementById('modal-overlay').style.display='block';
+  document.getElementById('modal-panel').style.display='block';
 }
 
-function exportData(){
-  var blob=new Blob([JSON.stringify({accounts:getAccounts(),fecha:new Date().toISOString()},null,2)],{type:'application/json'});
-  var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='panel_cuentas.json';
-  document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url)},1000);toast('Datos exportados');
-}
-function importData(){document.getElementById('f-import-data').click()}
-function doImportData(input){
-  var f=input.files[0];if(!f)return;
-  var reader=new FileReader();
-  reader.onload=function(e){try{var data=JSON.parse(e.target.result);if(data.accounts){saveAccounts(data.accounts);renderAccounts();toast('Datos importados')}}catch(err){alert('Archivo inválido')}};
-  reader.readAsText(f);
+function renderModalBody(i){
+  var a=getAccounts()[i];
+  var threshold=getThreshold();
+  var saldoNum=parseSaldo(a.saldo);
+  var presupNum=parseSaldo(a.presupuestoDiario);
+  var dias=presupNum>0?Math.floor(saldoNum/presupNum):null;
+  var diasColor=dias===null?'var(--text3)':dias<=2?'var(--red)':dias<=5?'var(--amber)':'var(--green)';
+  var saldoColor=!a.saldo?'var(--text3)':saldoNum<threshold?'var(--red)':'var(--green)';
+
+  var html='';
+
+  // Estado badges
+  html+='<div style="display:flex;gap:8px;margin-bottom:16px">';
+  var eb={activa:['var(--green-bg)','var(--green)'],pausada:['var(--amber-bg)','var(--amber)'],pendiente:['var(--red-bg)','var(--red)']};
+  var ec=eb[a.estado]||eb.pendiente;
+  html+='<span style="font-size:12px;padding:4px 12px;border-radius:20px;font-weight:600;background:'+ec[0]+';color:'+ec[1]+'">'+a.estado.toUpperCase()+'</span>';
+  html+='<span style="font-size:12px;padding:4px 12px;border-radius:20px;font-weight:600;'+(a.dospasos?'background:var(--green-bg);color:var(--green)':'background:var(--red-bg);color:var(--red)')+'">2FA: '+(a.dospasos?'Activado':'No activado')+'</span>';
+  html+='</div>';
+
+  // Saldo
+  html+='<div class="modal-section">';
+  html+='<div class="modal-section-title">Saldo actual</div>';
+  html+='<div style="font-size:26px;font-weight:700;color:'+saldoColor+';letter-spacing:-1px;margin-bottom:4px">'+(a.saldo?'$'+a.saldo:'Sin saldo cargado')+'</div>';
+  if(a.saldoFecha)html+='<div style="font-size:10px;color:var(--text3);margin-bottom:10px">Actualizado: '+a.saldoFecha+'</div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">';
+  html+='<div><div style="font-size:10px;color:var(--text3)">Presupuesto/día</div><div style="font-size:14px;font-weight:600">'+(a.presupuestoDiario?'$'+a.presupuestoDiario:'—')+'</div></div>';
+  html+='<div><div style="font-size:10px;color:var(--text3)">Días restantes</div><div style="font-size:14px;font-weight:600;color:'+diasColor+'">'+(dias!==null?dias+' días':'—')+'</div></div>';
+  html+='</div>';
+  html+='<div style="display:flex;gap:8px">';
+  html+='<input type="number" id="modal-saldo" value="'+(a.saldo||'')+'" placeholder="Nuevo saldo..." style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit">';
+  html+='<button onclick="saveModalSaldo('+i+')" style="padding:7px 14px;background:var(--vino);color:var(--cream);border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer">Guardar</button>';
+  html+='</div>';
+  html+='</div>';
+
+  // Acceso
+  html+='<div class="modal-section">';
+  html+='<div class="modal-section-title">Datos de acceso</div>';
+  html+='<div class="modal-field"><label>Cuenta Facebook</label><input type="text" id="mf-fbCuenta" value="'+(a.fbCuenta||'')+'" onchange="saveModalField('+i+',\'fbCuenta\',this.value)"></div>';
+  html+='<div class="modal-field"><label>Correo <span onclick="copyText(\'mf-correo\')" style="cursor:pointer;margin-left:4px">📋</span></label><input type="text" id="mf-correo" value="'+(a.correo||'')+'" onchange="saveModalField('+i+',\'correo\',this.value)"></div>';
+  html+='<div class="modal-field"><label>Contraseña <span id="pwd-toggle" onclick="togglePwd()" style="cursor:pointer;margin-left:4px">👁</span> <span onclick="copyText(\'mf-password\')" style="cursor:pointer;margin-left:4px">📋</span></label><input type="password" id="mf-password" value="'+(a.password||'')+'" onchange="saveModalField('+i+',\'password\',this.value)"></div>';
+  html+='<div class="modal-field"><label>Ad Account ID <span onclick="copyText(\'mf-adId\')" style="cursor:pointer;margin-left:4px">📋</span></label><input type="text" id="mf-adId" value="'+(a.adId||'')+'" onchange="saveModalField('+i+',\'adId\',this.value)"></div>';
+  html+='<div class="modal-field"><label>Presupuesto diario (MXN)</label><input type="number" id="mf-presup" value="'+(a.presupuestoDiario||'')+'" onchange="saveModalField('+i+',\'presupuestoDiario\',this.value)"></div>';
+  html+='</div>';
+
+  // Estado
+  html+='<div class="modal-section">';
+  html+='<div class="modal-section-title">Estado de la cuenta</div>';
+  html+='<div style="display:flex;gap:6px;margin-bottom:10px">';
+  ['activa','pausada','pendiente'].forEach(function(e){
+    html+='<button class="estado-btn '+(a.estado===e?'active-'+e:'')+'" onclick="setEstado('+i+',\''+e+'\')">'+e+'</button>';
+  });
+  html+='</div>';
+  html+='<button onclick="setDospasos('+i+')" style="width:100%;padding:8px;border-radius:var(--radius-sm);border:1px solid;cursor:pointer;font-size:12px;font-weight:600;'+(a.dospasos?'background:var(--green-bg);color:var(--green);border-color:var(--green-border)':'background:var(--red-bg);color:var(--red);border-color:var(--red-border)')+'">'+( a.dospasos?'✓ 2FA Activado — Click para desactivar':'✗ 2FA No activado — Click para activar')+'</button>';
+  html+='</div>';
+
+  // Notas
+  html+='<div class="modal-section">';
+  html+='<div class="modal-section-title">Notas</div>';
+  html+='<textarea onchange="saveModalField('+i+',\'notas\',this.value)" style="width:100%;height:70px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;font-family:inherit;font-size:13px;resize:vertical;outline:none" placeholder="Notas sobre esta cuenta...">'+(a.notas||'')+'</textarea>';
+  html+='</div>';
+
+  // Links
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  html+='<a href="https://facebook.com" target="_blank" style="display:block;text-align:center;padding:10px;background:var(--vino);color:var(--cream);border-radius:var(--radius-sm);font-size:13px;font-weight:500;text-decoration:none">Abrir Facebook →</a>';
+  html+=(a.adId?'<a href="https://adsmanager.facebook.com/manage/?act='+a.adId+'" target="_blank" style="display:block;text-align:center;padding:10px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-weight:500;text-decoration:none">Ads Manager →</a>':'<div></div>');
+  html+='</div>';
+
+  document.getElementById('modal-body').innerHTML=html;
 }
 
-// ===== CHECKLIST =====
-function getChecklist(){
-  var today=new Date().toDateString();
-  var saved=JSON.parse(localStorage.getItem('gl_checklist')||'{}');
-  if(saved.date!==today)return{date:today,items:{}};
-  return saved;
+function saveModalSaldo(i){
+  var val=document.getElementById('modal-saldo').value;
+  var accounts=getAccounts();
+  accounts[i].saldo=val;
+  var now=new Date();
+  accounts[i].saldoFecha=now.toLocaleDateString('es-MX',{day:'2-digit',month:'short'})+' '+now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  saveAccounts(accounts);renderAccounts();renderFinanzas();renderModalBody(i);toast('Saldo actualizado');
 }
+
+function saveModalField(i,field,value){
+  var accounts=getAccounts();accounts[i][field]=value;saveAccounts(accounts);renderAccounts();
+}
+
+function setEstado(i,estado){
+  var accounts=getAccounts();accounts[i].estado=estado;saveAccounts(accounts);renderAccounts();renderModalBody(i);toast('Estado: '+estado);
+}
+
+function setDospasos(i){
+  var accounts=getAccounts();accounts[i].dospasos=!accounts[i].dospasos;saveAccounts(accounts);renderAccounts();renderModalBody(i);toast(accounts[i].dospasos?'2FA activado':'2FA desactivado');
+}
+
+function togglePwd(){
+  var inp=document.getElementById('mf-password');
+  inp.type=inp.type==='password'?'text':'password';
+}
+
+function copyText(id){
+  var el=document.getElementById(id);
+  if(el)navigator.clipboard.writeText(el.value).then(function(){toast('Copiado')});
+}
+
+function closeModal(){
+  document.getElementById('modal-overlay').style.display='none';
+  document.getElementById('modal-panel').style.display='none';
+}
+
+// CHECKLIST
+function getChecklist(){var today=new Date().toDateString();var saved=JSON.parse(localStorage.getItem('gl_checklist')||'{}');if(saved.date!==today)return{date:today,items:{}};return saved;}
 function saveChecklist(data){localStorage.setItem('gl_checklist',JSON.stringify(data))}
 function renderChecklist(){
   var data=getChecklist();
@@ -547,107 +568,71 @@ function renderChecklist(){
       '<span onclick="toggleCheck('+i+',null)">'+item+'</span></div>';
   }).join('');
 }
-function toggleCheck(i,cb){
-  var data=getChecklist();
-  data.items[i]=cb?cb.checked:!data.items[i];
-  saveChecklist(data);renderChecklist();
+function toggleCheck(i,cb){var data=getChecklist();data.items[i]=cb?cb.checked:!data.items[i];saveChecklist(data);renderChecklist();}
+function resetChecklist(){saveChecklist({date:new Date().toDateString(),items:{}});renderChecklist();toast('Checklist reseteado');}
+
+// BACKUP / EXPORT / IMPORT
+function fullBackup(){
+  var b={fecha:new Date().toISOString(),accounts:getAccounts(),leads_base:getBase(),notas:localStorage.getItem('gl_notas')||'',threshold:localStorage.getItem('gl_threshold')||'300'};
+  var blob=new Blob([JSON.stringify(b,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);var a=document.createElement('a');
+  a.href=url;a.download='respaldo_completo_'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url)},1000);toast('Respaldo guardado');
 }
-function resetChecklist(){
-  saveChecklist({date:new Date().toDateString(),items:{}});renderChecklist();toast('Checklist reseteado');
+function exportData(){
+  var blob=new Blob([JSON.stringify({accounts:getAccounts()},null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='panel_cuentas.json';
+  document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url)},1000);toast('Exportado');
+}
+function importData(){document.getElementById('f-import-data').click()}
+function doImportData(input){
+  var f=input.files[0];if(!f)return;
+  var r=new FileReader();r.onload=function(e){try{var d=JSON.parse(e.target.result);if(d.accounts){saveAccounts(d.accounts);renderAccounts();toast('Importado')}}catch(err){alert('Archivo inválido')}};r.readAsText(f);
 }
 
-// ===== REGISTROS =====
-var histFiles={},newFiles={},allResults=[],activeTab='all';
-
+// DB INFO
 function updateDbInfo(){
-  var b=getBase();
-  var dot=document.getElementById('db-dot');
-  var txt=document.getElementById('db-text');
-  if(b.length){
-    dot.classList.add('active');
-    var src={};b.forEach(function(r){src[r._source]=(src[r._source]||0)+1});
-    txt.textContent='Base activa — '+b.length+' registros ('+Object.entries(src).map(function(e){return e[0]+': '+e[1]}).join(' | ')+')';
-  } else {
-    dot.classList.remove('active');
-    txt.textContent='Base vacía — carga el histórico la primera vez';
-  }
+  var b=getBase();var dot=document.getElementById('db-dot');var txt=document.getElementById('db-text');
+  if(b.length){dot.classList.add('active');var src={};b.forEach(function(r){src[r._source]=(src[r._source]||0)+1});txt.textContent='Base activa — '+b.length+' registros ('+Object.entries(src).map(function(e){return e[0]+': '+e[1]}).join(' | ')+')';}
+  else{dot.classList.remove('active');txt.textContent='Base vacía — carga el histórico la primera vez';}
   renderUltimosGuardados();
 }
 
 function renderUltimosGuardados(){
-  var b=getBase();var container=document.getElementById('ultimos-guardados');
-  if(!b.length){container.innerHTML='';return}
-  var html='';
-  ALL_SRCS.forEach(function(src){
-    var rows=b.filter(function(r){return r._source===src});if(!rows.length)return;
-    var last=rows.reduce(function(a,c){return new Date(c.created_time||c._date||0)>new Date(a.created_time||a._date||0)?c:a});
-    var schema=SCHEMAS[src];
-    var name=last[schema.name]||last.first_name||last.full_name||last.nombre_completo||'-';
-    html+='<div class="ultimo-card"><div class="ultimo-lbl">'+src+' — último guardado</div><div class="ultimo-name">'+name+'</div><div class="ultimo-date">'+fmtDate(last.created_time||last._date)+'</div></div>';
-  });
-  container.innerHTML=html;
-}
-
-function handleHist(input,key){
-  if(!input.files[0])return;
-  histFiles[key]=input.files[0];
-  var z=document.getElementById('zh-'+key);z.classList.add('done');
-  var s=document.getElementById('sh-'+key);s.style.display='block';s.textContent='✓ '+input.files[0].name;
-  document.getElementById('btn-load-hist').style.display='block';
-}
-
-function handleNew(input,key){
-  newFiles[key]=input.files[0];
-  var z=document.getElementById('zn-'+key);z.classList.add('done');
-  var s=document.getElementById('sn-'+key);s.style.display='block';s.textContent='✓ '+input.files[0].name;
-  document.getElementById('btn-run').disabled=!Object.keys(LABELS).some(function(k){return newFiles[k]});
+  var b=getBase();var c=document.getElementById('ultimos-guardados');if(!b.length){c.innerHTML='';return}
+  c.innerHTML=ALL_SRCS.map(function(src){
+    var rows=b.filter(function(r){return r._source===src});if(!rows.length)return'';
+    var last=rows.reduce(function(a,c){return new Date(c.created_time||0)>new Date(a.created_time||0)?c:a});
+    var name=last[SCHEMAS[src].name]||last.first_name||last.full_name||last.nombre_completo||'-';
+    return'<div class="ultimo-card"><div class="ultimo-lbl">'+src+' — último guardado</div><div class="ultimo-name">'+name+'</div><div class="ultimo-date">'+fmtDate(last.created_time)+'</div></div>';
+  }).join('');
 }
 
 function getPhoneFromRow(row,src){
-  var schema=SCHEMAS[src];
-  // try exact column name first, then common names
-  var val=row[schema.phone]||row['phone_number']||row['numero_de_telefono']||row['telefono']||'';
-  // also try accent variant
-  if(!val) val=row['\u00famero_de_tel\u00e9fono']||row['n\u00famero_de_tel\u00e9fono']||'';
-  return val;
+  var s=SCHEMAS[src];var v=row[s.phone]||row['phone_number']||row['número_de_teléfono']||row['numero_de_telefono']||'';return v;
 }
-
-function getNameFromRow(row,src){
-  var schema=SCHEMAS[src];
-  return row[schema.name]||row['first_name']||row['full_name']||row['nombre_completo']||'';
-}
-
+function getNameFromRow(row,src){var s=SCHEMAS[src];return row[s.name]||row['first_name']||row['full_name']||row['nombre_completo']||''}
 function getDescFromRow(row,src){
-  var schema=SCHEMAS[src];
-  var desc=row[schema.desc]||'';
-  if(!desc){
-    // try to find any description column
-    var keys=Object.keys(row);
-    for(var i=0;i<keys.length;i++){
-      var k=keys[i];
-      if(k.indexOf('describe')>-1||k.indexOf('fraude')>-1||k.indexOf('sucedio')>-1||k.indexOf('delito')>-1||k.indexOf('caso')>-1){
-        desc=row[k];break;
-      }
-    }
-  }
-  return desc||'';
+  var s=SCHEMAS[src];var d=row[s.desc]||'';
+  if(!d)Object.keys(row).forEach(function(k){if(!d&&(k.indexOf('describe')>-1||k.indexOf('fraude')>-1||k.indexOf('sucedio')>-1||k.indexOf('delito')>-1||k.indexOf('caso')>-1))d=row[k]});
+  return d||'';
 }
+
+var histFiles={},newFiles={},allResults=[],activeTab='all';
+
+function handleHist(input,key){if(!input.files[0])return;histFiles[key]=input.files[0];var z=document.getElementById('zh-'+key);z.classList.add('done');var s=document.getElementById('sh-'+key);s.style.display='block';s.textContent='✓ '+input.files[0].name;document.getElementById('btn-load-hist').style.display='block';}
+function handleNew(input,key){newFiles[key]=input.files[0];var z=document.getElementById('zn-'+key);z.classList.add('done');var s=document.getElementById('sn-'+key);s.style.display='block';s.textContent='✓ '+input.files[0].name;document.getElementById('btn-run').disabled=!Object.keys(LABELS).some(function(k){return newFiles[k]});}
 
 function loadHist(){
   var btn=document.getElementById('btn-load-hist');btn.textContent='Cargando...';btn.disabled=true;
-  var base=getBase();var phones=new Set(base.map(function(r){return normalize(getPhoneFromRow(r,r._source)||r.phone_number||'')}));
+  var base=getBase();var phones=new Set(base.map(function(r){return normalize(getPhoneFromRow(r,r._source||'ALF'))}));
   var keys=Object.keys(LABELS);var idx=0;var added=0;
   function next(){
-    if(idx>=keys.length){setBase(base);updateDbInfo();btn.textContent='✓ '+added+' registros cargados';btn.disabled=false;toast('Histórico cargado: '+added+' registros');return}
+    if(idx>=keys.length){setBase(base);updateDbInfo();btn.textContent='✓ '+added+' registros';btn.disabled=false;toast('Histórico: '+added+' registros');return}
     var key=keys[idx];var label=LABELS[key];idx++;
     if(!histFiles[key]){next();return}
     parseFile(histFiles[key]).then(function(rows){
-      rows.forEach(function(row){
-        var phone=getPhoneFromRow(row,label)||row.phone_number||row.telefono||'';
-        var n=normalize(phone);
-        if(n&&!phones.has(n)){phones.add(n);base.push(Object.assign({},row,{_source:label}));added++}
-      });
-      next();
+      rows.forEach(function(row){var n=normalize(getPhoneFromRow(row,label)||'');if(n&&!phones.has(n)){phones.add(n);base.push(Object.assign({},row,{_source:label}));added++}});next();
     });
   }
   next();
@@ -655,37 +640,19 @@ function loadHist(){
 
 function run(){
   var btn=document.getElementById('btn-run');btn.disabled=true;btn.textContent='Procesando...';
-  var base=getBase();
-  var basePhones=new Set(base.map(function(r){return normalize(getPhoneFromRow(r,r._source)||r.phone_number||'')}));
+  var base=getBase();var basePhones=new Set(base.map(function(r){return normalize(getPhoneFromRow(r,r._source||'ALF'))}));
   var todayRows=[];var keys=Object.keys(LABELS);var idx=0;
-  function next(){
-    if(idx>=keys.length){process();return}
-    var key=keys[idx];var label=LABELS[key];idx++;
-    if(!newFiles[key]){next();return}
-    parseFile(newFiles[key]).then(function(rows){rows.forEach(function(row){todayRows.push(Object.assign({},row,{_source:label}))});next()});
-  }
+  function next(){if(idx>=keys.length){process();return}var key=keys[idx];var label=LABELS[key];idx++;if(!newFiles[key]){next();return}parseFile(newFiles[key]).then(function(rows){rows.forEach(function(row){todayRows.push(Object.assign({},row,{_source:label}))});next()});}
   function process(){
     var seenToday=new Map();
-    todayRows.forEach(function(row){
-      var n=normalize(getPhoneFromRow(row,row._source)||row.phone_number||'');
-      if(!n)return;if(!seenToday.has(n))seenToday.set(n,[]);seenToday.get(n).push(row);
-    });
+    todayRows.forEach(function(row){var n=normalize(getPhoneFromRow(row,row._source)||'');if(!n)return;if(!seenToday.has(n))seenToday.set(n,[]);seenToday.get(n).push(row)});
     allResults=todayRows.map(function(row){
-      var src=row._source;
-      var n=normalize(getPhoneFromRow(row,src)||row.phone_number||'');
-      var status='ok';
-      if(n&&basePhones.has(n))status='dup';
-      else if(n&&seenToday.get(n)&&seenToday.get(n).length>1)status='ndup';
-      return{_status:status,_source:src,_phone_norm:n,_keep:false,
-        fecha:fmtDate(row.created_time),
-        nombre:getNameFromRow(row,src),
-        telefono:getPhoneFromRow(row,src)||row.phone_number||'',
-        descripcion:getDescFromRow(row,src),_raw:row};
+      var src=row._source;var n=normalize(getPhoneFromRow(row,src)||'');
+      var status='ok';if(n&&basePhones.has(n))status='dup';else if(n&&seenToday.get(n)&&seenToday.get(n).length>1)status='ndup';
+      return{_status:status,_source:src,_phone_norm:n,_keep:false,fecha:fmtDate(row.created_time),nombre:getNameFromRow(row,src),telefono:getPhoneFromRow(row,src)||'',descripcion:getDescFromRow(row,src),_raw:row};
     });
-    var total=allResults.length;
-    var dups=allResults.filter(function(r){return r._status==='dup'}).length;
-    var ndups=allResults.filter(function(r){return r._status==='ndup'}).length;
-    var clean=allResults.filter(function(r){return r._status==='ok'}).length;
+    var total=allResults.length;var dups=allResults.filter(function(r){return r._status==='dup'}).length;
+    var ndups=allResults.filter(function(r){return r._status==='ndup'}).length;var clean=allResults.filter(function(r){return r._status==='ok'}).length;
     document.getElementById('hint-ndup').style.display=ndups>0?'block':'none';
     document.getElementById('stats-row').innerHTML=
       '<div class="stat"><div class="stat-val">'+total+'</div><div class="stat-lbl">Total hoy</div></div>'+
@@ -693,43 +660,28 @@ function run(){
       '<div class="stat"><div class="stat-val amber">'+ndups+'</div><div class="stat-lbl">Dup entre hoy</div></div>'+
       '<div class="stat"><div class="stat-val green">'+clean+'</div><div class="stat-lbl">Únicos nuevos</div></div>';
     var sources=[...new Set(allResults.map(function(r){return r._source}))];
-    document.getElementById('tabs-row').innerHTML='<div class="tab active" onclick="setTab(\'all\',this)">Todas</div>'+
-      sources.map(function(s){return'<div class="tab" onclick="setTab(\''+s+'\',this)">'+s+'</div>'}).join('');
+    document.getElementById('tabs-row').innerHTML='<div class="tab active" onclick="setTab(\'all\',this)">Todas</div>'+sources.map(function(s){return'<div class="tab" onclick="setTab(\''+s+'\',this)">'+s+'</div>'}).join('');
     updateDlGrid();
-    var ultimosHoy='';
-    ALL_SRCS.forEach(function(src){
-      var srcRows=allResults.filter(function(r){return r._source===src});if(!srcRows.length)return;
+    document.getElementById('ultimos-hoy').innerHTML=ALL_SRCS.map(function(src){
+      var srcRows=allResults.filter(function(r){return r._source===src});if(!srcRows.length)return'';
       var last=srcRows.reduce(function(a,b){return new Date(a._raw.created_time)>new Date(b._raw.created_time)?a:b});
-      var d=new Date(last._raw.created_time);
-      var fecha=!isNaN(d)?d.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}):'';
-      ultimosHoy+='<div class="ultimo-card"><div class="ultimo-lbl">'+src+' — último de hoy</div><div class="ultimo-name">'+(last.nombre||'-')+'</div><div class="ultimo-date">'+fecha+'</div></div>';
-    });
-    document.getElementById('ultimos-hoy').innerHTML=ultimosHoy;
+      var d=new Date(last._raw.created_time);var fecha=!isNaN(d)?d.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}):'';
+      return'<div class="ultimo-card"><div class="ultimo-lbl">'+src+' — último de hoy</div><div class="ultimo-name">'+(last.nombre||'-')+'</div><div class="ultimo-date">'+fecha+'</div></div>';
+    }).join('');
     var today=new Date().toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
-    var reporteLines=ALL_SRCS.map(function(s){
-      var c=allResults.filter(function(r){return r._source===s&&r._status==='ok'}).length;
-      return c>0?s+': '+c+' registros':null;
-    }).filter(Boolean).join('\n');
+    var reporteLines=ALL_SRCS.map(function(s){var c=allResults.filter(function(r){return r._source===s&&r._status==='ok'}).length;return c>0?s+': '+c+' registros':null}).filter(Boolean).join('\n');
     document.getElementById('reporte-text').textContent='Reporte '+today+'\n'+reporteLines+'\nTotal: '+clean+' registros\nDuplicados descartados: '+(dups+ndups);
-    document.getElementById('results').style.display='block';
-    renderTable();btn.textContent='Analizar registros';btn.disabled=false;
+    document.getElementById('results').style.display='block';renderTable();btn.textContent='Analizar registros';btn.disabled=false;
   }
   next();
 }
 
 function updateDlGrid(){
   var g=document.getElementById('dl-grid');if(!g)return;
-  g.innerHTML=ALL_SRCS.map(function(src){
-    var cnt=allResults.filter(function(r){return r._source===src&&(r._status==='ok'||r._keep)}).length;
-    return'<button class="btn-dl" onclick="downloadPage(\''+src+'\')">'+src+'<span class="dl-count">'+cnt+' únicos</span></button>';
-  }).join('');
+  g.innerHTML=ALL_SRCS.map(function(src){var cnt=allResults.filter(function(r){return r._source===src&&(r._status==='ok'||r._keep)}).length;return'<button class="btn-dl" onclick="downloadPage(\''+src+'\')">'+src+'<span class="dl-count">'+cnt+' únicos</span></button>';}).join('');
 }
 
-function setTab(t,el){
-  activeTab=t;
-  document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
-  el.classList.add('active');renderTable();
-}
+function setTab(t,el){activeTab=t;document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});el.classList.add('active');renderTable();}
 
 function renderTable(){
   var filter=document.getElementById('filter-status').value;
@@ -738,83 +690,44 @@ function renderTable(){
   if(filter!=='all')rows=rows.filter(function(r){return r._status===filter});
   if(!rows.length){document.getElementById('tbl-container').innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">No hay registros.</div>';return}
   var bmap={dup:'<span class="badge b-dup">dup base</span>',ndup:'<span class="badge b-ndup">dup hoy</span>',ok:'<span class="badge b-ok">nuevo</span>'};
-
-  // Group ndup rows by phone, keep ok/dup rows separate
-  var groups=[];
-  var usedIdx=new Set();
-
-  rows.forEach(function(r,i){
+  var groups=[];var usedIdx=new Set();
+  rows.forEach(function(r){
     if(usedIdx.has(allResults.indexOf(r)))return;
     var idx=allResults.indexOf(r);
     if(r._status==='ndup'){
-      // find all rows with same phone
       var group=rows.filter(function(r2){return r2._phone_norm===r._phone_norm&&r2._status==='ndup'});
       group.forEach(function(r2){usedIdx.add(allResults.indexOf(r2))});
       groups.push({type:'group',rows:group});
-    } else {
-      usedIdx.add(idx);
-      groups.push({type:'single',row:r});
-    }
+    }else{usedIdx.add(idx);groups.push({type:'single',row:r});}
   });
-
   var trs='';
   groups.forEach(function(g){
     if(g.type==='single'){
-      var r=g.row;var idx=allResults.indexOf(r);
-      var chk=r._status==='ok'?'<span style="color:var(--green);font-size:13px">✓</span>':'<span style="color:var(--border2)">—</span>';
-      trs+='<tr class="'+(r._status==='dup'?'dup':'')+'">'+
-        '<td style="width:28px;text-align:center">'+chk+'</td>'+
-        '<td style="width:135px">'+r.fecha+'</td>'+
-        '<td style="width:46px">'+r._source+'</td>'+
-        '<td style="width:130px">'+r.nombre+'</td>'+
-        '<td style="width:108px">'+r.telefono+'</td>'+
-        '<td style="width:85px">'+bmap[r._status]+'</td>'+
-        '<td>'+r.descripcion+'</td></tr>';
-    } else {
-      // GROUP of duplicates — show together with border
-      var groupRows=g.rows;
-      var groupSize=groupRows.length;
-      groupRows.forEach(function(r,gi){
+      var r=g.row;var chk=r._status==='ok'?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--border2)">—</span>';
+      trs+='<tr class="'+(r._status==='dup'?'dup':'')+'"><td style="width:28px;text-align:center">'+chk+'</td><td style="width:130px">'+r.fecha+'</td><td style="width:46px">'+r._source+'</td><td style="width:130px">'+r.nombre+'</td><td style="width:110px">'+r.telefono+'</td><td style="width:80px">'+bmap[r._status]+'</td><td>'+r.descripcion+'</td></tr>';
+    }else{
+      var gs=g.rows;var gsz=gs.length;
+      gs.forEach(function(r,gi){
         var idx=allResults.indexOf(r);
-        var isFirst=gi===0;var isLast=gi===groupSize-1;
-        var borderStyle='';
-        if(isFirst)borderStyle='border-top:2px solid var(--amber);';
-        if(isLast)borderStyle+='border-bottom:2px solid var(--amber);';
+        var bs='';if(gi===0)bs='border-top:2px solid var(--amber);';if(gi===gsz-1)bs+='border-bottom:2px solid var(--amber);';
         var chk='<input type="checkbox" '+(r._keep?'checked':'')+' onchange="toggleKeep('+idx+',this)" style="cursor:pointer;width:13px;height:13px;accent-color:var(--amber)">';
-        var groupTag=isFirst?'<div style="font-size:9px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">'+groupSize+'x dup</div>':'';
-        trs+='<tr style="background:var(--amber-bg);'+borderStyle+'">'+
-          '<td style="width:28px;text-align:center">'+chk+'</td>'+
-          '<td style="width:135px">'+groupTag+r.fecha+'</td>'+
-          '<td style="width:46px"><span style="font-weight:600;color:var(--amber)">'+r._source+'</span></td>'+
-          '<td style="width:130px">'+r.nombre+'</td>'+
-          '<td style="width:108px">'+r.telefono+'</td>'+
-          '<td style="width:85px">'+bmap[r._status]+'</td>'+
-          '<td>'+r.descripcion+'</td></tr>';
+        var tag=gi===0?'<div style="font-size:9px;font-weight:600;color:var(--amber);margin-bottom:2px">'+gsz+'x dup</div>':'';
+        trs+='<tr style="background:var(--amber-bg);'+bs+'"><td style="width:28px;text-align:center">'+chk+'</td><td style="width:130px">'+tag+r.fecha+'</td><td style="width:46px;font-weight:600;color:var(--amber)">'+r._source+'</td><td style="width:130px">'+r.nombre+'</td><td style="width:110px">'+r.telefono+'</td><td style="width:80px">'+bmap[r._status]+'</td><td>'+r.descripcion+'</td></tr>';
       });
-      // separator
       trs+='<tr><td colspan="7" style="padding:3px;background:var(--cream)"></td></tr>';
     }
   });
-
-  document.getElementById('tbl-container').innerHTML='<table><thead><tr>'+
-    '<th style="width:28px"></th><th style="width:135px">Fecha</th><th style="width:46px">Pág</th>'+
-    '<th style="width:130px">Nombre</th><th style="width:108px">Teléfono</th><th style="width:85px">Estado</th><th>Descripción</th>'+
-    '</tr></thead><tbody>'+trs+'</tbody></table>';
+  document.getElementById('tbl-container').innerHTML='<table><thead><tr><th style="width:28px"></th><th style="width:130px">Fecha</th><th style="width:46px">Pág</th><th style="width:130px">Nombre</th><th style="width:110px">Teléfono</th><th style="width:80px">Estado</th><th>Descripción</th></tr></thead><tbody>'+trs+'</tbody></table>';
 }
 
 function toggleKeep(idx,cb){
-  allResults[idx]._keep=cb.checked;
-  var phone=allResults[idx]._phone_norm;
+  allResults[idx]._keep=cb.checked;var phone=allResults[idx]._phone_norm;
   if(cb.checked)allResults.forEach(function(r,i){if(i!==idx&&r._phone_norm===phone&&r._status==='ndup')r._keep=false});
   renderTable();updateDlGrid();
 }
 
 function downloadAll(){
-  var n=0;
-  ALL_SRCS.forEach(function(src){
-    if(!allResults.filter(function(r){return r._source===src&&(r._status==='ok'||r._keep)}).length)return;
-    setTimeout(function(s){downloadPage(s)},n*800,src);n++;
-  });
+  var n=0;ALL_SRCS.forEach(function(src){if(!allResults.filter(function(r){return r._source===src&&(r._status==='ok'||r._keep)}).length)return;setTimeout(function(s){downloadPage(s)},n*800,src);n++;});
   if(!n)alert('No hay registros únicos para descargar.');
 }
 
@@ -823,106 +736,103 @@ function downloadPage(src){
   var rows=allResults.filter(function(r){return r._source===src&&(r._status==='ok'||r._keep)}).map(function(r){return r._raw});
   if(!rows.length){alert('No hay registros únicos de '+src+'.');return}
   var clean=rows.map(function(r){
-    var o={};
-    // use actual columns from the row, filtered to schema cols
-    var cols=schema.cols;
-    // find actual matching columns (handle accent variants)
-    var rowKeys=Object.keys(r).filter(function(k){return !k.startsWith('_')});
-    var outCols=cols.filter(function(c){return rowKeys.some(function(k){return k===c||normalize(k)===normalize(c)})});
+    var o={};var rowKeys=Object.keys(r).filter(function(k){return !k.startsWith('_')});
+    var outCols=schema.cols.filter(function(c){return rowKeys.indexOf(c)>-1});
     if(!outCols.length)outCols=rowKeys.slice(0,5);
     outCols.forEach(function(c){
-      var actualKey=rowKeys.find(function(k){return k===c})||c;
-      if(c==='created_time'&&r[actualKey]){var d=new Date(r[actualKey]);o[c]=!isNaN(d)?d.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}):String(r[actualKey]).slice(0,10);}
+      if(c==='created_time'&&r[c]){var d=new Date(r[c]);o[c]=!isNaN(d)?d.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}):String(r[c]).slice(0,10);}
       else if(c==='ad_name'){o[c]=src;}
-      else if((c==='phone_number'||c==='numero_de_telefono')&&r[actualKey]){var p=String(r[actualKey]).replace(/^p:/i,'');if(!p.startsWith('+'))p='+'+p;o[c]=p;}
-      else{o[c]=r[actualKey]!==undefined?r[actualKey]:'';}
+      else if((c==='phone_number'||c==='número_de_teléfono')&&r[c]){var p=String(r[c]).replace(/^p:/i,'');if(!p.startsWith('+'))p='+'+p;o[c]=p;}
+      else{o[c]=r[c]!==undefined?r[c]:'';}
     });
     return o;
   });
-  var ws=XLSX.utils.json_to_sheet(clean);
-  var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,src);
+  var ws=XLSX.utils.json_to_sheet(clean);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,src);
   var wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
-  var blob=new Blob([wbout],{type:'application/octet-stream'});
-  var url=URL.createObjectURL(blob);var a=document.createElement('a');
+  var blob=new Blob([wbout],{type:'application/octet-stream'});var url=URL.createObjectURL(blob);var a=document.createElement('a');
   a.href=url;a.download=(FULL_NAMES[src]||src)+'_'+src+'_'+new Date().toISOString().slice(0,10)+'.xlsx';
-  document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url)},1000);
-  toast(src+' descargado');
+  document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url)},1000);toast(src+' descargado');
 }
 
 function saveToBase(){
-  var unique=allResults.filter(function(r){return r._status==='ok'||r._keep});
-  if(!unique.length){alert('No hay registros únicos para guardar.');return}
-  var base=getBase();
-  var phones=new Set(base.map(function(r){return normalize(getPhoneFromRow(r,r._source)||r.phone_number||'')}));
-  var added=0;
-  unique.forEach(function(r){
-    var n=normalize(r.telefono);
-    if(n&&!phones.has(n)){phones.add(n);base.push(Object.assign({},r._raw,{_source:r._source}));added++}
-  });
+  var unique=allResults.filter(function(r){return r._status==='ok'||r._keep});if(!unique.length){alert('No hay registros únicos.');return}
+  var base=getBase();var phones=new Set(base.map(function(r){return normalize(getPhoneFromRow(r,r._source||'ALF'))}));var added=0;
+  unique.forEach(function(r){var n=normalize(r.telefono);if(n&&!phones.has(n)){phones.add(n);base.push(Object.assign({},r._raw,{_source:r._source}));added++}});
   setBase(base);updateDbInfo();toast('✓ '+added+' registros guardados');
 }
 
 function copyReporte(){
   var txt=document.getElementById('reporte-text').textContent;
-  navigator.clipboard.writeText(txt).then(function(){toast('Reporte copiado')}).catch(function(){
-    var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Reporte copiado');
-  });
+  navigator.clipboard.writeText(txt).then(function(){toast('Reporte copiado')}).catch(function(){var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Copiado');});
 }
 
 function exportBase(){
   var base=getBase();if(!base.length){alert('La base está vacía.');return}
-  var blob=new Blob([JSON.stringify(base,null,2)],{type:'application/json'});
-  var url=URL.createObjectURL(blob);var a=document.createElement('a');
-  a.href=url;a.download='base_registros.json';document.body.appendChild(a);a.click();
-  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url)},1000);
-  localStorage.setItem('leads_last_backup',Date.now().toString());toast('Base exportada');
+  var blob=new Blob([JSON.stringify(base,null,2)],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');
+  a.href=url;a.download='base_registros.json';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url)},1000);toast('Base exportada');
 }
-
 function importBase(){document.getElementById('f-import-base').click()}
 function doImportBase(input){
   var f=input.files[0];if(!f)return;
-  var reader=new FileReader();
-  reader.onload=function(e){try{var data=JSON.parse(e.target.result);if(!Array.isArray(data))throw new Error();setBase(data);updateDbInfo();toast('Base importada: '+data.length+' registros')}catch(err){alert('Archivo inválido')}};
-  reader.readAsText(f);
+  var r=new FileReader();r.onload=function(e){try{var d=JSON.parse(e.target.result);if(!Array.isArray(d))throw new Error();setBase(d);updateDbInfo();toast('Base importada: '+d.length+' registros')}catch(err){alert('Archivo inválido')}};r.readAsText(f);
 }
+function resetBase(){if(!confirm('¿Segura?'))return;localStorage.removeItem('leads_base');updateDbInfo();toast('Base limpiada');}
 
-function resetBase(){
-  if(!confirm('¿Segura que quieres limpiar toda la base?'))return;
-  localStorage.removeItem('leads_base');updateDbInfo();toast('Base limpiada');
-}
-
-// ===== BASE DE DATOS =====
+// BASE DE DATOS
 function renderBase(){
   var query=(document.getElementById('search-input').value||'').toLowerCase().trim();
   var srcFilter=document.getElementById('base-filter-src').value;
   var base=getBase();
   if(srcFilter!=='all')base=base.filter(function(r){return r._source===srcFilter});
-  if(query)base=base.filter(function(r){
-    var src=r._source||'ALF';
-    var name=getNameFromRow(r,src).toLowerCase();
-    // also search in all string fields for name
-    var allText=Object.values(r).filter(function(v){return typeof v==='string'&&v.length>1&&v.length<80}).join(' ').toLowerCase();
-    var phone=normalize(getPhoneFromRow(r,src)||r.phone_number||r['número_de_teléfono']||'');
-    var queryClean=query.replace(/\D/g,'');
-    return name.includes(query)||allText.includes(query)||(queryClean&&phone.includes(queryClean));
-  });
-  document.getElementById('base-count').textContent=base.length+' registros encontrados'+(base.length>500?' (mostrando primeros 500)':'');
-  if(!base.length){document.getElementById('base-tbl').innerHTML='<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No hay registros.</div>';return}
+  if(query){
+    base=base.filter(function(r){
+      var src=r._source||'ALF';
+      var name=getNameFromRow(r,src).toLowerCase();
+      var allText=Object.values(r).filter(function(v){return typeof v==='string'&&v.length>1&&v.length<80}).join(' ').toLowerCase();
+      var phone=normalize(getPhoneFromRow(r,src)||'');
+      var qc=query.replace(/\D/g,'');
+      return name.includes(query)||allText.includes(query)||(qc&&phone.includes(qc));
+    });
+  }
+  document.getElementById('base-count').textContent=base.length+' registros'+(base.length>500?' (mostrando 500)':'');
+  if(!base.length){document.getElementById('base-tbl').innerHTML='<div style="text-align:center;padding:28px;color:var(--text3)">No hay registros.</div>';return}
   var trs=base.slice(0,500).map(function(r){
     var src=r._source||'ALF';
-    var name=getNameFromRow(r,src)||'-';
-    var phone=getPhoneFromRow(r,src)||r.phone_number||'';
-    return'<tr><td style="width:100px">'+fmtDateShort(r.created_time||r._date)+'</td>'+
-      '<td style="width:50px">'+src+'</td>'+
-      '<td style="width:170px">'+name+'</td>'+
-      '<td>'+phone+'</td></tr>';
+    return'<tr><td style="width:100px">'+fmtDateShort(r.created_time)+'</td><td style="width:50px">'+src+'</td><td style="width:170px">'+getNameFromRow(r,src)+'</td><td>'+getPhoneFromRow(r,src)+'</td></tr>';
   }).join('');
-  document.getElementById('base-tbl').innerHTML='<table><thead><tr>'+
-    '<th style="width:100px">Fecha</th><th style="width:50px">Pág</th><th style="width:170px">Nombre</th><th>Teléfono</th>'+
-    '</tr></thead><tbody>'+trs+'</tbody></table>';
+  document.getElementById('base-tbl').innerHTML='<table><thead><tr><th style="width:100px">Fecha</th><th style="width:50px">Pág</th><th style="width:170px">Nombre</th><th>Teléfono</th></tr></thead><tbody>'+trs+'</tbody></table>';
 }
 
-// ===== INIT =====
+// FINANZAS
+function renderFinanzas(){
+  var accounts=getAccounts();
+  var conSaldo=accounts.filter(function(a){return a.saldo&&parseSaldo(a.saldo)>0});
+  var maxSaldo=Math.max.apply(null,conSaldo.map(function(a){return parseSaldo(a.saldo)}))||1;
+  document.getElementById('finanzas-cards').innerHTML=conSaldo.map(function(a){
+    var s=parseSaldo(a.saldo);var p=parseSaldo(a.presupuestoDiario);
+    var dias=p>0?Math.floor(s/p):null;
+    var dc=dias===null?'var(--text3)':dias<=2?'var(--red)':dias<=5?'var(--amber)':'var(--green)';
+    return'<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow)">'+
+      '<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:11px;font-weight:600;color:var(--text2)">'+a.pagina.slice(0,20)+'...</span><span class="page-abbr">'+a.abbr+'</span></div>'+
+      '<div style="font-size:22px;font-weight:700;color:var(--green);letter-spacing:-1px;margin-bottom:4px">$'+s.toLocaleString('es-MX')+'</div>'+
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:6px">Presup/día: '+(p?'$'+p.toLocaleString('es-MX'):'—')+'</div>'+
+      '<div style="font-size:12px;font-weight:600;color:'+dc+'">'+(dias!==null?dias+' días restantes':'Sin presupuesto asignado')+'</div>'+
+    '</div>';
+  }).join('')||'<div style="color:var(--text3);font-size:13px">No hay cuentas con saldo cargado. Actualiza los saldos en la pestaña Cuentas.</div>';
+  var activas=accounts.filter(function(a){return a.estado==='activa'});
+  document.getElementById('finanzas-bars').innerHTML=activas.map(function(a){
+    var s=parseSaldo(a.saldo);var p=parseSaldo(a.presupuestoDiario);
+    var pct=maxSaldo>0?Math.round((s/maxSaldo)*100):0;
+    var bc=s===0?'var(--border2)':s<1000?'var(--red)':s<3000?'var(--amber)':'var(--green)';
+    return'<div style="margin-bottom:12px">'+
+      '<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:500">'+a.pagina.slice(0,28)+'<span class="page-abbr" style="margin-left:6px">'+a.abbr+'</span></span><span style="font-size:12px;font-weight:600;color:'+bc+'">$'+(s?s.toLocaleString('es-MX'):'0')+'</span></div>'+
+      '<div style="background:var(--surface2);border-radius:20px;height:10px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+bc+';border-radius:20px;transition:width .4s"></div></div>'+
+      (p?'<div style="font-size:10px;color:var(--text3);margin-top:2px">Presupuesto diario: $'+p.toLocaleString('es-MX')+'</div>':'')+
+    '</div>';
+  }).join('')||'<div style="color:var(--text3);font-size:13px">No hay cuentas activas.</div>';
+}
+
+// INIT
 document.getElementById('hdr-date').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 document.getElementById('threshold-input').value=getThreshold();
 document.getElementById('notas-dia').value=getNotas();
