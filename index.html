@@ -738,18 +738,64 @@ function renderTable(){
   if(filter!=='all')rows=rows.filter(function(r){return r._status===filter});
   if(!rows.length){document.getElementById('tbl-container').innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">No hay registros.</div>';return}
   var bmap={dup:'<span class="badge b-dup">dup base</span>',ndup:'<span class="badge b-ndup">dup hoy</span>',ok:'<span class="badge b-ok">nuevo</span>'};
-  var trs=rows.map(function(r){
+
+  // Group ndup rows by phone, keep ok/dup rows separate
+  var groups=[];
+  var usedIdx=new Set();
+
+  rows.forEach(function(r,i){
+    if(usedIdx.has(allResults.indexOf(r)))return;
     var idx=allResults.indexOf(r);
-    var chk=r._status==='ndup'?'<input type="checkbox" '+(r._keep?'checked':'')+' onchange="toggleKeep('+idx+',this)" style="cursor:pointer;width:13px;height:13px">':r._status==='ok'?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--border2)">—</span>';
-    return'<tr class="'+(r._status==='dup'?'dup':r._status==='ndup'&&!r._keep?'ndup':'')+'">'+
-      '<td style="width:28px;text-align:center">'+chk+'</td>'+
-      '<td style="width:135px">'+r.fecha+'</td>'+
-      '<td style="width:46px">'+r._source+'</td>'+
-      '<td style="width:130px">'+r.nombre+'</td>'+
-      '<td style="width:108px">'+r.telefono+'</td>'+
-      '<td style="width:85px">'+bmap[r._status]+'</td>'+
-      '<td>'+r.descripcion+'</td></tr>';
-  }).join('');
+    if(r._status==='ndup'){
+      // find all rows with same phone
+      var group=rows.filter(function(r2){return r2._phone_norm===r._phone_norm&&r2._status==='ndup'});
+      group.forEach(function(r2){usedIdx.add(allResults.indexOf(r2))});
+      groups.push({type:'group',rows:group});
+    } else {
+      usedIdx.add(idx);
+      groups.push({type:'single',row:r});
+    }
+  });
+
+  var trs='';
+  groups.forEach(function(g){
+    if(g.type==='single'){
+      var r=g.row;var idx=allResults.indexOf(r);
+      var chk=r._status==='ok'?'<span style="color:var(--green);font-size:13px">✓</span>':'<span style="color:var(--border2)">—</span>';
+      trs+='<tr class="'+(r._status==='dup'?'dup':'')+'">'+
+        '<td style="width:28px;text-align:center">'+chk+'</td>'+
+        '<td style="width:135px">'+r.fecha+'</td>'+
+        '<td style="width:46px">'+r._source+'</td>'+
+        '<td style="width:130px">'+r.nombre+'</td>'+
+        '<td style="width:108px">'+r.telefono+'</td>'+
+        '<td style="width:85px">'+bmap[r._status]+'</td>'+
+        '<td>'+r.descripcion+'</td></tr>';
+    } else {
+      // GROUP of duplicates — show together with border
+      var groupRows=g.rows;
+      var groupSize=groupRows.length;
+      groupRows.forEach(function(r,gi){
+        var idx=allResults.indexOf(r);
+        var isFirst=gi===0;var isLast=gi===groupSize-1;
+        var borderStyle='';
+        if(isFirst)borderStyle='border-top:2px solid var(--amber);';
+        if(isLast)borderStyle+='border-bottom:2px solid var(--amber);';
+        var chk='<input type="checkbox" '+(r._keep?'checked':'')+' onchange="toggleKeep('+idx+',this)" style="cursor:pointer;width:13px;height:13px;accent-color:var(--amber)">';
+        var groupTag=isFirst?'<div style="font-size:9px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">'+groupSize+'x dup</div>':'';
+        trs+='<tr style="background:var(--amber-bg);'+borderStyle+'">'+
+          '<td style="width:28px;text-align:center">'+chk+'</td>'+
+          '<td style="width:135px">'+groupTag+r.fecha+'</td>'+
+          '<td style="width:46px"><span style="font-weight:600;color:var(--amber)">'+r._source+'</span></td>'+
+          '<td style="width:130px">'+r.nombre+'</td>'+
+          '<td style="width:108px">'+r.telefono+'</td>'+
+          '<td style="width:85px">'+bmap[r._status]+'</td>'+
+          '<td>'+r.descripcion+'</td></tr>';
+      });
+      // separator
+      trs+='<tr><td colspan="7" style="padding:3px;background:var(--cream)"></td></tr>';
+    }
+  });
+
   document.getElementById('tbl-container').innerHTML='<table><thead><tr>'+
     '<th style="width:28px"></th><th style="width:135px">Fecha</th><th style="width:46px">Pág</th>'+
     '<th style="width:130px">Nombre</th><th style="width:108px">Teléfono</th><th style="width:85px">Estado</th><th>Descripción</th>'+
