@@ -245,6 +245,7 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
       <div class="uzone" id="zh-avf" onclick="document.getElementById('fh-avf').click()"><span class="uz-label">Asesoría Víctimas de Fraude</span><span class="uz-sub">AVF · .xls/.xlsx</span><span class="uz-ok" id="sh-avf"></span></div>
       <div class="uzone" id="zh-ssn" onclick="document.getElementById('fh-ssn').click()"><span class="uz-label">Secretaría Seguridad Nacional</span><span class="uz-sub">SSN · .xls/.xlsx</span><span class="uz-ok" id="sh-ssn"></span></div>
       <div class="uzone" id="zh-sncf" onclick="document.getElementById('fh-sncf').click()"><span class="uz-label">Sec. Nacional contra el Fraude</span><span class="uz-sub">SNCF · .xls/.xlsx</span><span class="uz-ok" id="sh-sncf"></span></div>
+      <div class="uzone" id="zh-ajn" onclick="document.getElementById('fh-ajn').click()"><span class="uz-label">Asesoría Jurídica Nacional</span><span class="uz-sub">AJN · .xls/.xlsx</span><span class="uz-ok" id="sh-ajn"></span></div>
     </div>
     <input type="file" id="fh-alf" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'alf')">
     <input type="file" id="fh-fgr" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'fgr')">
@@ -252,6 +253,7 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
     <input type="file" id="fh-avf" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'avf')">
     <input type="file" id="fh-ssn" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'ssn')">
     <input type="file" id="fh-sncf" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'sncf')">
+    <input type="file" id="fh-ajn" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'ajn')">
     <button id="btn-load-hist" onclick="loadHist()" style="display:none;width:100%;margin-top:10px;padding:9px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer">Cargar histórico a la base</button>
   </div>
 
@@ -265,6 +267,7 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
       <div class="uzone" id="zn-avf" onclick="document.getElementById('fn-avf').click()"><span class="uz-label">Asesoría Víctimas de Fraude</span><span class="uz-sub">AVF · hoy</span><span class="uz-ok" id="sn-avf"></span></div>
       <div class="uzone" id="zn-ssn" onclick="document.getElementById('fn-ssn').click()"><span class="uz-label">Secretaría Seguridad Nacional</span><span class="uz-sub">SSN · hoy</span><span class="uz-ok" id="sn-ssn"></span></div>
       <div class="uzone" id="zn-sncf" onclick="document.getElementById('fn-sncf').click()"><span class="uz-label">Sec. Nacional contra el Fraude</span><span class="uz-sub">SNCF · hoy</span><span class="uz-ok" id="sn-sncf"></span></div>
+      <div class="uzone" id="zn-ajn" onclick="document.getElementById('fn-ajn').click()"><span class="uz-label">Asesoría Jurídica Nacional</span><span class="uz-sub">AJN · hoy</span><span class="uz-ok" id="sn-ajn"></span></div>
     </div>
     <input type="file" id="fn-alf" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'alf')">
     <input type="file" id="fn-fgr" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'fgr')">
@@ -272,6 +275,7 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
     <input type="file" id="fn-avf" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'avf')">
     <input type="file" id="fn-ssn" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'ssn')">
     <input type="file" id="fn-sncf" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'sncf')">
+    <input type="file" id="fn-ajn" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'ajn')">
   </div>
 
   <button class="btn-primary" id="btn-run" onclick="run()" disabled style="margin-bottom:16px;padding:11px;font-size:14px">Analizar registros</button>
@@ -325,6 +329,7 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--
         <option value="AVF">Asesoría Víctimas de Fraude</option>
         <option value="SSN">Secretaría Seguridad Nacional</option>
         <option value="SNCF">Sec. Nacional contra el Fraude</option>
+        <option value="AJN">Asesoría Jurídica Nacional</option>
       </select>
     </div>
     <div class="tbl-wrap" style="max-height:440px"><div id="base-tbl"></div></div>
@@ -345,16 +350,18 @@ var SCHEMAS = {
   SPC: {cols:['created_time','ad_name','full_name','phone_number','¿qué_sucedió_exactamente?__describe_brevemente_lo_que_ocurrió_en_tu_caso'], name:'full_name', phone:'phone_number', desc:'¿qué_sucedió_exactamente?__describe_brevemente_lo_que_ocurrió_en_tu_caso'},
   AVF: {cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿qué_tipo_de_fraude_sufriste?_descríbelo_brevemente'], name:'nombre_completo', phone:'número_de_teléfono', desc:'¿qué_tipo_de_fraude_sufriste?_descríbelo_brevemente'},
   SSN: {cols:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_delito_o_fraude_sufriste?_descríbelo_brevemente.'], name:'full_name', phone:'phone_number', desc:'¿qué_tipo_de_delito_o_fraude_sufriste?_descríbelo_brevemente.'},
-  SNCF: {cols:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'], name:'full_name', phone:'phone_number', desc:'¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'}
+  SNCF: {cols:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'], name:'full_name', phone:'phone_number', desc:'¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'},
+  AJN: {cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿cuál_es_tu_situación_legal_o_financiera?_descríbela_brevemente.'], name:'nombre_completo', phone:'número_de_teléfono', desc:'¿cuál_es_tu_situación_legal_o_financiera?_descríbela_brevemente.'}
 };
 
 var FULL_NAMES = {
   ALF:'Asesoria_Legal_en_Fraude', FGR:'Fiscalia_General_Republica', SPC:'Seguridad_y_Proteccion_Ciudadana',
-  AVF:'Asesoria_para_Victimas_de_Fraude', SSN:'Secretaria_de_Seguridad_Nacional', SNCF:'Secretaria_Nacional_contra_el_Fraude'
+  AVF:'Asesoria_para_Victimas_de_Fraude', SSN:'Secretaria_de_Seguridad_Nacional', SNCF:'Secretaria_Nacional_contra_el_Fraude',
+  AJN:'Asesoria_Juridica_Nacional'
 };
 
-var ALL_SRCS = ['ALF','FGR','SPC','AVF','SSN','SNCF'];
-var LABELS = {alf:'ALF',fgr:'FGR',spc:'SPC',avf:'AVF',ssn:'SSN',sncf:'SNCF'};
+var ALL_SRCS = ['ALF','FGR','SPC','AVF','SSN','SNCF','AJN'];
+var LABELS = {alf:'ALF',fgr:'FGR',spc:'SPC',avf:'AVF',ssn:'SSN',sncf:'SNCF',ajn:'AJN'};
 
 var DEFAULT_ACCOUNTS = [
   {id:1,pagina:'Asesoría Legal en Fraude',abbr:'ALF',fbCuenta:'Bach Uri',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:'',fbUrl:'https://facebook.com/'},
