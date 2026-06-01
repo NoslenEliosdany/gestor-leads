@@ -217,6 +217,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
       <div class="uzone" id="zh-sncf" onclick="document.getElementById('fh-sncf').click()"><span class="uz-label">Sec. Nacional contra el Fraude</span><span class="uz-sub">SNCF</span><span class="uz-ok" id="sh-sncf"></span></div>
       <div class="uzone" id="zh-ajn" onclick="document.getElementById('fh-ajn').click()"><span class="uz-label">Asesoría Jurídica Nacional</span><span class="uz-sub">AJN</span><span class="uz-ok" id="sh-ajn"></span></div>
       <div class="uzone" id="zh-cl" onclick="document.getElementById('fh-cl').click()"><span class="uz-label">Consultoría Legal</span><span class="uz-sub">CL</span><span class="uz-ok" id="sh-cl"></span></div>
+      <div class="uzone" id="zh-inal" onclick="document.getElementById('fh-inal').click()"><span class="uz-label">Instituto Nacional Asesoría Legal</span><span class="uz-sub">INAL</span><span class="uz-ok" id="sh-inal"></span></div>
     </div>
     <input type="file" id="fh-alf" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'alf')">
     <input type="file" id="fh-fgr" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'fgr')">
@@ -226,6 +227,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
     <input type="file" id="fh-sncf" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'sncf')">
     <input type="file" id="fh-ajn" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'ajn')">
     <input type="file" id="fh-cl" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'cl')">
+    <input type="file" id="fh-inal" accept=".xls,.xlsx,.csv" onchange="handleHist(this,'inal')">
     <button id="btn-load-hist" onclick="loadHist()" style="display:none;width:100%;margin-top:10px;padding:9px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer">Cargar histórico a la base</button>
   </div>
   <div class="card">
@@ -239,6 +241,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
       <div class="uzone" id="zn-sncf" onclick="document.getElementById('fn-sncf').click()"><span class="uz-label">Sec. Nacional contra el Fraude</span><span class="uz-sub">SNCF · hoy</span><span class="uz-ok" id="sn-sncf"></span></div>
       <div class="uzone" id="zn-ajn" onclick="document.getElementById('fn-ajn').click()"><span class="uz-label">Asesoría Jurídica Nacional</span><span class="uz-sub">AJN · hoy</span><span class="uz-ok" id="sn-ajn"></span></div>
       <div class="uzone" id="zn-cl" onclick="document.getElementById('fn-cl').click()"><span class="uz-label">Consultoría Legal</span><span class="uz-sub">CL · hoy</span><span class="uz-ok" id="sn-cl"></span></div>
+      <div class="uzone" id="zn-inal" onclick="document.getElementById('fn-inal').click()"><span class="uz-label">Instituto Nacional Asesoría Legal</span><span class="uz-sub">INAL · hoy</span><span class="uz-ok" id="sn-inal"></span></div>
     </div>
     <input type="file" id="fn-alf" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'alf')">
     <input type="file" id="fn-fgr" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'fgr')">
@@ -248,6 +251,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
     <input type="file" id="fn-sncf" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'sncf')">
     <input type="file" id="fn-ajn" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'ajn')">
     <input type="file" id="fn-cl" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'cl')">
+    <input type="file" id="fn-inal" accept=".xls,.xlsx,.csv" onchange="handleNew(this,'inal')">
   </div>
   <button class="btn-primary" id="btn-run" onclick="run()" disabled style="margin-bottom:16px;padding:11px;font-size:14px">Analizar registros</button>
   <div id="results" style="display:none">
@@ -298,6 +302,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
         <option value="SNCF">Sec. Nacional contra el Fraude</option>
         <option value="AJN">Asesoría Jurídica Nacional</option>
         <option value="CL">Consultoría Legal</option>
+        <option value="INAL">Instituto Nacional Asesoría Legal</option>
       </select>
     </div>
     <div class="tbl-wrap" style="max-height:440px"><div id="base-tbl"></div></div>
@@ -343,11 +348,12 @@ var SCHEMAS = {
   SSN:{cols:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_delito_o_fraude_sufriste?_descríbelo_brevemente.'],name:'full_name',phone:'phone_number',desc:'¿qué_tipo_de_delito_o_fraude_sufriste?_descríbelo_brevemente.'},
   SNCF:{cols:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'],name:'full_name',phone:'phone_number',desc:'¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'},
   AJN:{cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿cuál_es_tu_situación_legal_o_financiera?_descríbela_brevemente.'],name:'nombre_completo',phone:'número_de_teléfono',desc:'¿cuál_es_tu_situación_legal_o_financiera?_descríbela_brevemente.'},
-  CL:{cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿qué_tipo_de_fraude_o_problema_financiero_estás_enfrentando?_descríbelo_brevemente.'],name:'nombre_completo',phone:'número_de_teléfono',desc:'¿qué_tipo_de_fraude_o_problema_financiero_estás_enfrentando?_descríbelo_brevemente.'}
+  CL:{cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿qué_tipo_de_fraude_o_problema_financiero_estás_enfrentando?_descríbelo_brevemente.'],name:'nombre_completo',phone:'número_de_teléfono',desc:'¿qué_tipo_de_fraude_o_problema_financiero_estás_enfrentando?_descríbelo_brevemente.'},
+  INAL:{cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿con_que_institución_financiera_o_situación_necesitas_ayuda_legal?'],name:'nombre_completo',phone:'número_de_teléfono',desc:'¿con_que_institución_financiera_o_situación_necesitas_ayuda_legal?'}
 };
-var FULL_NAMES={ALF:'Asesoria_Legal_en_Fraude',FGR:'Fiscalia_General_Republica',SPC:'Seguridad_y_Proteccion_Ciudadana',AVF:'Asesoria_para_Victimas_de_Fraude',SSN:'Secretaria_de_Seguridad_Nacional',SNCF:'Secretaria_Nacional_contra_el_Fraude',AJN:'Asesoria_Juridica_Nacional',CL:'Consultoria_Legal'};
-var ALL_SRCS=['ALF','FGR','SPC','AVF','SSN','SNCF','AJN','CL'];
-var LABELS={alf:'ALF',fgr:'FGR',spc:'SPC',avf:'AVF',ssn:'SSN',sncf:'SNCF',ajn:'AJN',cl:'CL'};
+var FULL_NAMES={ALF:'Asesoria_Legal_en_Fraude',FGR:'Fiscalia_General_Republica',SPC:'Seguridad_y_Proteccion_Ciudadana',AVF:'Asesoria_para_Victimas_de_Fraude',SSN:'Secretaria_de_Seguridad_Nacional',SNCF:'Secretaria_Nacional_contra_el_Fraude',AJN:'Asesoria_Juridica_Nacional',CL:'Consultoria_Legal',INAL:'Instituto_Nacional_de_Asesoria_Legal'};
+var ALL_SRCS=['ALF','FGR','SPC','AVF','SSN','SNCF','AJN','CL','INAL'];
+var LABELS={alf:'ALF',fgr:'FGR',spc:'SPC',avf:'AVF',ssn:'SSN',sncf:'SNCF',ajn:'AJN',cl:'CL',inal:'INAL'};
 var DEFAULT_ACCOUNTS=[
   {id:1,pagina:'Asesoría Legal en Fraude',abbr:'ALF',fbCuenta:'Bach Uri',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
   {id:2,pagina:'Fiscalía General República',abbr:'FGR',fbCuenta:'Bach Uri',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
