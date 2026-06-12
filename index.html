@@ -109,6 +109,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 .toast.show{opacity:1}
 .saldo-input{background:transparent;border:none;border-bottom:1px dashed var(--border);font-family:inherit;font-size:13px;font-weight:600;width:80px;padding:2px 4px;outline:none;color:var(--green)}
 .divider{border:none;border-top:1px solid var(--border);margin:14px 0}
+/* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300}
 .modal-panel{display:none;position:fixed;top:0;right:0;width:400px;height:100vh;background:var(--surface);z-index:301;box-shadow:-4px 0 24px rgba(0,0,0,.15);overflow-y:auto}
 .modal-header{background:var(--vino-dark);padding:16px 20px;border-bottom:2px solid var(--gold);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1}
@@ -346,28 +347,28 @@ var SCHEMAS = {
   AVF:{cols:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente'],name:'full_name',phone:'phone_number',desc:'¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente'},
   SSN:{cols:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_delito_o_fraude_sufriste?_descríbelo_brevemente.'],name:'full_name',phone:'phone_number',desc:'¿qué_tipo_de_delito_o_fraude_sufriste?_descríbelo_brevemente.'},
   SNCF:{cols:['created_time','ad_name','full_name','phone_number','¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'],name:'full_name',phone:'phone_number',desc:'¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'},
-  IFPC:{cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'],name:'nombre_completo',phone:'número_de_teléfono',desc:'¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'},
   AJN:{cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿cuál_es_tu_situación_legal_o_financiera?_descríbela_brevemente.'],name:'nombre_completo',phone:'número_de_teléfono',desc:'¿cuál_es_tu_situación_legal_o_financiera?_descríbela_brevemente.'},
   CL:{cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿qué_tipo_de_fraude_o_problema_financiero_estás_enfrentando?_descríbelo_brevemente.'],name:'nombre_completo',phone:'número_de_teléfono',desc:'¿qué_tipo_de_fraude_o_problema_financiero_estás_enfrentando?_descríbelo_brevemente.'},
-  INAL:{cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿con_que_institución_financiera_o_situación_necesitas_ayuda_legal?'],name:'nombre_completo',phone:'número_de_teléfono',desc:'¿con_que_institución_financiera_o_situación_necesitas_ayuda_legal?'}
+  INAL:{cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿con_que_institución_financiera_o_situación_necesitas_ayuda_legal?'],name:'nombre_completo',phone:'número_de_teléfono',desc:'¿con_que_institución_financiera_o_situación_necesitas_ayuda_legal?'},
+  IFPC:{cols:['created_time','ad_name','nombre_completo','número_de_teléfono','¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'],name:'nombre_completo',phone:'número_de_teléfono',desc:'¿qué_tipo_de_fraude_sufriste?_cuéntanos_brevemente_tu_caso.'}
 };
 var FULL_NAMES={ALF:'Asesoria_Legal_en_Fraude',FGR:'Fiscalia_General_Republica',SPC:'Seguridad_y_Proteccion_Ciudadana',AVF:'Asesoria_para_Victimas_de_Fraude',SSN:'Secretaria_de_Seguridad_Nacional',SNCF:'Secretaria_Nacional_contra_el_Fraude',AJN:'Asesoria_Juridica_Nacional',CL:'Consultoria_Legal',INAL:'Instituto_Nacional_de_Asesoria_Legal',IFPC:'Instituto_Federal_de_Proteccion_Ciudadana'};
 var ALL_SRCS=['SSN','AJN','CL','INAL','ALF','SPC','IFPC','AVF','SNCF'];
 var LABELS={ssn:'SSN',ajn:'AJN',cl:'CL',inal:'INAL',alf:'ALF',spc:'SPC',ifpc:'IFPC',avf:'AVF',sncf:'SNCF'};
 var DEFAULT_ACCOUNTS=[
-  {id:1,pagina:'Asesoría Legal en Fraude',abbr:'ALF',fbCuenta:'Frank Torres',correo:'admintorres05@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
-  {id:2,pagina:'Fiscalía General República',abbr:'FGR',fbCuenta:'Bach Uri',correo:'uribach456@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pausada',dospasos:false,presupuestoDiario:'',notas:''},
-  {id:3,pagina:'Seguridad y Protección Ciudadana',abbr:'SPC',fbCuenta:'Ernesto Torres',correo:'admintorres07@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
-  {id:4,pagina:'Asesoría para Víctimas de Fraude',abbr:'AVF',fbCuenta:'Bach Uriuno',correo:'bachuno98@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
-  {id:5,pagina:'Secretaría de Seguridad Nacional',abbr:'SSN',fbCuenta:'Carlos Torres',correo:'admintorres01@gmail.com',password:'',adId:'999544542732383',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
-  {id:6,pagina:'Asesoría Jurídica Nacional',abbr:'AJN',fbCuenta:'Ana Torres',correo:'admintorres02@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:''},
-  {id:7,pagina:'Consultoría Legal',abbr:'CL',fbCuenta:'Luis Torres',correo:'admintorres03@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:''},
-  {id:8,pagina:'Instituto Nacional de Asesoría Legal',abbr:'INAL',fbCuenta:'María Torres',correo:'admintorres04@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:''},
-  {id:9,pagina:'Secretaría Nacional contra el Fraude',abbr:'SNCF',fbCuenta:'Pedro Torres',correo:'5656024109',password:'',adId:'',saldo:'',saldoFecha:'',estado:'pendiente',dospasos:false,presupuestoDiario:'',notas:''},
-  {id:10,pagina:'Instituto Federal Protección Ciudadana',abbr:'IFPC',fbCuenta:'',correo:'',password:'',adId:'120247745454730544',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''}
+  {id:1,pagina:'Secretaría de Seguridad Nacional',abbr:'SSN',fbCuenta:'Carlos Torres',correo:'admintorres01@gmail.com',password:'',adId:'999544542732383',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:2,pagina:'Asesoría Jurídica Nacional',abbr:'AJN',fbCuenta:'Ana Torres',correo:'admintorres02@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:3,pagina:'Consultoría Legal',abbr:'CL',fbCuenta:'Luis Torres',correo:'admintorres03@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:4,pagina:'Instituto Nacional de Asesoría Legal',abbr:'INAL',fbCuenta:'María Torres',correo:'admintorres04@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:5,pagina:'Asesoría Legal en Fraude',abbr:'ALF',fbCuenta:'Frank Torres',correo:'admintorres05@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:6,pagina:'Seguridad y Protección Ciudadana',abbr:'SPC',fbCuenta:'Anto Torres',correo:'admintorres06@gmail.com',password:'Torres06.480090',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:7,pagina:'Instituto Federal Protección Ciudadana',abbr:'IFPC',fbCuenta:'Ernesto Torres',correo:'admintorres07@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:8,pagina:'Asesoría para Víctimas de Fraude',abbr:'AVF',fbCuenta:'Bach Uriuno',correo:'bachuno98@gmail.com',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''},
+  {id:9,pagina:'Secretaría Nacional contra el Fraude',abbr:'SNCF',fbCuenta:'Pedro Torres',correo:'5656024109',password:'',adId:'',saldo:'',saldoFecha:'',estado:'activa',dospasos:false,presupuestoDiario:'',notas:''}
 ];
 var CHECKLIST_ITEMS=['Descargar registros ALF, FGR, SPC','Descargar registros AVF, SSN, SNCF','Analizar duplicados en la herramienta','Descargar archivos limpios','Mandar reporte a Amix','Revisar saldos de todas las cuentas','Revisar anuncios activos','Guardar registros en la base','Exportar base de datos','Revisar mensajes de páginas'];
 
+// UTILS
 function normalize(p){if(!p)return'';return String(p).replace(/^p:/i,'').replace(/\D/g,'').replace(/^521/,'52').slice(-10);}
 function getBase(){try{return JSON.parse(localStorage.getItem('leads_base')||'[]')}catch(e){return[]}}
 function setBase(a){localStorage.setItem('leads_base',JSON.stringify(a))}
@@ -383,6 +384,7 @@ function fmtDateShort(val){var d=new Date(val||'');if(isNaN(d))return'-';return 
 function parseFile(file){return file.arrayBuffer().then(function(buf){var wb=XLSX.read(buf,{type:'array',cellDates:true});var ws=wb.Sheets[wb.SheetNames[0]];return XLSX.utils.sheet_to_json(ws,{defval:''})})}
 function parseSaldo(s){return parseFloat(String(s||0).replace(/,/g,''))||0}
 
+// VIEW SWITCH
 function switchView(name,el){
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
   document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active')});
@@ -392,6 +394,7 @@ function switchView(name,el){
   if(name==='finanzas')renderFinanzas();
 }
 
+// ACCOUNTS TABLE
 function renderAccounts(){
   var accounts=getAccounts();
   var threshold=getThreshold();
@@ -448,6 +451,7 @@ function renderAlerts(){
   }).join('');
 }
 
+// MODAL
 var currentModalIdx=-1;
 function openModal(i){
   currentModalIdx=i;
@@ -467,13 +471,18 @@ function renderModalBody(i){
   var dias=presupNum>0?Math.floor(saldoNum/presupNum):null;
   var diasColor=dias===null?'var(--text3)':dias<=2?'var(--red)':dias<=5?'var(--amber)':'var(--green)';
   var saldoColor=!a.saldo?'var(--text3)':saldoNum<threshold?'var(--red)':'var(--green)';
+
   var html='';
+
+  // Estado badges
   html+='<div style="display:flex;gap:8px;margin-bottom:16px">';
   var eb={activa:['var(--green-bg)','var(--green)'],pausada:['var(--amber-bg)','var(--amber)'],pendiente:['var(--red-bg)','var(--red)']};
   var ec=eb[a.estado]||eb.pendiente;
   html+='<span style="font-size:12px;padding:4px 12px;border-radius:20px;font-weight:600;background:'+ec[0]+';color:'+ec[1]+'">'+a.estado.toUpperCase()+'</span>';
   html+='<span style="font-size:12px;padding:4px 12px;border-radius:20px;font-weight:600;'+(a.dospasos?'background:var(--green-bg);color:var(--green)':'background:var(--red-bg);color:var(--red)')+'">2FA: '+(a.dospasos?'Activado':'No activado')+'</span>';
   html+='</div>';
+
+  // Saldo
   html+='<div class="modal-section">';
   html+='<div class="modal-section-title">Saldo actual</div>';
   html+='<div style="font-size:26px;font-weight:700;color:'+saldoColor+';letter-spacing:-1px;margin-bottom:4px">'+(a.saldo?'$'+a.saldo:'Sin saldo cargado')+'</div>';
@@ -487,6 +496,8 @@ function renderModalBody(i){
   html+='<button onclick="saveModalSaldo('+i+')" style="padding:7px 14px;background:var(--vino);color:var(--cream);border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer">Guardar</button>';
   html+='</div>';
   html+='</div>';
+
+  // Acceso
   html+='<div class="modal-section">';
   html+='<div class="modal-section-title">Datos de acceso</div>';
   html+='<div class="modal-field"><label>Cuenta Facebook</label><input type="text" id="mf-fbCuenta" value="'+(a.fbCuenta||'')+'" onchange="saveModalField('+i+',\'fbCuenta\',this.value)"></div>';
@@ -495,6 +506,8 @@ function renderModalBody(i){
   html+='<div class="modal-field"><label>Ad Account ID <span onclick="copyText(\'mf-adId\')" style="cursor:pointer;margin-left:4px">📋</span></label><input type="text" id="mf-adId" value="'+(a.adId||'')+'" onchange="saveModalField('+i+',\'adId\',this.value)"></div>';
   html+='<div class="modal-field"><label>Presupuesto diario (MXN)</label><input type="number" id="mf-presup" value="'+(a.presupuestoDiario||'')+'" onchange="saveModalField('+i+',\'presupuestoDiario\',this.value)"></div>';
   html+='</div>';
+
+  // Estado
   html+='<div class="modal-section">';
   html+='<div class="modal-section-title">Estado de la cuenta</div>';
   html+='<div style="display:flex;gap:6px;margin-bottom:10px">';
@@ -504,14 +517,19 @@ function renderModalBody(i){
   html+='</div>';
   html+='<button onclick="setDospasos('+i+')" style="width:100%;padding:8px;border-radius:var(--radius-sm);border:1px solid;cursor:pointer;font-size:12px;font-weight:600;'+(a.dospasos?'background:var(--green-bg);color:var(--green);border-color:var(--green-border)':'background:var(--red-bg);color:var(--red);border-color:var(--red-border)')+'">'+( a.dospasos?'✓ 2FA Activado — Click para desactivar':'✗ 2FA No activado — Click para activar')+'</button>';
   html+='</div>';
+
+  // Notas
   html+='<div class="modal-section">';
   html+='<div class="modal-section-title">Notas</div>';
   html+='<textarea onchange="saveModalField('+i+',\'notas\',this.value)" style="width:100%;height:70px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;font-family:inherit;font-size:13px;resize:vertical;outline:none" placeholder="Notas sobre esta cuenta...">'+(a.notas||'')+'</textarea>';
   html+='</div>';
+
+  // Links
   html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
   html+='<a href="https://facebook.com" target="_blank" style="display:block;text-align:center;padding:10px;background:var(--vino);color:var(--cream);border-radius:var(--radius-sm);font-size:13px;font-weight:500;text-decoration:none">Abrir Facebook →</a>';
   html+=(a.adId?'<a href="https://adsmanager.facebook.com/manage/?act='+a.adId+'" target="_blank" style="display:block;text-align:center;padding:10px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-weight:500;text-decoration:none">Ads Manager →</a>':'<div></div>');
   html+='</div>';
+
   document.getElementById('modal-body').innerHTML=html;
 }
 
@@ -523,13 +541,35 @@ function saveModalSaldo(i){
   accounts[i].saldoFecha=now.toLocaleDateString('es-MX',{day:'2-digit',month:'short'})+' '+now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
   saveAccounts(accounts);renderAccounts();renderFinanzas();renderModalBody(i);toast('Saldo actualizado');
 }
-function saveModalField(i,field,value){var accounts=getAccounts();accounts[i][field]=value;saveAccounts(accounts);renderAccounts();}
-function setEstado(i,estado){var accounts=getAccounts();accounts[i].estado=estado;saveAccounts(accounts);renderAccounts();renderModalBody(i);toast('Estado: '+estado);}
-function setDospasos(i){var accounts=getAccounts();accounts[i].dospasos=!accounts[i].dospasos;saveAccounts(accounts);renderAccounts();renderModalBody(i);toast(accounts[i].dospasos?'2FA activado':'2FA desactivado');}
-function togglePwd(){var inp=document.getElementById('mf-password');inp.type=inp.type==='password'?'text':'password';}
-function copyText(id){var el=document.getElementById(id);if(el)navigator.clipboard.writeText(el.value).then(function(){toast('Copiado')});}
-function closeModal(){document.getElementById('modal-overlay').style.display='none';document.getElementById('modal-panel').style.display='none';}
 
+function saveModalField(i,field,value){
+  var accounts=getAccounts();accounts[i][field]=value;saveAccounts(accounts);renderAccounts();
+}
+
+function setEstado(i,estado){
+  var accounts=getAccounts();accounts[i].estado=estado;saveAccounts(accounts);renderAccounts();renderModalBody(i);toast('Estado: '+estado);
+}
+
+function setDospasos(i){
+  var accounts=getAccounts();accounts[i].dospasos=!accounts[i].dospasos;saveAccounts(accounts);renderAccounts();renderModalBody(i);toast(accounts[i].dospasos?'2FA activado':'2FA desactivado');
+}
+
+function togglePwd(){
+  var inp=document.getElementById('mf-password');
+  inp.type=inp.type==='password'?'text':'password';
+}
+
+function copyText(id){
+  var el=document.getElementById(id);
+  if(el)navigator.clipboard.writeText(el.value).then(function(){toast('Copiado')});
+}
+
+function closeModal(){
+  document.getElementById('modal-overlay').style.display='none';
+  document.getElementById('modal-panel').style.display='none';
+}
+
+// CHECKLIST
 function getChecklist(){var today=new Date().toDateString();var saved=JSON.parse(localStorage.getItem('gl_checklist')||'{}');if(saved.date!==today)return{date:today,items:{}};return saved;}
 function saveChecklist(data){localStorage.setItem('gl_checklist',JSON.stringify(data))}
 function renderChecklist(){
@@ -544,6 +584,7 @@ function renderChecklist(){
 function toggleCheck(i,cb){var data=getChecklist();data.items[i]=cb?cb.checked:!data.items[i];saveChecklist(data);renderChecklist();}
 function resetChecklist(){saveChecklist({date:new Date().toDateString(),items:{}});renderChecklist();toast('Checklist reseteado');}
 
+// BACKUP / EXPORT / IMPORT
 function fullBackup(){
   var b={fecha:new Date().toISOString(),accounts:getAccounts(),leads_base:getBase(),notas:localStorage.getItem('gl_notas')||'',threshold:localStorage.getItem('gl_threshold')||'300'};
   var blob=new Blob([JSON.stringify(b,null,2)],{type:'application/json'});
@@ -562,6 +603,7 @@ function doImportData(input){
   var r=new FileReader();r.onload=function(e){try{var d=JSON.parse(e.target.result);if(d.accounts){saveAccounts(d.accounts);renderAccounts();toast('Importado')}}catch(err){alert('Archivo inválido')}};r.readAsText(f);
 }
 
+// DB INFO
 function updateDbInfo(){
   var b=getBase();var dot=document.getElementById('db-dot');var txt=document.getElementById('db-text');
   if(b.length){dot.classList.add('active');var src={};b.forEach(function(r){src[r._source]=(src[r._source]||0)+1});txt.textContent='Base activa — '+b.length+' registros ('+Object.entries(src).map(function(e){return e[0]+': '+e[1]}).join(' | ')+')';}
@@ -579,7 +621,9 @@ function renderUltimosGuardados(){
   }).join('');
 }
 
-function getPhoneFromRow(row,src){var s=SCHEMAS[src];var v=row[s.phone]||row['phone_number']||row['número_de_teléfono']||row['numero_de_telefono']||'';return v;}
+function getPhoneFromRow(row,src){
+  var s=SCHEMAS[src];var v=row[s.phone]||row['phone_number']||row['número_de_teléfono']||row['numero_de_telefono']||'';return v;
+}
 function getNameFromRow(row,src){var s=SCHEMAS[src];return row[s.name]||row['first_name']||row['full_name']||row['nombre_completo']||''}
 function getDescFromRow(row,src){
   var s=SCHEMAS[src];var d=row[s.desc]||'';
@@ -747,6 +791,7 @@ function doImportBase(input){
 }
 function resetBase(){if(!confirm('¿Segura?'))return;localStorage.removeItem('leads_base');updateDbInfo();toast('Base limpiada');}
 
+// BASE DE DATOS
 function renderBase(){
   var query=(document.getElementById('search-input').value||'').toLowerCase().trim();
   var srcFilter=document.getElementById('base-filter-src').value;
@@ -771,6 +816,7 @@ function renderBase(){
   document.getElementById('base-tbl').innerHTML='<table><thead><tr><th style="width:100px">Fecha</th><th style="width:50px">Pág</th><th style="width:170px">Nombre</th><th>Teléfono</th></tr></thead><tbody>'+trs+'</tbody></table>';
 }
 
+// FINANZAS
 function renderFinanzas(){
   var accounts=getAccounts();
   var conSaldo=accounts.filter(function(a){return a.saldo&&parseSaldo(a.saldo)>0});
@@ -785,7 +831,7 @@ function renderFinanzas(){
       '<div style="font-size:11px;color:var(--text3);margin-bottom:6px">Presup/día: '+(p?'$'+p.toLocaleString('es-MX'):'—')+'</div>'+
       '<div style="font-size:12px;font-weight:600;color:'+dc+'">'+(dias!==null?dias+' días restantes':'Sin presupuesto asignado')+'</div>'+
     '</div>';
-  }).join('')||'<div style="color:var(--text3);font-size:13px">No hay cuentas con saldo cargado.</div>';
+  }).join('')||'<div style="color:var(--text3);font-size:13px">No hay cuentas con saldo cargado. Actualiza los saldos en la pestaña Cuentas.</div>';
   var activas=accounts.filter(function(a){return a.estado==='activa'});
   document.getElementById('finanzas-bars').innerHTML=activas.map(function(a){
     var s=parseSaldo(a.saldo);var p=parseSaldo(a.presupuestoDiario);
@@ -799,6 +845,7 @@ function renderFinanzas(){
   }).join('')||'<div style="color:var(--text3);font-size:13px">No hay cuentas activas.</div>';
 }
 
+// INIT
 document.getElementById('hdr-date').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 document.getElementById('threshold-input').value=getThreshold();
 document.getElementById('notas-dia').value=getNotas();
