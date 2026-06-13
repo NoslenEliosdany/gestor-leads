@@ -133,7 +133,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
     <div class="hdr-seal">⚖️</div>
     <div>
       <div class="hdr-title">Panel de Registros</div>
-      <div class="hdr-sub">Grupo MX · v2.6</div>
+      <div class="hdr-sub">Grupo MX · v2.7</div>
     </div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
@@ -622,9 +622,9 @@ function renderUltimosGuardados(){
 }
 
 function getPhoneFromRow(row,src){
-  var s=SCHEMAS[src]||{};var v=row[s.phone]||row['phone_number']||row['número_de_teléfono']||row['numero_de_telefono']||'';return v;
+  var s=SCHEMAS[src]||{};var v=row[s.phone]||row['phone_number']||row['número_de_teléfono']||row['numero_de_telefono']||'';return String(v);
 }
-function getNameFromRow(row,src){var s=SCHEMAS[src]||{};return row[s.name]||row['first_name']||row['full_name']||row['nombre_completo']||''}
+function getNameFromRow(row,src){var s=SCHEMAS[src]||{};var v=row[s.name]||row['first_name']||row['full_name']||row['nombre_completo']||'';return String(v);}
 function getDescFromRow(row,src){
   var s=SCHEMAS[src]||{};var d=row[s.desc]||'';
   if(!d)Object.keys(row).forEach(function(k){if(!d&&(k.indexOf('describe')>-1||k.indexOf('fraude')>-1||k.indexOf('sucedio')>-1||k.indexOf('delito')>-1||k.indexOf('caso')>-1))d=row[k]});
