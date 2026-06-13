@@ -133,7 +133,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
     <div class="hdr-seal">⚖️</div>
     <div>
       <div class="hdr-title">Panel de Registros</div>
-      <div class="hdr-sub">Grupo MX · v2.5</div>
+      <div class="hdr-sub">Grupo MX · v2.6</div>
     </div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
@@ -616,17 +616,17 @@ function renderUltimosGuardados(){
   c.innerHTML=ALL_SRCS.map(function(src){
     var rows=b.filter(function(r){return r._source===src});if(!rows.length)return'';
     var last=rows.reduce(function(a,c){return new Date(c.created_time||0)>new Date(a.created_time||0)?c:a});
-    var name=last[SCHEMAS[src].name]||last.first_name||last.full_name||last.nombre_completo||'-';
+    var name=last[(SCHEMAS[src]||{}).name]||last.first_name||last.full_name||last.nombre_completo||'-';
     return'<div class="ultimo-card"><div class="ultimo-lbl">'+src+' — último guardado</div><div class="ultimo-name">'+name+'</div><div class="ultimo-date">'+fmtDate(last.created_time)+'</div></div>';
   }).join('');
 }
 
 function getPhoneFromRow(row,src){
-  var s=SCHEMAS[src];var v=row[s.phone]||row['phone_number']||row['número_de_teléfono']||row['numero_de_telefono']||'';return v;
+  var s=SCHEMAS[src]||{};var v=row[s.phone]||row['phone_number']||row['número_de_teléfono']||row['numero_de_telefono']||'';return v;
 }
-function getNameFromRow(row,src){var s=SCHEMAS[src];return row[s.name]||row['first_name']||row['full_name']||row['nombre_completo']||''}
+function getNameFromRow(row,src){var s=SCHEMAS[src]||{};return row[s.name]||row['first_name']||row['full_name']||row['nombre_completo']||''}
 function getDescFromRow(row,src){
-  var s=SCHEMAS[src];var d=row[s.desc]||'';
+  var s=SCHEMAS[src]||{};var d=row[s.desc]||'';
   if(!d)Object.keys(row).forEach(function(k){if(!d&&(k.indexOf('describe')>-1||k.indexOf('fraude')>-1||k.indexOf('sucedio')>-1||k.indexOf('delito')>-1||k.indexOf('caso')>-1))d=row[k]});
   return d||'';
 }
@@ -745,7 +745,7 @@ function downloadAll(){
 }
 
 function downloadPage(src){
-  var schema=SCHEMAS[src];
+  var schema=SCHEMAS[src]||{cols:[]};
   var rows=allResults.filter(function(r){return r._source===src&&(r._status==='ok'||r._keep)}).map(function(r){return r._raw});
   if(!rows.length){alert('No hay registros únicos de '+src+'.');return}
   var clean=rows.map(function(r){
