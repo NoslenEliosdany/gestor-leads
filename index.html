@@ -122,16 +122,13 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
   <div id="alerts-container"></div>
   <div class="threshold-row">⚠️ Alertar cuando saldo baje de <input type="number" id="threshold-input" value="300" onchange="saveThreshold()" style="width:80px;padding:5px 8px;border:1px solid var(--amber-border);border-radius:var(--radius-sm);font-size:13px;font-weight:600;color:var(--amber);background:var(--surface)"> MXN por cuenta</div>
   <div class="card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><p class="card-title" style="margin:0">Checklist diario</p><button class="btn-ghost" onclick="resetChecklist()">Resetear</button></div>
-    <div class="checklist" id="checklist-container"></div>
-  </div>
-  <div class="card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
       <p class="card-title" style="margin:0">Cuentas y páginas <span style="font-size:10px;color:var(--text3);font-weight:400;margin-left:6px">— Click en una fila para ver detalles</span></p>
       <div style="display:flex;gap:8px">
         <button class="btn-ghost" style="border-color:var(--gold);color:var(--amber)" onclick="fullBackup()">💾 Respaldo</button>
         <button class="btn-ghost" onclick="exportData()">Exportar</button>
         <button class="btn-ghost" onclick="importData()">Importar</button>
+        <button class="btn-ghost" style="border-color:var(--vino);color:var(--vino)" onclick="downloadChecklistFormat()">📋 Checklist semanal (PDF)</button>
       </div>
     </div>
     <div class="tbl-wrap"><table id="accounts-table"><thead><tr>
@@ -595,14 +592,46 @@ function buildUploadZones(){
 function saveThreshold(){threshold=parseInt(document.getElementById('threshold-input').value)||0;saveKey('threshold',threshold);renderStats();renderAlerts();toast('Umbral guardado');}
 function saveNotas(){notas=document.getElementById('notas-dia').value;saveKey('notas',notas);}
 var checklistData={date:new Date().toDateString(),items:{}};
-function renderChecklist(){
-  var today=new Date().toDateString();if(checklistData.date!==today)checklistData={date:today,items:{}};
-  document.getElementById('checklist-container').innerHTML=CHECKLIST_ITEMS.map(function(item,i){var checked=checklistData.items[i]||false;return'<div class="check-item'+(checked?' done':'')+'"><input type="checkbox" '+(checked?'checked':'')+' onchange="toggleCheck('+i+',this)" style="width:14px;height:14px;accent-color:var(--green);cursor:pointer"><span onclick="toggleCheck('+i+',null)">'+item+'</span></div>';}).join('');
-}
-function toggleCheck(i,cb){checklistData.items[i]=cb?cb.checked:!checklistData.items[i];saveKey('checklist',checklistData);renderChecklist();}
-function resetChecklist(){checklistData={date:new Date().toDateString(),items:{}};saveKey('checklist',checklistData);renderChecklist();toast('Checklist reseteado');}
 
 // BACKUP / EXPORT / IMPORT
+// CHECKLIST SEMANAL IMPRIMIBLE (sin fechas fijas, solo días de la semana)
+function downloadChecklistFormat(){
+  var dias=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  var rowsHtml=PAGES.map(function(p,i){
+    return '<tr>'+
+      '<td class="num">'+(i+1)+'</td>'+
+      '<td class="abr">'+p.abbr+'</td>'+
+      '<td class="pagina">'+p.pagina+'</td>'+
+      '<td class="cuenta">'+(p.fbCuenta||'')+'</td>'+
+      '<td class="correo">'+(p.correo||'')+'</td>'+
+      dias.map(function(){return '<td class="chk"></td>';}).join('')+
+    '</tr>';
+  }).join('');
+  var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Checklist Semanal</title><style>'+
+    '*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,Helvetica,Arial,sans-serif}'+
+    'body{padding:24px;color:#1A1410}'+
+    '.hdr{background:#3A0F17;color:#F5F0E8;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-radius:6px}'+
+    '.hdr h1{font-size:16px;letter-spacing:.04em}'+
+    '.hdr .sub{font-size:11px;color:#C9A84C}'+
+    'table{width:100%;border-collapse:collapse;font-size:11px}'+
+    'th,td{border:1px solid #C8C2B8;padding:6px 8px;text-align:left}'+
+    'th{background:#3A0F17;color:#F0D080;font-size:10px;text-transform:uppercase;letter-spacing:.04em}'+
+    '.num{width:24px;text-align:center;color:#9E8E7E}'+
+    '.abr{width:50px;font-weight:700;color:#C9A84C;background:#3A0F17;color:#F0D080;text-align:center}'+
+    '.chk{width:40px;text-align:center}'+
+    '.print-btn{margin-bottom:14px;padding:9px 18px;background:#5C1A24;color:#F5F0E8;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}'+
+    '@media print{.print-btn{display:none}}'+
+    '</style></head><body>'+
+    '<button class="print-btn" onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button>'+
+    '<div class="hdr"><div><h1>PANEL DE REGISTROS — CHECKLIST SEMANAL</h1><div class="sub">Grupo MX</div></div></div>'+
+    '<table><thead><tr><th>#</th><th>Abr</th><th>Página</th><th>Cuenta FB</th><th>Correo</th>'+
+    dias.map(function(d){return '<th>'+d+'</th>';}).join('')+
+    '</tr></thead><tbody>'+rowsHtml+'</tbody></table>'+
+    '</body></html>';
+  var win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+}
 function fullBackup(){
   var b={fecha:new Date().toISOString(),pages:PAGES,leads_base:base,notas:notas,threshold:threshold};
   var blob=new Blob([JSON.stringify(b,null,2)],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');
@@ -806,10 +835,9 @@ async function init(){
   base=[];
   threshold=await loadKey('threshold',300);
   notas=await loadKey('notas','');
-  checklistData=await loadKey('checklist',{date:new Date().toDateString(),items:{}});
   document.getElementById('threshold-input').value=threshold;
   document.getElementById('notas-dia').value=notas;
-  buildUploadZones();renderAccounts();renderChecklist();updateDbInfo();updateBaseFilterOptions();
+  buildUploadZones();renderAccounts();updateDbInfo();updateBaseFilterOptions();
   if(SHEETS_URL){
     document.getElementById('sheets-url-input').value=SHEETS_URL;
     syncFromSheets();
