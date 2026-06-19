@@ -106,7 +106,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v3.4</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v3.5</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -232,7 +232,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
         <p class="card-title" style="margin:0;color:var(--green)">Guardar en la base (se sincroniza solo con Google Sheets)</p>
       </div>
       <button class="btn-save" onclick="saveToBase()" style="margin-bottom:8px">Guardar registros únicos en la base</button>
-      <p style="font-size:11px;color:var(--text3);margin-bottom:8px">Si tienes la URL de Google Sheets configurada arriba (Paso 1), los registros se suben automáticamente — no necesitas exportar ni subir nada manualmente.</p>
+      <p style="font-size:11px;color:var(--text3);margin-bottom:8px">Los registros se suben directo a Google Sheets — no se guardan en este navegador.</p>
       <button class="btn-ghost" onclick="exportBase()" style="width:100%">📤 (opcional) Descargar respaldo JSON</button>
     </div>
   </div>
@@ -318,8 +318,10 @@ async function loadKey(key,def){
     else{var v=localStorage.getItem('panel_'+key);return v!==null?JSON.parse(v):def;}
   }catch(e){return def;}
 }
-// FIX v3.1: detecta QuotaExceededError y avisa en lugar de fallar silenciosamente
+// v3.5: leads_base YA NO se guarda nunca en localStorage/window.storage.
+// La base vive solo en memoria (variable `base`) y se sincroniza con Google Sheets.
 function saveKey(key,val){
+  if(key==='leads_base')return; // nunca persistir la base completa localmente
   try{
     if(HAS_CLOUD){
       window.storage.set(key,JSON.stringify(val)).catch(function(e){
@@ -330,7 +332,7 @@ function saveKey(key,val){
     }
   }catch(e){
     if(e.name==='QuotaExceededError'||e.code===22){
-      alert('⚠️ La base excede el límite del navegador (~5MB). Haz clic en "Exportar" para guardar un respaldo y luego en "Limpiar" para liberar espacio.');
+      toast('⚠️ No se pudo guardar localmente (límite del navegador). Esto no afecta tu base, que vive en Google Sheets.');
     }else{console.error('saveKey:',e);}
   }
 }
@@ -357,16 +359,13 @@ async function syncFromSheets(){
     return;
   }
   base=records;
-  saveKey('leads_base',base);
   updateDbInfo();
   toast('\u2713 '+base.length+' registros sincronizados desde Sheets');
   if(st){st.textContent='\u2713 Conectado \u2014 '+base.length+' registros en Sheets';st.style.color='var(--green)';}
 }
 
 // FIX v3.1: slimRecord elimina campos pesados que el panel no usa
-// reduce el tamaño de la base ~40% para evitar el límite de 5MB
 function slimRecord(r){
-  // Compact format: solo _source, p (telefono), n (nombre), d (fecha)
   var phone=r.phone_number||r['número_de_teléfono']||r.telefono||r.p||r.Teléfono||'';
   var name=r.full_name||r.nombre_completo||r.first_name||r.n||r.Nombre||'';
   var date=r.created_time||r.d||r.Fecha||'';
@@ -568,9 +567,16 @@ function renderFieldEditorBody(){
   html+='<button class="btn-ghost danger" style="width:100%" onclick="deletePage(currentPageEditIdx);closeModal2()">Eliminar esta p\u00e1gina</button>';
   document.getElementById('modal2-body').innerHTML=html;
 }
-function updatePageMeta(field,value){
+async function updatePageMeta(field,value){
   var p=PAGES[currentPageEditIdx];
-  if(field==='abbr'){value=value.trim().toUpperCase();if(!value){toast('La abreviatura no puede estar vac\u00eda');renderFieldEditorBody();return}if(PAGES.some(function(x,idx){return idx!==currentPageEditIdx&&x.abbr===value})){toast('Esa abreviatura ya existe');renderFieldEditorBody();return}var oldAbbr=p.abbr;base.forEach(function(r){if(r._source===oldAbbr)r._source=value});saveKey('leads_base',base);}
+  if(field==='abbr'){
+    value=value.trim().toUpperCase();
+    if(!value){toast('La abreviatura no puede estar vac\u00eda');renderFieldEditorBody();return}
+    if(PAGES.some(function(x,idx){return idx!==currentPageEditIdx&&x.abbr===value})){toast('Esa abreviatura ya existe');renderFieldEditorBody();return}
+    var oldAbbr=p.abbr;
+    base.forEach(function(r){if(r._source===oldAbbr)r._source=value});
+    if(SHEETS_URL){toast('Actualizando Sheets...');await sheetsSet(base);}
+  }
   p[field]=value;savePages();document.getElementById('modal2-title').textContent='Configurar: '+p.pagina;document.getElementById('modal2-abbr').textContent=p.abbr;
 }
 function updateField(fi,field,value){PAGES[currentPageEditIdx].fields[fi][field]=value;savePages();if(field==='role')renderFieldEditorBody();}
@@ -606,13 +612,17 @@ function exportData(){var blob=new Blob([JSON.stringify({pages:PAGES},null,2)],{
 function importData(){document.getElementById('f-import-data').click();}
 function doImportData(input){
   var f=input.files[0];if(!f)return;
-  var r=new FileReader();r.onload=function(e){
+  var r=new FileReader();r.onload=async function(e){
     try{
       var d=JSON.parse(e.target.result);
       if(d.pages){PAGES=d.pages;}
       if(d.accounts){d.accounts.forEach(function(a){var p=findPage(a.abbr);if(p){['fbCuenta','correo','password','adId','saldo','saldoFecha','estado','dospasos','presupuestoDiario','notas'].forEach(function(k){if(a[k]!==undefined)p[k]=a[k]});}});}
       if(!d.pages&&!d.accounts)throw new Error();
-      if(d.leads_base){base=d.leads_base.map(slimRecord);saveKey('leads_base',base);}
+      if(d.leads_base){
+        base=d.leads_base.map(slimRecord);
+        updateDbInfo();
+        if(SHEETS_URL){toast('Subiendo base a Google Sheets...');await sheetsSet(base);toast('\u2713 Base subida a Sheets');}
+      }
       if(d.notas!==undefined){notas=d.notas;saveKey('notas',notas);}
       if(d.threshold!==undefined){threshold=d.threshold;saveKey('threshold',threshold);}
       savePages();renderAccounts();buildUploadZones();renderPagesView();updateBaseFilterOptions();renderFinanzas();updateDbInfo();
@@ -626,7 +636,7 @@ function doImportData(input){
 function updateDbInfo(){
   var dot=document.getElementById('db-dot');var txt=document.getElementById('db-text');
   if(base.length){dot.classList.add('active');var src={};base.forEach(function(r){src[r._source]=(src[r._source]||0)+1});txt.textContent='Base activa \u2014 '+base.length+' registros ('+Object.entries(src).map(function(e){return e[0]+': '+e[1]}).join(' | ')+')';}
-  else{dot.classList.remove('active');txt.textContent='Base vac\u00eda \u2014 importa tu base JSON para comenzar';}
+  else{dot.classList.remove('active');txt.textContent='Base vac\u00eda \u2014 sincroniza desde Google Sheets para comenzar';}
   renderUltimosGuardados();
 }
 function renderUltimosGuardados(){
@@ -641,8 +651,31 @@ function handleNew(input,abbr){if(!input.files[0])return;newFiles[abbr]=input.fi
 function loadHist(){
   var btn=document.getElementById('btn-load-hist');btn.textContent='Cargando...';btn.disabled=true;
   var phones=new Set(base.map(function(r){return normalize(getPhoneFromRow(r,findPage(r._source)));}));
-  var pages=PAGES.slice();var idx=0;var added=0;
-  function next(){if(idx>=pages.length){saveKey('leads_base',base);updateDbInfo();btn.textContent='\u2713 '+added+' registros';btn.disabled=false;toast('Hist\u00f3rico: '+added+' registros');return}var page=pages[idx];idx++;if(!histFiles[page.abbr]){next();return}parseFile(histFiles[page.abbr]).then(function(rows){rows.forEach(function(row){var n=normalize(getPhoneFromRow(row,page)||'');if(n&&!phones.has(n)){phones.add(n);base.push(slimRecord(Object.assign({},row,{_source:page.abbr})));added++;}});next();});}
+  var pages=PAGES.slice();var idx=0;var added=0;var newOnes=[];
+  function next(){
+    if(idx>=pages.length){
+      updateDbInfo();
+      if(SHEETS_URL&&newOnes.length){
+        btn.textContent='Subiendo a Sheets...';
+        sheetsAppend(newOnes).then(function(ok){
+          btn.textContent='\u2713 '+added+' registros';btn.disabled=false;
+          toast(ok?('Hist\u00f3rico: '+added+' registros subidos a Sheets'):('Hist\u00f3rico cargado, pero fall\u00f3 sincronizar con Sheets'));
+        });
+      }else{
+        btn.textContent='\u2713 '+added+' registros';btn.disabled=false;
+        toast('Hist\u00f3rico: '+added+' registros');
+      }
+      return;
+    }
+    var page=pages[idx];idx++;if(!histFiles[page.abbr]){next();return}
+    parseFile(histFiles[page.abbr]).then(function(rows){
+      rows.forEach(function(row){
+        var n=normalize(getPhoneFromRow(row,page)||'');
+        if(n&&!phones.has(n)){phones.add(n);var slim=slimRecord(Object.assign({},row,{_source:page.abbr}));base.push(slim);newOnes.push(slim);added++;}
+      });
+      next();
+    });
+  }
   next();
 }
 function run(){
@@ -702,38 +735,46 @@ function downloadPage(src){
   var wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});var blob=new Blob([wbout],{type:'application/octet-stream'});var url=URL.createObjectURL(blob);var a=document.createElement('a');
   a.href=url;a.download=(page?page.fullName:src)+'_'+src+'_'+new Date().toISOString().slice(0,10)+'.xlsx';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);toast(src+' descargado');
 }
-// FIX v3.1: slimRecord aplicado al guardar
+// v3.5: saveToBase ya NO guarda nada en localStorage, manda directo a Sheets
 async function saveToBase(){
   var unique=allResults.filter(function(r){return r._status==='ok'||r._keep;});if(!unique.length){alert('No hay registros \u00fanicos.');return}
   var phones=new Set(base.map(function(r){return normalize(getPhoneFromRow(r,findPage(r._source)));}));var added=0;var newRecords=[];
   unique.forEach(function(r){var n=normalize(r.telefono);if(n&&!phones.has(n)){phones.add(n);var slim=slimRecord(Object.assign({},r._raw,{_source:r._source}));base.push(slim);newRecords.push(slim);added++;}});
-  saveKey('leads_base',base);updateDbInfo();
+  updateDbInfo();
   if(SHEETS_URL&&newRecords.length){
-    toast('Guardando '+added+' registros y sincronizando con Sheets...');
+    toast('Guardando '+added+' registros en Google Sheets...');
     var ok=await sheetsAppend(newRecords);
-    toast(ok?('\u2713 '+added+' registros guardados y sincronizados con Google Sheets'):('\u2713 '+added+' guardados localmente \u2014 \u26a0\ufe0f fall\u00f3 sincronizar con Sheets'));
+    toast(ok?('\u2713 '+added+' registros guardados en Google Sheets'):('\u26a0\ufe0f Fall\u00f3 sincronizar con Sheets \u2014 revisa la URL'));
+  }else if(!SHEETS_URL){
+    toast('\u26a0\ufe0f Configura la URL de Google Sheets en el Paso 1 para guardar permanentemente');
   }else{
-    toast('\u2713 '+added+' registros guardados');
+    toast('\u2713 '+added+' registros agregados (sin nuevos que subir)');
   }
 }
 function copyReporte(){var txt=document.getElementById('reporte-text').textContent;navigator.clipboard.writeText(txt).then(function(){toast('Reporte copiado');}).catch(function(){var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Copiado');});}
 function exportBase(){if(!base.length){alert('La base est\u00e1 vac\u00eda.');return}var blob=new Blob([JSON.stringify(base,null,2)],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='base_registros_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);toast('Base exportada: '+base.length+' registros');}
 function importBase(){document.getElementById('f-import-base').click();}
-// FIX v3.1: slimRecord en importBase para reducir tamaño y evitar QuotaExceededError
+// v3.5: doImportBase ya no toca localStorage, sube directo a Sheets vía sheetsSet
 function doImportBase(input){
   var f=input.files[0];if(!f)return;
-  var r=new FileReader();r.onload=function(e){
+  var r=new FileReader();r.onload=async function(e){
     try{
       var d=JSON.parse(e.target.result);
       if(!Array.isArray(d))throw new Error('No es un array');
       base=d.map(slimRecord);
-      saveKey('leads_base',base);
       updateDbInfo();
-      toast('Base importada: '+base.length+' registros');
+      toast('Base le\u00edda: '+base.length+' registros');
+      if(SHEETS_URL){
+        toast('Subiendo '+base.length+' registros a Google Sheets...');
+        var ok=await sheetsSet(base);
+        toast(ok?('\u2713 '+base.length+' registros subidos a Google Sheets'):('\u26a0\ufe0f Fall\u00f3 subir a Sheets \u2014 revisa la URL'));
+      }else{
+        toast('\u26a0\ufe0f Configura la URL de Google Sheets (Paso 1) para guardar permanentemente');
+      }
     }catch(err){alert('Archivo inv\u00e1lido: '+err.message);}
   };r.readAsText(f);
 }
-function resetBase(){if(!confirm('\u00bfSegura? Esto borra todos los registros guardados.'))return;base=[];saveKey('leads_base',base);updateDbInfo();renderPagesView();toast('Base limpiada');}
+function resetBase(){if(!confirm('\u00bfSegura? Esto borra los registros cargados en memoria (no afecta lo que ya est\u00e1 en Google Sheets).'))return;base=[];updateDbInfo();renderPagesView();toast('Base limpiada de la pantalla');}
 
 // BASE DE DATOS
 function updateBaseFilterOptions(){var sel=document.getElementById('base-filter-src');var cur=sel.value;sel.innerHTML='<option value="all">Todas las p\u00e1ginas</option>'+PAGES.map(function(p){return'<option value="'+p.abbr+'">'+p.pagina+' ('+p.abbr+')</option>';}).join('');if(cur==='all'||PAGES.some(function(p){return p.abbr===cur;}))sel.value=cur;}
@@ -761,7 +802,8 @@ function renderFinanzas(){
 async function init(){
   document.getElementById('hdr-date').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   PAGES=await loadKey('pages',null)||JSON.parse(JSON.stringify(DEFAULT_PAGES));
-  base=await loadKey('leads_base',[]);
+  // v3.5: la base YA NO se carga de localStorage; se carga siempre desde Google Sheets
+  base=[];
   threshold=await loadKey('threshold',300);
   notas=await loadKey('notas','');
   checklistData=await loadKey('checklist',{date:new Date().toDateString(),items:{}});
