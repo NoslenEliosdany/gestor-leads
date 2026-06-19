@@ -106,7 +106,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v3.1</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v3.4</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -144,24 +144,51 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
   </div>
 </div></div>
 <div class="view" id="view-registros"><div class="layout">
-  <div class="db-bar">
-    <div class="dot" id="db-dot"></div>
-    <span style="font-size:13px;color:var(--text2);flex:1" id="db-text">Base vacía</span>
-    <div style="display:flex;gap:6px">
-      <button class="btn-ghost" onclick="exportBase()">Exportar</button>
-      <button class="btn-ghost" onclick="importBase()">Importar</button>
+
+  <!-- PASO 1 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--vino);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">1</div>
+      <p class="card-title" style="margin:0">Base de datos (Google Sheets en tiempo real)</p>
+    </div>
+    <div class="db-bar" style="margin-bottom:10px">
+      <div class="dot" id="db-dot"></div>
+      <span style="font-size:13px;color:var(--text2);flex:1" id="db-text">Base vacía</span>
+    </div>
+    <div class="ultimos-row" id="ultimos-guardados"></div>
+    <div id="sheets-config" style="margin-bottom:10px">
+      <p style="font-size:11px;color:var(--text3);margin-bottom:6px">URL de Google Sheets (pégala una sola vez, queda guardada en este navegador):</p>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="sheets-url-input" placeholder="https://script.google.com/macros/s/.../exec" style="flex:1">
+        <button class="btn-ghost" onclick="saveSheetsUrl()">Guardar URL</button>
+      </div>
+      <div id="sheets-status" style="font-size:11px;margin-top:6px;color:var(--text3)"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-primary" onclick="syncFromSheets()" style="flex:1">🔄 Sincronizar desde Google Sheets</button>
+      <button class="btn-ghost" onclick="importBase()">📂 Importar JSON</button>
       <button class="btn-ghost danger" onclick="resetBase()">Limpiar</button>
     </div>
   </div>
-  <div class="ultimos-row" id="ultimos-guardados"></div>
+
+  <!-- PASO 2 -->
   <div class="card">
-    <p class="card-title">Histórico inicial (solo la primera vez)</p>
-    <p style="font-size:12px;color:var(--text3);margin-bottom:10px">Sube el Excel/CSV completo de cada página para precargar la base.</p>
-    <div class="upload-grid" id="hist-upload-grid"></div>
-    <button id="btn-load-hist" onclick="loadHist()" style="display:none;width:100%;margin-top:10px;padding:9px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer">Cargar histórico a la base</button>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--vino);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">2</div>
+      <p class="card-title" style="margin:0">Subir registros de hoy</p>
+    </div>
+    <div class="upload-grid" id="new-upload-grid"></div>
   </div>
-  <div class="card"><p class="card-title">Registros de hoy</p><div class="upload-grid" id="new-upload-grid"></div></div>
+
+  <!-- PASO 3 -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <div style="width:28px;height:28px;border-radius:50%;background:var(--vino);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">3</div>
+    <p class="card-title" style="margin:0">Analizar</p>
+  </div>
   <button class="btn-primary" id="btn-run" onclick="run()" disabled style="margin-bottom:16px;padding:11px;font-size:14px">Analizar registros</button>
+
+  <!-- oculto pero necesario para historial -->
+  <div style="display:none"><div class="upload-grid" id="hist-upload-grid"></div><button id="btn-load-hist" onclick="loadHist()"></button></div>
   <div id="results" style="display:none">
     <div class="ultimos-row" id="ultimos-hoy"></div>
     <div class="stats" id="stats-row"></div>
@@ -176,16 +203,37 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
       </div>
       <div class="tbl-wrap scrollable"><div id="tbl-container"></div></div>
     </div>
+    <!-- PASO 4 -->
     <div class="card">
-      <p class="card-title">Descargar registros únicos de hoy</p>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--vino);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">4</div>
+        <p class="card-title" style="margin:0">Descargar archivos limpios</p>
+      </div>
       <button class="btn-primary" onclick="downloadAll()" style="margin-bottom:8px">Descargar todos los archivos de un clic</button>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px" id="dl-grid"></div>
-      <button class="btn-save" onclick="saveToBase()">Guardar registros únicos en la base → listo para mañana</button>
+    </div>
+
+    <!-- PASO 5 -->
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--vino);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">5</div>
+        <p class="card-title" style="margin:0">Reporte para WhatsApp</p>
+      </div>
       <div class="reporte-box">
-        <p class="card-title" style="margin-bottom:8px">Reporte para WhatsApp</p>
         <div class="reporte-text" id="reporte-text"></div>
         <button class="btn-ghost" onclick="copyReporte()" style="width:100%;padding:8px">Copiar reporte</button>
       </div>
+    </div>
+
+    <!-- PASO 6 -->
+    <div class="card" style="border:2px solid var(--green-border);background:var(--green-bg)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">6</div>
+        <p class="card-title" style="margin:0;color:var(--green)">Guardar en la base (se sincroniza solo con Google Sheets)</p>
+      </div>
+      <button class="btn-save" onclick="saveToBase()" style="margin-bottom:8px">Guardar registros únicos en la base</button>
+      <p style="font-size:11px;color:var(--text3);margin-bottom:8px">Si tienes la URL de Google Sheets configurada arriba (Paso 1), los registros se suben automáticamente — no necesitas exportar ni subir nada manualmente.</p>
+      <button class="btn-ghost" onclick="exportBase()" style="width:100%">📤 (opcional) Descargar respaldo JSON</button>
     </div>
   </div>
 </div></div>
@@ -236,6 +284,34 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <script>
 // ============ STORAGE ============
 var HAS_CLOUD=(typeof window.storage!=='undefined'&&window.storage);
+// ============ GOOGLE SHEETS (tiempo real) ============
+var SHEETS_URL = localStorage.getItem('panel_sheets_url') || '';
+function setSheetsUrl(url){SHEETS_URL=url.trim();localStorage.setItem('panel_sheets_url',SHEETS_URL);}
+async function sheetsGet(){
+  if(!SHEETS_URL)return null;
+  try{
+    var res=await fetch(SHEETS_URL+'?action=get');
+    var data=await res.json();
+    if(data.error)throw new Error(data.error);
+    return data;
+  }catch(e){console.error('sheetsGet:',e);return null;}
+}
+async function sheetsSet(records){
+  if(!SHEETS_URL)return false;
+  try{
+    var res=await fetch(SHEETS_URL,{method:'POST',body:JSON.stringify({action:'set',records:records})});
+    var data=await res.json();
+    return !data.error;
+  }catch(e){console.error('sheetsSet:',e);return false;}
+}
+async function sheetsAppend(records){
+  if(!SHEETS_URL)return false;
+  try{
+    var res=await fetch(SHEETS_URL,{method:'POST',body:JSON.stringify({action:'append',records:records})});
+    var data=await res.json();
+    return !data.error;
+  }catch(e){console.error('sheetsAppend:',e);return false;}
+}
 async function loadKey(key,def){
   try{
     if(HAS_CLOUD){var r=await window.storage.get(key);return r?JSON.parse(r.value):def;}
@@ -260,16 +336,41 @@ function saveKey(key,val){
 }
 function savePages(){saveKey('pages',PAGES);}
 
+// ============ UI GOOGLE SHEETS ============
+function saveSheetsUrl(){
+  var val=document.getElementById('sheets-url-input').value.trim();
+  if(!val){toast('Pega la URL primero');return}
+  setSheetsUrl(val);
+  var st=document.getElementById('sheets-status');
+  if(st){st.textContent='\u2713 URL guardada';st.style.color='var(--green)';}
+  syncFromSheets();
+}
+async function syncFromSheets(){
+  if(!SHEETS_URL){toast('Primero pega y guarda la URL de Google Sheets');return}
+  var st=document.getElementById('sheets-status');
+  if(st){st.textContent='Sincronizando...';st.style.color='var(--amber)';}
+  toast('Sincronizando con Google Sheets...');
+  var records=await sheetsGet();
+  if(records===null){
+    toast('\u26a0\ufe0f No se pudo conectar a Google Sheets');
+    if(st){st.textContent='\u26a0\ufe0f Error de conexi\u00f3n \u2014 revisa la URL';st.style.color='var(--red)';}
+    return;
+  }
+  base=records;
+  saveKey('leads_base',base);
+  updateDbInfo();
+  toast('\u2713 '+base.length+' registros sincronizados desde Sheets');
+  if(st){st.textContent='\u2713 Conectado \u2014 '+base.length+' registros en Sheets';st.style.color='var(--green)';}
+}
+
 // FIX v3.1: slimRecord elimina campos pesados que el panel no usa
 // reduce el tamaño de la base ~40% para evitar el límite de 5MB
 function slimRecord(r){
-  var PAT=/fraude|describe|situaci|instituc|sucedi|delito|brevemente|cu\u00e9ntanos|v\u00edctima|victima/i;
-  var EX={'_source':1,'created_time':1,'ad_name':1,'full_name':1,'nombre_completo':1,'first_name':1,
-    'phone_number':1,'\u00famero_de_tel\u00e9fono':1,'telefono':1,
-    'Nombre':1,'Tel\u00e9fono':1,'Descripci\u00f3n':1,'Fecha':1,'Anuncio':1};
-  var s={};
-  Object.keys(r).forEach(function(k){if(EX[k]||PAT.test(k))s[k]=r[k];});
-  return s;
+  // Compact format: solo _source, p (telefono), n (nombre), d (fecha)
+  var phone=r.phone_number||r['número_de_teléfono']||r.telefono||r.p||r.Teléfono||'';
+  var name=r.full_name||r.nombre_completo||r.first_name||r.n||r.Nombre||'';
+  var date=r.created_time||r.d||r.Fecha||'';
+  return {_source:r._source||'',p:String(phone),n:String(name),d:String(date).slice(0,10)};
 }
 
 // ============ CONFIGURACION POR DEFECTO ============
@@ -326,10 +427,10 @@ function parseSaldo(s){return parseFloat(String(s||0).replace(/,/g,''))||0}
 // HELPERS POR PAGINA
 function findPage(abbr){return PAGES.find(function(p){return p.abbr===abbr})}
 function fieldByRole(page,role){return page&&(page.fields||[]).find(function(f){return f.role===role})}
-function getNameFromRow(row,page){var f=fieldByRole(page,'nombre');var v=f?row[f.key]:undefined;if(v===undefined||v==='')v=row.full_name||row.nombre_completo||row.first_name;return v!==undefined?String(v):'';}
+function getNameFromRow(row,page){var f=fieldByRole(page,'nombre');var v=f?row[f.key]:undefined;if(v===undefined||v==='')v=row.full_name||row.nombre_completo||row.first_name||row.n;return v!==undefined?String(v):'';}
 function getPhoneFromRow(row,page){var f=fieldByRole(page,'telefono');var v=f?row[f.key]:undefined;if(v===undefined||v==='')v=row.phone_number||row['\u00famero_de_tel\u00e9fono']||row.telefono;return v!==undefined?String(v):'';}
 function getDescFromRow(row,page){var f=fieldByRole(page,'descripcion');var v=f?row[f.key]:undefined;if(v===undefined||v==='')Object.keys(row).forEach(function(k){if(v===undefined&&/describe|fraude|sucedio|sucedi\u00f3|delito|caso|situacion|situaci\u00f3n|mensaje/i.test(k))v=row[k]});return v!==undefined?String(v):'';}
-function getFechaFromRow(row,page){var f=fieldByRole(page,'fecha');var v=f?row[f.key]:undefined;if(v===undefined||v==='')v=row.created_time;return v;}
+function getFechaFromRow(row,page){var f=fieldByRole(page,'fecha');var v=f?row[f.key]:undefined;if(v===undefined||v==='')v=row.created_time||row.d;return v;}
 
 // NAVEGACION
 function switchView(name,el){
@@ -602,11 +703,18 @@ function downloadPage(src){
   a.href=url;a.download=(page?page.fullName:src)+'_'+src+'_'+new Date().toISOString().slice(0,10)+'.xlsx';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);toast(src+' descargado');
 }
 // FIX v3.1: slimRecord aplicado al guardar
-function saveToBase(){
+async function saveToBase(){
   var unique=allResults.filter(function(r){return r._status==='ok'||r._keep;});if(!unique.length){alert('No hay registros \u00fanicos.');return}
-  var phones=new Set(base.map(function(r){return normalize(getPhoneFromRow(r,findPage(r._source)));}));var added=0;
-  unique.forEach(function(r){var n=normalize(r.telefono);if(n&&!phones.has(n)){phones.add(n);base.push(slimRecord(Object.assign({},r._raw,{_source:r._source})));added++;}});
-  saveKey('leads_base',base);updateDbInfo();toast('\u2713 '+added+' registros guardados');
+  var phones=new Set(base.map(function(r){return normalize(getPhoneFromRow(r,findPage(r._source)));}));var added=0;var newRecords=[];
+  unique.forEach(function(r){var n=normalize(r.telefono);if(n&&!phones.has(n)){phones.add(n);var slim=slimRecord(Object.assign({},r._raw,{_source:r._source}));base.push(slim);newRecords.push(slim);added++;}});
+  saveKey('leads_base',base);updateDbInfo();
+  if(SHEETS_URL&&newRecords.length){
+    toast('Guardando '+added+' registros y sincronizando con Sheets...');
+    var ok=await sheetsAppend(newRecords);
+    toast(ok?('\u2713 '+added+' registros guardados y sincronizados con Google Sheets'):('\u2713 '+added+' guardados localmente \u2014 \u26a0\ufe0f fall\u00f3 sincronizar con Sheets'));
+  }else{
+    toast('\u2713 '+added+' registros guardados');
+  }
 }
 function copyReporte(){var txt=document.getElementById('reporte-text').textContent;navigator.clipboard.writeText(txt).then(function(){toast('Reporte copiado');}).catch(function(){var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Copiado');});}
 function exportBase(){if(!base.length){alert('La base est\u00e1 vac\u00eda.');return}var blob=new Blob([JSON.stringify(base,null,2)],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='base_registros_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);toast('Base exportada: '+base.length+' registros');}
@@ -660,6 +768,10 @@ async function init(){
   document.getElementById('threshold-input').value=threshold;
   document.getElementById('notas-dia').value=notas;
   buildUploadZones();renderAccounts();renderChecklist();updateDbInfo();updateBaseFilterOptions();
+  if(SHEETS_URL){
+    document.getElementById('sheets-url-input').value=SHEETS_URL;
+    syncFromSheets();
+  }
 }
 init();
 </script>
