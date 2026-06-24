@@ -281,11 +281,18 @@ function setSheetsUrl(url){SHEETS_URL=url.trim();localStorage.setItem('panel_she
 async function sheetsGet(){
   if(!SHEETS_URL)return null;
   try{
-    var res=await fetch(SHEETS_URL+'?action=get');
+    var controller=new AbortController();
+    var timer=setTimeout(function(){controller.abort();},25000); // 25s timeout
+    var res=await fetch(SHEETS_URL+'?action=get',{signal:controller.signal});
+    clearTimeout(timer);
     var data=await res.json();
     if(data.error)throw new Error(data.error);
     return data;
-  }catch(e){console.error('sheetsGet:',e);return null;}
+  }catch(e){
+    if(e.name==='AbortError'){console.warn('sheetsGet: timeout');}
+    else{console.error('sheetsGet:',e);}
+    return null;
+  }
 }
 async function sheetsSet(records){
   if(!SHEETS_URL)return false;
@@ -344,20 +351,23 @@ function saveSheetsUrl(){
   syncFromSheets();
 }
 async function syncFromSheets(){
-  if(!SHEETS_URL){toast('Primero pega y guarda la URL de Google Sheets');return}
-  var st=document.getElementById('sheets-status');
-  if(st){st.textContent='Sincronizando...';st.style.color='var(--amber)';}
-  toast('Sincronizando con Google Sheets...');
+  if(!SHEETS_URL){toast('Primero configura la URL (⚙️)');return}
+  var btn=document.getElementById('btn-sync');
+  var txt=document.getElementById('db-text');
+  if(btn)btn.disabled=true;
+  if(txt)txt.textContent='Cargando base desde Google Sheets...';
+  var dot=document.getElementById('db-dot');
+  if(dot)dot.classList.remove('active');
   var records=await sheetsGet();
+  if(btn)btn.disabled=false;
   if(records===null){
-    toast('\u26a0\ufe0f No se pudo conectar a Google Sheets');
-    if(st){st.textContent='\u26a0\ufe0f Error de conexi\u00f3n \u2014 revisa la URL';st.style.color='var(--red)';}
+    toast('\u26a0\ufe0f No se pudo conectar a Google Sheets. Intenta de nuevo.');
+    if(txt)txt.textContent='\u26a0\ufe0f Error de conexi\u00f3n \u2014 revisa la URL (⚙️)';
     return;
   }
   base=records;
   updateDbInfo();
-  toast('\u2713 '+base.length+' registros sincronizados desde Sheets');
-  if(st){st.textContent='\u2713 Conectado \u2014 '+base.length+' registros en Sheets';st.style.color='var(--green)';}
+  toast('\u2713 '+base.length+' registros cargados');
 }
 
 // v3.8: slimRecord — teléfono y fecha normalizados correctamente
@@ -796,15 +806,23 @@ async function saveToBase(){
   var unique=allResults.filter(function(r){return r._status==='ok'||r._keep;});if(!unique.length){alert('No hay registros \u00fanicos.');return}
   var phones=new Set(base.map(function(r){return normalize(getPhoneFromRow(r,findPage(r._source)));}));var added=0;var newRecords=[];
   unique.forEach(function(r){var n=normalize(r.telefono);if(n&&!phones.has(n)){phones.add(n);var slim=slimRecord(Object.assign({},r._raw,{_source:r._source}));base.push(slim);newRecords.push(slim);added++;}});
-  updateDbInfo();
+  updateDbInfo(); // actualizar pantalla inmediatamente con datos en memoria
   if(SHEETS_URL&&newRecords.length){
     toast('Guardando '+added+' registros en Google Sheets...');
     var ok=await sheetsAppend(newRecords);
-    toast(ok?('\u2713 '+added+' registros guardados en Google Sheets'):('\u26a0\ufe0f Fall\u00f3 sincronizar con Sheets \u2014 revisa la URL'));
+    if(ok){
+      toast('\u2713 '+added+' registros guardados. Actualizando vista...');
+      // Volver a leer de Sheets para confirmar y mostrar fechas correctas
+      var fresh=await sheetsGet();
+      if(fresh){base=fresh;updateDbInfo();}
+      toast('\u2713 '+added+' registros guardados en Google Sheets \u2714');
+    }else{
+      toast('\u26a0\ufe0f Fall\u00f3 guardar en Sheets \u2014 los datos est\u00e1n en memoria pero no en la nube');
+    }
   }else if(!SHEETS_URL){
-    toast('\u26a0\ufe0f Configura la URL de Google Sheets en el Paso 1 para guardar permanentemente');
+    toast('\u26a0\ufe0f Configura la URL de Google Sheets (\u2699\ufe0f) para guardar permanentemente');
   }else{
-    toast('\u2713 '+added+' registros agregados (sin nuevos que subir)');
+    toast('\u2713 Sin registros nuevos que agregar');
   }
 }
 function copyReporte(){var txt=document.getElementById('reporte-text').textContent;navigator.clipboard.writeText(txt).then(function(){toast('Reporte copiado');}).catch(function(){var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Copiado');});}
