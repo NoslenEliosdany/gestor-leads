@@ -106,7 +106,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v3.8</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v3.9</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -360,16 +360,30 @@ async function syncFromSheets(){
   if(st){st.textContent='\u2713 Conectado \u2014 '+base.length+' registros en Sheets';st.style.color='var(--green)';}
 }
 
-// v3.6: slimRecord normaliza el teléfono al guardarlo para que el cruce siempre funcione
+// v3.8: slimRecord — teléfono y fecha normalizados correctamente
 function slimRecord(r){
-  var phone=r.phone_number||r['número_de_teléfono']||r['Teléfono']||r['teléfono']||r.telefono||r.p||r.Nombre||'';
-  // phone puede venir en distintos campos según si es raw de Meta o ya procesado
-  phone=r.phone_number||r['número_de_teléfono']||r['Teléfono']||r['teléfono']||r.telefono||r.p||'';
-  var name=r.full_name||r.nombre_completo||r.Nombre||r.nombre||r.first_name||r.n||'';
-  var date=r.created_time||r.Fecha||r.fecha||r.d||'';
+  // Teléfono: buscar en todos los campos posibles
+  var phone=r.phone_number||r['número_de_teléfono']||r['Teléfono']||r['teléfono']||r.telefono||r.p||'';
   var pnorm=String(phone).replace(/^p:/i,'').replace(/\D/g,'').replace(/^521/,'52');
   pnorm=pnorm.length>=10?pnorm.slice(-10):pnorm;
-  return {_source:r._source||'',p:pnorm,n:String(name),d:String(date).slice(0,10)};
+  // Nombre
+  var name=r.full_name||r.nombre_completo||r.Nombre||r.nombre||r.first_name||r.n||'';
+  // Fecha: puede ser objeto Date (de xlsx), string ISO, o string toDateString
+  var date=r.created_time||r.Fecha||r.fecha||r.d||'';
+  var d='';
+  if(date){
+    var dt=new Date(date);
+    if(!isNaN(dt)){
+      // Formatear como YYYY-MM-DD en hora local
+      var y=dt.getFullYear();
+      var m=String(dt.getMonth()+1).padStart(2,'0');
+      var day=String(dt.getDate()).padStart(2,'0');
+      d=y+'-'+m+'-'+day;
+    }else{
+      d=String(date).slice(0,10);
+    }
+  }
+  return {_source:r._source||'',p:pnorm,n:String(name),d:d};
 }
 
 // ============ CONFIGURACION POR DEFECTO ============
