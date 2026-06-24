@@ -106,7 +106,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v3.6</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v3.8</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -142,44 +142,38 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 </div></div>
 <div class="view" id="view-registros"><div class="layout">
 
+  <!-- BARRA DE BASE (auto-sincroniza al abrir) -->
+  <div class="card" style="padding:14px 18px">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div class="dot" id="db-dot"></div>
+      <span style="font-size:13px;color:var(--text2);flex:1" id="db-text">Conectando con Google Sheets...</span>
+      <button class="btn-ghost" onclick="syncFromSheets()" id="btn-sync" style="font-size:11px;padding:4px 10px">🔄 Actualizar</button>
+      <button class="btn-ghost" onclick="toggleUrlConfig()" style="font-size:11px;padding:4px 10px">⚙️</button>
+    </div>
+    <div class="ultimos-row" id="ultimos-guardados" style="margin-top:10px;margin-bottom:0"></div>
+    <!-- Config URL (oculta por defecto si ya está guardada) -->
+    <div id="sheets-config" style="margin-top:10px;display:none">
+      <p style="font-size:11px;color:var(--text3);margin-bottom:6px">URL del Apps Script de Google Sheets:</p>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="sheets-url-input" placeholder="https://script.google.com/macros/s/.../exec" style="flex:1">
+        <button class="btn-ghost" onclick="saveSheetsUrl()">Guardar</button>
+      </div>
+      <div id="sheets-status" style="font-size:11px;margin-top:6px;color:var(--text3)"></div>
+    </div>
+  </div>
+
   <!-- PASO 1 -->
   <div class="card">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
       <div style="width:28px;height:28px;border-radius:50%;background:var(--vino);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">1</div>
-      <p class="card-title" style="margin:0">Base de datos (Google Sheets en tiempo real)</p>
-    </div>
-    <div class="db-bar" style="margin-bottom:10px">
-      <div class="dot" id="db-dot"></div>
-      <span style="font-size:13px;color:var(--text2);flex:1" id="db-text">Base vacía</span>
-    </div>
-    <div class="ultimos-row" id="ultimos-guardados"></div>
-    <div id="sheets-config" style="margin-bottom:10px">
-      <p style="font-size:11px;color:var(--text3);margin-bottom:6px">URL de Google Sheets (pégala una sola vez, queda guardada en este navegador):</p>
-      <div style="display:flex;gap:8px">
-        <input type="text" id="sheets-url-input" placeholder="https://script.google.com/macros/s/.../exec" style="flex:1">
-        <button class="btn-ghost" onclick="saveSheetsUrl()">Guardar URL</button>
-      </div>
-      <div id="sheets-status" style="font-size:11px;margin-top:6px;color:var(--text3)"></div>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn-primary" onclick="syncFromSheets()" style="flex:1">🔄 Sincronizar desde Google Sheets</button>
-      <button class="btn-ghost" onclick="importBase()">📂 Importar JSON</button>
-      <button class="btn-ghost danger" onclick="resetBase()">Limpiar</button>
-    </div>
-  </div>
-
-  <!-- PASO 2 -->
-  <div class="card">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-      <div style="width:28px;height:28px;border-radius:50%;background:var(--vino);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">2</div>
-      <p class="card-title" style="margin:0">Subir registros de hoy</p>
+      <p class="card-title" style="margin:0">Subir archivos de hoy</p>
     </div>
     <div class="upload-grid" id="new-upload-grid"></div>
   </div>
 
-  <!-- PASO 3 -->
+  <!-- PASO 2 -->
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-    <div style="width:28px;height:28px;border-radius:50%;background:var(--vino);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">3</div>
+    <div style="width:28px;height:28px;border-radius:50%;background:var(--vino);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">2</div>
     <p class="card-title" style="margin:0">Analizar</p>
   </div>
   <button class="btn-primary" id="btn-run" onclick="run()" disabled style="margin-bottom:16px;padding:11px;font-size:14px">Analizar registros</button>
@@ -203,7 +197,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
     <!-- PASO 4 -->
     <div class="card">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <div style="width:28px;height:28px;border-radius:50%;background:var(--vino);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">4</div>
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--vino);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">3</div>
         <p class="card-title" style="margin:0">Descargar archivos limpios</p>
       </div>
       <button class="btn-primary" onclick="downloadAll()" style="margin-bottom:8px">Descargar todos los archivos de un clic</button>
@@ -213,7 +207,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
     <!-- PASO 5 -->
     <div class="card">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <div style="width:28px;height:28px;border-radius:50%;background:var(--vino);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">5</div>
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--vino);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">4</div>
         <p class="card-title" style="margin:0">Reporte para WhatsApp</p>
       </div>
       <div class="reporte-box">
@@ -225,8 +219,8 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
     <!-- PASO 6 -->
     <div class="card" style="border:2px solid var(--green-border);background:var(--green-bg)">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <div style="width:28px;height:28px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">6</div>
-        <p class="card-title" style="margin:0;color:var(--green)">Guardar en la base (se sincroniza solo con Google Sheets)</p>
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">5</div>
+        <p class="card-title" style="margin:0;color:var(--green)">Guardar en la base</p>
       </div>
       <button class="btn-save" onclick="saveToBase()" style="margin-bottom:8px">Guardar registros únicos en la base</button>
       <p style="font-size:11px;color:var(--text3);margin-bottom:8px">Los registros se suben directo a Google Sheets — no se guardan en este navegador.</p>
@@ -336,12 +330,17 @@ function saveKey(key,val){
 function savePages(){saveKey('pages',PAGES);}
 
 // ============ UI GOOGLE SHEETS ============
+function toggleUrlConfig(){
+  var el=document.getElementById('sheets-config');
+  el.style.display=el.style.display==='none'?'block':'none';
+}
 function saveSheetsUrl(){
   var val=document.getElementById('sheets-url-input').value.trim();
   if(!val){toast('Pega la URL primero');return}
   setSheetsUrl(val);
   var st=document.getElementById('sheets-status');
   if(st){st.textContent='\u2713 URL guardada';st.style.color='var(--green)';}
+  document.getElementById('sheets-config').style.display='none';
   syncFromSheets();
 }
 async function syncFromSheets(){
@@ -674,7 +673,17 @@ function updateDbInfo(){
 }
 function renderUltimosGuardados(){
   var c=document.getElementById('ultimos-guardados');if(!base.length){c.innerHTML='';return}
-  c.innerHTML=PAGES.map(function(page){var rows=base.filter(function(r){return r._source===page.abbr});if(!rows.length)return'';var last=rows.reduce(function(a,c){return new Date(c.created_time||0)>new Date(a.created_time||0)?c:a});var name=getNameFromRow(last,page)||'-';return'<div class="ultimo-card"><div class="ultimo-lbl">'+page.abbr+' \u2014 \u00faltimo guardado</div><div class="ultimo-name">'+name+'</div><div class="ultimo-date">'+fmtDate(last.created_time)+'</div></div>';}).join('');
+  c.innerHTML=PAGES.map(function(page){
+    var rows=base.filter(function(r){return r._source===page.abbr});
+    if(!rows.length)return'';
+    var last=rows.reduce(function(a,b){
+      var da=a.d||a.created_time||'';var db=b.d||b.created_time||'';
+      return new Date(db)>new Date(da)?b:a;
+    });
+    var name=last.n||getNameFromRow(last,page)||'-';
+    var fecha=last.d||last.created_time||'';
+    return'<div class="ultimo-card"><div class="ultimo-lbl">'+page.abbr+' \u2014 \u00faltimo guardado</div><div class="ultimo-name">'+name+'</div><div class="ultimo-date">'+fmtDateShort(fecha)+'</div></div>';
+  }).join('');
 }
 
 // REGISTROS DIARIOS
@@ -843,8 +852,15 @@ async function init(){
   document.getElementById('notas-dia').value=notas;
   buildUploadZones();renderAccounts();updateDbInfo();updateBaseFilterOptions();
   if(SHEETS_URL){
-    document.getElementById('sheets-url-input').value=SHEETS_URL;
+    var inp=document.getElementById('sheets-url-input');
+    if(inp)inp.value=SHEETS_URL;
+    // Si ya hay URL configurada, mostrar solo el status, ocultar el input
+    document.getElementById('sheets-config').style.display='none';
     syncFromSheets();
+  } else {
+    // Sin URL: mostrar el config para que la pegue
+    document.getElementById('sheets-config').style.display='block';
+    document.getElementById('db-text').textContent='Configura la URL de Google Sheets (⚙️)';
   }
 }
 init();
