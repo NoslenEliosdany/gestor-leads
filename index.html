@@ -106,7 +106,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v3.9</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v4.0</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -116,6 +116,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
   <div class="nav-tab" onclick="switchView('base',this)">Base de Datos</div>
   <div class="nav-tab" onclick="switchView('finanzas',this)">📊 Finanzas</div>
   <div class="nav-tab" onclick="switchView('paginas',this)">⚙️ Páginas</div>
+  <div class="nav-tab" onclick="switchView('fondeos',this)">💰 Fondeos</div>
 </div>
 <div class="view active" id="view-cuentas"><div class="layout">
   <div class="stats" id="stats-cuentas"></div>
@@ -252,6 +253,53 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
     </div>
   </div>
   <div class="card"><p class="card-title">Páginas configuradas</p><div id="pages-list"></div></div>
+</div></div>
+<div class="view" id="view-fondeos"><div class="layout">
+
+  <!-- NUEVA SOLICITUD -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <p class="card-title" style="margin:0">💰 Nueva solicitud de fondeo</p>
+      <div style="font-size:12px;color:var(--text3);font-weight:600" id="fondeo-semana"></div>
+    </div>
+
+    <!-- ORDEN DE TRABAJO -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:160px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;display:flex;gap:10px;align-items:flex-start">
+        <div style="width:22px;height:22px;border-radius:50%;background:var(--vino);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</div>
+        <div><div style="font-size:12px;font-weight:600">Marca las páginas</div><div style="font-size:11px;color:var(--text3)">Las rojas ya necesitan fondeo urgente</div></div>
+      </div>
+      <div style="flex:1;min-width:160px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;display:flex;gap:10px;align-items:flex-start">
+        <div style="width:22px;height:22px;border-radius:50%;background:var(--vino);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</div>
+        <div><div style="font-size:12px;font-weight:600">Captura el monto</div><div style="font-size:11px;color:var(--text3)">Usa el sugerido o escribe otro</div></div>
+      </div>
+      <div style="flex:1;min-width:160px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--radius-sm);padding:10px 12px;display:flex;gap:10px;align-items:flex-start">
+        <div style="width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">3</div>
+        <div><div style="font-size:12px;font-weight:600;color:var(--green)">Registrar fondeo</div><div style="font-size:11px;color:var(--text3)">Guarda el historial y genera el Excel en un solo clic</div></div>
+      </div>
+    </div>
+    <div id="fondeo-tabla"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn-save" onclick="registrarFondeo()" style="flex:2;margin:0;font-size:14px;padding:12px">✅ Registrar fondeo y descargar Excel</button>
+      <button class="btn-ghost" onclick="generarExcelFondeo()" style="flex:1" title="Solo regenera el Excel sin guardar en historial">📊 Solo Excel</button>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center">"Registrar fondeo" guarda en el historial y descarga el Excel automáticamente</p>
+  </div>
+
+  <!-- HISTORIAL SEMANAL -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <p class="card-title" style="margin:0">📅 Historial de fondeos</p>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="fondeo-filtro" onchange="renderHistorialFondeos()" class="filter-sel">
+          <option value="all">Todas las semanas</option>
+        </select>
+        <button class="btn-ghost" onclick="syncFondeos()">🔄</button>
+      </div>
+    </div>
+    <div id="fondeo-historial"></div>
+  </div>
+
 </div></div>
 <div class="modal-overlay" id="modal-overlay" onclick="closeModal()"></div>
 <div class="modal-panel" id="modal-panel">
@@ -460,7 +508,7 @@ function switchView(name,el){
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
   document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active')});
   document.getElementById('view-'+name).classList.add('active');el.classList.add('active');
-  if(name==='base')renderBase();if(name==='finanzas')renderFinanzas();if(name==='paginas')renderPagesView();
+  if(name==='base')renderBase();if(name==='finanzas')renderFinanzas();if(name==='paginas')renderPagesView();if(name==='fondeos'){renderFondeoTabla();renderHistorialFondeos();syncFondeos();}
 }
 
 // CUENTAS
@@ -872,6 +920,234 @@ function renderFinanzas(){
   document.getElementById('finanzas-bars').innerHTML=activas.map(function(a){var s=parseSaldo(a.saldo),p=parseSaldo(a.presupuestoDiario);var pct=maxSaldo>0?Math.round((s/maxSaldo)*100):0;var bc=s===0?'var(--border2)':s<1000?'var(--red)':s<3000?'var(--amber)':'var(--green)';return'<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:500">'+a.pagina.slice(0,28)+'<span class="page-abbr" style="margin-left:6px">'+a.abbr+'</span></span><span style="font-size:12px;font-weight:600;color:'+bc+'">$'+(s?s.toLocaleString('es-MX'):'0')+'</span></div><div style="background:var(--surface2);border-radius:20px;height:10px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+bc+';border-radius:20px;transition:width .4s"></div></div>'+(p?'<div style="font-size:10px;color:var(--text3);margin-top:2px">Presupuesto diario: $'+p.toLocaleString('es-MX')+'</div>':'')+' </div>';}).join('')||'<div style="color:var(--text3);font-size:13px">No hay cuentas activas.</div>';
 }
 
+// ============ FONDEOS ============
+var fondeos = []; // historial en memoria
+
+async function sheetsFondeosGet(){
+  if(!SHEETS_URL)return null;
+  try{
+    var controller=new AbortController();
+    var timer=setTimeout(function(){controller.abort();},25000);
+    var res=await fetch(SHEETS_URL+'?action=getFondeos',{signal:controller.signal});
+    clearTimeout(timer);
+    var data=await res.json();
+    if(data.error)return null;
+    return data;
+  }catch(e){return null;}
+}
+
+async function sheetsFondeosAppend(registros){
+  if(!SHEETS_URL)return false;
+  try{
+    var res=await fetch(SHEETS_URL,{method:'POST',body:JSON.stringify({action:'appendFondeos',records:registros})});
+    var data=await res.json();
+    return !data.error;
+  }catch(e){return false;}
+}
+
+function getWeekLabel(dateStr){
+  var d=new Date(dateStr||Date.now());
+  if(isNaN(d))d=new Date();
+  var day=d.getDay();
+  var diff=d.getDate()-day+(day===0?-6:1);
+  var lun=new Date(d.setDate(diff));
+  var vie=new Date(lun);vie.setDate(lun.getDate()+6);
+  var fmt=function(dt){return dt.toLocaleDateString('es-MX',{day:'2-digit',month:'short'});};
+  return fmt(lun)+' – '+fmt(vie);
+}
+
+function getCurrentWeekLabel(){return getWeekLabel(new Date().toISOString());}
+
+function renderFondeoTabla(){
+  var semana=getCurrentWeekLabel();
+  document.getElementById('fondeo-semana').textContent='Semana: '+semana;
+  var html='<table style="width:100%;border-collapse:collapse;font-size:13px">';
+  html+='<thead><tr style="background:var(--surface2)">';
+  html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">Fondear</th>';
+  html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">Página</th>';
+  html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">Saldo actual</th>';
+  html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">Días rest.</th>';
+  html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">Presup/día</th>';
+  html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">Monto a fondear</th>';
+  html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">Sugerido (7d)</th>';
+  html+='</tr></thead><tbody>';
+
+  PAGES.forEach(function(p,i){
+    var saldo=parseSaldo(p.saldo);
+    var presup=parseSaldo(p.presupuestoDiario);
+    var dias=presup>0?Math.floor(saldo/presup):null;
+    var urgente=dias!==null&&dias<=3;
+    var sugerido=presup>0?presup*7:0;
+    var dc=dias===null?'var(--text3)':dias<=2?'var(--red)':dias<=5?'var(--amber)':'var(--green)';
+    var bg=urgente?'background:var(--red-bg)':'';
+
+    html+='<tr style="border-bottom:1px solid var(--border);'+bg+'">';
+    html+='<td style="padding:8px;text-align:center"><input type="checkbox" id="fc-'+i+'" '+(urgente?'checked':'')+' style="width:15px;height:15px;accent-color:var(--vino);cursor:pointer" onchange="toggleFondeoRow('+i+')"></td>';
+    html+='<td style="padding:8px"><strong>'+p.pagina+'</strong><span class="page-abbr">'+p.abbr+'</span>'+(p.adId?'<div style="font-size:10px;color:var(--text3)">'+p.adId+'</div>':'')+'</td>';
+    html+='<td style="padding:8px;font-weight:600;color:'+(saldo>0?'var(--green)':'var(--text3)')+'">'+(saldo>0?'$'+saldo.toLocaleString('es-MX'):'—')+'</td>';
+    html+='<td style="padding:8px;font-weight:600;color:'+dc+'">'+(dias!==null?dias+' días':'—')+'</td>';
+    html+='<td style="padding:8px">'+(presup>0?'$'+presup.toLocaleString('es-MX'):'<span style="color:var(--text3)">—</span>')+'</td>';
+    html+='<td style="padding:8px"><input type="number" id="fm-'+i+'" placeholder="$0" value="'+(urgente&&sugerido>0?sugerido:'')+'" style="width:110px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit"></td>';
+    html+='<td style="padding:8px;color:var(--text3);font-size:12px">'+(sugerido>0?'$'+sugerido.toLocaleString('es-MX'):'—')+'</td>';
+    html+='</tr>';
+  });
+
+  html+='</tbody></table>';
+  document.getElementById('fondeo-tabla').innerHTML=html;
+}
+
+function toggleFondeoRow(i){
+  var cb=document.getElementById('fc-'+i);
+  var inp=document.getElementById('fm-'+i);
+  if(inp)inp.style.opacity=cb.checked?'1':'0.4';
+}
+
+function getFondeoSeleccionados(){
+  var sel=[];
+  PAGES.forEach(function(p,i){
+    var cb=document.getElementById('fc-'+i);
+    var inp=document.getElementById('fm-'+i);
+    if(cb&&cb.checked){
+      var monto=inp?parseSaldo(inp.value):0;
+      sel.push({
+        abbr:p.abbr,
+        pagina:p.pagina,
+        adId:p.adId||'',
+        saldo:p.saldo||'',
+        presupuestoDiario:p.presupuestoDiario||'',
+        monto:monto
+      });
+    }
+  });
+  return sel;
+}
+
+function generarExcelFondeo(){
+  var sel=getFondeoSeleccionados();
+  if(!sel.length){toast('Selecciona al menos una página');return}
+
+  var semana=getCurrentWeekLabel();
+  var filas=sel.map(function(p){
+    var presup=parseSaldo(p.presupuestoDiario);
+    var dias=presup>0&&p.monto>0?Math.floor(p.monto/presup):0;
+    return{
+      'Semana':semana,
+      'Página':p.pagina,
+      'Abreviatura':p.abbr,
+      'Ad Account ID':p.adId,
+      'Saldo actual':'$'+(parseSaldo(p.saldo)||0).toLocaleString('es-MX'),
+      'Presupuesto diario':'$'+(presup||0).toLocaleString('es-MX'),
+      'Monto a fondear':'$'+(p.monto||0).toLocaleString('es-MX'),
+      'Días que cubre':dias>0?dias+' días':'—',
+      '¿Fondeado?':''
+    };
+  });
+
+  var ws=XLSX.utils.json_to_sheet(filas);
+  // Anchos
+  ws['!cols']=[{wch:20},{wch:32},{wch:8},{wch:20},{wch:14},{wch:16},{wch:16},{wch:14},{wch:12}];
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Fondeo');
+  var wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  var blob=new Blob([wbout],{type:'application/octet-stream'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='Fondeo_'+semana.replace(/[^a-zA-Z0-9]/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.xlsx';
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+  toast('Excel de fondeo generado ✅');
+}
+
+async function registrarFondeo(){
+  var sel=getFondeoSeleccionados();
+  if(!sel.length){toast('Selecciona al menos una página');return}
+  var montos=sel.filter(function(p){return p.monto>0;});
+  if(!montos.length){toast('Captura al menos un monto');return}
+
+  var fecha=new Date().toISOString().slice(0,10);
+  var semana=getCurrentWeekLabel();
+  var registros=montos.map(function(p){
+    return{
+      fecha:fecha,
+      semana:semana,
+      abbr:p.abbr,
+      pagina:p.pagina,
+      adId:p.adId,
+      presupuestoDiario:p.presupuestoDiario,
+      monto:p.monto
+    };
+  });
+
+  fondeos=fondeos.concat(registros);
+  renderHistorialFondeos();
+  generarExcelFondeo();
+
+  if(SHEETS_URL){
+    toast('Guardando en Google Sheets...');
+    var ok=await sheetsFondeosAppend(registros);
+    toast(ok?'✅ Fondeo registrado y guardado':'⚠️ Registrado en memoria, falló Sheets');
+  }else{
+    toast('✅ Fondeo registrado');
+  }
+}
+
+async function syncFondeos(){
+  if(!SHEETS_URL){toast('Configura la URL de Sheets (⚙️)');return}
+  var data=await sheetsFondeosGet();
+  if(data){fondeos=data;renderHistorialFondeos();toast('✅ Historial actualizado');}
+  else toast('⚠️ No se pudo cargar el historial');
+}
+
+function renderHistorialFondeos(){
+  // Actualizar opciones de filtro por semana
+  var semanas=[...new Set(fondeos.map(function(r){return r.semana||'Sin semana';}))].sort().reverse();
+  var sel=document.getElementById('fondeo-filtro');
+  var cur=sel.value;
+  sel.innerHTML='<option value="all">Todas las semanas</option>'+
+    semanas.map(function(s){return'<option value="'+s+'"'+(cur===s?' selected':'')+'>'+s+'</option>';}).join('');
+
+  var filtro=sel.value;
+  var rows=filtro==='all'?fondeos:fondeos.filter(function(r){return r.semana===filtro;});
+
+  if(!rows.length){
+    document.getElementById('fondeo-historial').innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">No hay fondeos registrados aún.</div>';
+    return;
+  }
+
+  // Agrupar por semana
+  var porSemana={};
+  rows.forEach(function(r){
+    var s=r.semana||r.fecha||'Sin fecha';
+    if(!porSemana[s])porSemana[s]=[];
+    porSemana[s].push(r);
+  });
+
+  var html='';
+  Object.keys(porSemana).sort().reverse().forEach(function(semana){
+    var regs=porSemana[semana];
+    var totalSemana=regs.reduce(function(a,r){return a+(parseSaldo(r.monto)||0);},0);
+    html+='<div style="margin-bottom:16px">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+    html+='<span style="font-size:12px;font-weight:700;color:var(--vino)">📅 '+semana+'</span>';
+    html+='<span style="font-size:12px;font-weight:600;color:var(--green)">Total: $'+totalSemana.toLocaleString('es-MX')+'</span>';
+    html+='</div>';
+    html+='<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">';
+    regs.forEach(function(r,i){
+      var bg=i%2===0?'var(--surface)':'var(--surface2)';
+      html+='<div style="display:flex;align-items:center;padding:8px 12px;background:'+bg+';gap:10px;flex-wrap:wrap">';
+      html+='<span class="page-abbr" style="margin:0">'+r.abbr+'</span>';
+      html+='<span style="flex:1;font-size:13px">'+r.pagina+'</span>';
+      html+='<span style="font-size:11px;color:var(--text3)">'+r.fecha+'</span>';
+      html+='<span style="font-weight:700;color:var(--green);font-size:14px">$'+(parseSaldo(r.monto)||0).toLocaleString('es-MX')+'</span>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+  });
+
+  document.getElementById('fondeo-historial').innerHTML=html;
+}
+
 // INIT
 async function init(){
   document.getElementById('hdr-date').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
@@ -883,6 +1159,7 @@ async function init(){
   document.getElementById('threshold-input').value=threshold;
   document.getElementById('notas-dia').value=notas;
   buildUploadZones();renderAccounts();updateDbInfo();updateBaseFilterOptions();
+  renderFondeoTabla();
   if(SHEETS_URL){
     var inp=document.getElementById('sheets-url-input');
     if(inp)inp.value=SHEETS_URL;
