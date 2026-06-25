@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel de Registros</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root{--vino:#5C1A24;--vino-dark:#3A0F17;--vino-light:#7A2535;--gold:#C9A84C;--gold-light:#F0D080;--cream:#F5F0E8;--surface:#fff;--surface2:#F8F4EE;--border:#E8E0D0;--border2:#C8C2B8;--text:#1A1410;--text2:#6B5D50;--text3:#9E8E7E;--green:#2D6A4F;--green-bg:#EAF4EE;--green-border:#B7DFC7;--red:#A33030;--red-bg:#FDF0F0;--red-border:#F0C0C0;--amber:#8A5A00;--amber-bg:#FDF6E3;--amber-border:#F0D890;--blue:#1A4F8A;--blue-bg:#EEF4FC;--shadow:0 2px 16px rgba(92,26,36,0.08);--radius:10px;--radius-sm:6px;}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -106,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v4.1</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v4.3</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -279,11 +280,9 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
       </div>
     </div>
     <div id="fondeo-tabla"></div>
-    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-      <button class="btn-save" onclick="registrarFondeo()" style="flex:2;margin:0;font-size:14px;padding:12px">✅ Registrar fondeo y descargar Excel</button>
-      <button class="btn-ghost" onclick="generarExcelFondeo()" style="flex:1" title="Solo regenera el Excel sin guardar en historial">📊 Solo Excel</button>
+    <div style="margin-top:12px">
+      <button class="btn-save" onclick="registrarFondeo()" style="margin:0;font-size:14px;padding:13px;width:100%">✅ Registrar fondeo</button>
     </div>
-    <p style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center">"Registrar fondeo" guarda en el historial y descarga el Excel automáticamente</p>
   </div>
 
   <!-- HISTORIAL SEMANAL -->
@@ -963,42 +962,27 @@ function renderFondeoTabla(){
   document.getElementById('fondeo-semana').textContent='Semana: '+semana;
   var html='<table style="width:100%;border-collapse:collapse;font-size:13px">';
   html+='<thead><tr style="background:var(--surface2)">';
-  var ths=['Fondear','Página','Saldo actual','Actualizar saldo','Días rest.','Presup/día','Monto a fondear','Sugerido (7d)'];
-  ths.forEach(function(t){html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">'+t+'</th>';});
+  ['Fondear','Página','Saldo actual','Actualizar saldo','Días rest.','Presup/día','Monto a fondear','Sugerido (7d)'].forEach(function(t){
+    html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">'+t+'</th>';
+  });
   html+='</tr></thead><tbody>';
-
   PAGES.forEach(function(p,i){
     var saldo=parseSaldo(p.saldo);
     var presup=parseSaldo(p.presupuestoDiario);
     var dias=presup>0?Math.floor(saldo/presup):null;
-    var urgente=dias!==null&&dias<=3;
     var sugerido=presup>0?presup*7:0;
-    var dc=dias===null?'var(--text3)':dias<=2?'var(--red)':dias<=5?'var(--amber)':'var(--green)';
-    var bg=urgente?'background:var(--red-bg)':'';
-
-    html+='<tr style="border-bottom:1px solid var(--border);'+bg+'">';
-    // Checkbox
-    html+='<td style="padding:8px;text-align:center"><input type="checkbox" id="fc-'+i+'" '+(urgente?'checked':'')+' style="width:15px;height:15px;accent-color:var(--vino);cursor:pointer" onchange="toggleFondeoRow('+i+')"></td>';
-    // Página
+    var diasColor=dias===null?'var(--text3)':dias<=2?'var(--red)':dias<=5?'var(--amber)':'var(--green)';
+    html+='<tr id="frow-'+i+'" style="border-bottom:1px solid var(--border)">';
+    html+='<td style="padding:8px;text-align:center"><input type="checkbox" id="fc-'+i+'" onchange="toggleFondeoRow('+i+')" style="width:15px;height:15px;accent-color:var(--vino);cursor:pointer"></td>';
     html+='<td style="padding:8px"><strong>'+p.pagina+'</strong><span class="page-abbr">'+p.abbr+'</span>'+(p.adId?'<div style="font-size:10px;color:var(--text3)">'+p.adId+'</div>':'')+'</td>';
-    // Saldo actual
     html+='<td style="padding:8px;font-weight:600;color:'+(saldo>0?'var(--green)':'var(--text3)')+'">'+(saldo>0?'$'+saldo.toLocaleString('es-MX'):'—')+'</td>';
-    // Actualizar saldo
-    html+='<td style="padding:8px"><div style="display:flex;gap:5px;align-items:center">';
-    html+='<input type="number" id="fs-'+i+'" placeholder="Nuevo saldo" value="'+(p.saldo||'')+'" style="width:100px;padding:5px 7px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:inherit">';
-    html+='<button onclick="guardarSaldoFondeo('+i+')" style="padding:4px 8px;background:var(--vino);color:var(--cream);border:none;border-radius:var(--radius-sm);font-size:11px;cursor:pointer;white-space:nowrap">✓</button>';
-    html+='</div></td>';
-    // Días restantes
-    html+='<td style="padding:8px;font-weight:600;color:'+dc+'">'+(dias!==null?dias+' días':'—')+'</td>';
-    // Presupuesto
+    html+='<td style="padding:8px"><div style="display:flex;gap:5px;align-items:center"><input type="number" id="fs-'+i+'" placeholder="Nuevo saldo" value="'+(p.saldo||'')+'" style="width:100px;padding:5px 7px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:inherit"><button onclick="guardarSaldoFondeo('+i+')" style="padding:4px 8px;background:var(--vino);color:var(--cream);border:none;border-radius:var(--radius-sm);font-size:11px;cursor:pointer">✓</button></div></td>';
+    html+='<td style="padding:8px;font-weight:600;color:'+diasColor+'">'+(dias!==null?dias+' días':'—')+'</td>';
     html+='<td style="padding:8px">'+(presup>0?'$'+presup.toLocaleString('es-MX'):'<span style="color:var(--text3)">—</span>')+'</td>';
-    // Monto a fondear
-    html+='<td style="padding:8px"><input type="number" id="fm-'+i+'" placeholder="$0" value="'+(urgente&&sugerido>0?sugerido:'')+'" style="width:110px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit"></td>';
-    // Sugerido
+    html+='<td style="padding:8px"><input type="number" id="fm-'+i+'" placeholder="$0" style="width:110px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit" onchange="toggleFondeoRow('+i+')"></td>';
     html+='<td style="padding:8px;color:var(--text3);font-size:12px">'+(sugerido>0?'$'+sugerido.toLocaleString('es-MX'):'—')+'</td>';
     html+='</tr>';
   });
-
   html+='</tbody></table>';
   document.getElementById('fondeo-tabla').innerHTML=html;
 }
@@ -1006,7 +990,10 @@ function renderFondeoTabla(){
 function toggleFondeoRow(i){
   var cb=document.getElementById('fc-'+i);
   var inp=document.getElementById('fm-'+i);
-  if(inp)inp.style.opacity=cb.checked?'1':'0.4';
+  var row=document.getElementById('frow-'+i);
+  var checked=cb&&cb.checked;
+  if(inp)inp.style.opacity=checked?'1':'0.4';
+  if(row)row.style.background=checked?'var(--green-bg)':'';
 }
 
 function getFondeoSeleccionados(){
@@ -1029,7 +1016,7 @@ function getFondeoSeleccionados(){
   return sel;
 }
 
-function generarExcelFondeo(){
+function generarImagenFondeo(){
   var sel=getFondeoSeleccionados();
   if(!sel.length){toast('Selecciona al menos una página');return}
 
@@ -1091,12 +1078,37 @@ async function registrarFondeo(){
   generarExcelFondeo();
 
   if(SHEETS_URL){
-    toast('Guardando en Google Sheets...');
     var ok=await sheetsFondeosAppend(registros);
-    toast(ok?'✅ Fondeo registrado y guardado':'⚠️ Registrado en memoria, falló Sheets');
-  }else{
-    toast('✅ Fondeo registrado');
+    if(!ok)toast('⚠️ Falló guardar en Sheets');
   }
+  var opcion=await preguntarDescarga();
+  if(opcion==='imagen'||opcion==='ambos')generarImagenFondeo();
+  if(opcion==='excel'||opcion==='ambos')generarExcelFondeo();
+  toast('✅ Fondeo registrado');
+}
+
+function preguntarDescarga(){
+  return new Promise(function(resolve){
+    var overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center';
+    var panel=document.createElement('div');
+    panel.style.cssText='background:#fff;border-radius:12px;padding:24px;max-width:320px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2)';
+    panel.innerHTML=
+      '<div style="font-size:15px;font-weight:700;margin-bottom:6px;color:var(--vino)">✅ Fondeo registrado</div>'+
+      '<div style="font-size:13px;color:var(--text2);margin-bottom:18px">¿Qué quieres descargar?</div>'+
+      '<div style="display:flex;flex-direction:column;gap:8px">'+
+        '<button id="op-img" style="padding:10px;background:var(--vino);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">🖼️ Imagen (para WhatsApp)</button>'+
+        '<button id="op-xls" style="padding:10px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer">📊 Excel</button>'+
+        '<button id="op-amb" style="padding:10px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);border-radius:8px;font-size:13px;cursor:pointer">📎 Imagen + Excel</button>'+
+        '<button id="op-no" style="padding:8px;background:transparent;color:var(--text3);border:none;font-size:12px;cursor:pointer">Sin descargar</button>'+
+      '</div>';
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+    panel.querySelector('#op-img').onclick=function(){document.body.removeChild(overlay);resolve('imagen');};
+    panel.querySelector('#op-xls').onclick=function(){document.body.removeChild(overlay);resolve('excel');};
+    panel.querySelector('#op-amb').onclick=function(){document.body.removeChild(overlay);resolve('ambos');};
+    panel.querySelector('#op-no').onclick=function(){document.body.removeChild(overlay);resolve('ninguno');};
+  });
 }
 
 async function syncFondeos(){
@@ -1153,6 +1165,38 @@ function renderHistorialFondeos(){
   });
 
   document.getElementById('fondeo-historial').innerHTML=html;
+}
+
+function generarExcelFondeo(){
+  var semana=getCurrentWeekLabel();
+  var filas=PAGES.map(function(p,i){
+    var saldo=parseSaldo(p.saldo);
+    var presup=parseSaldo(p.presupuestoDiario);
+    var dias=presup>0?Math.floor(saldo/presup):null;
+    var cb=document.getElementById('fc-'+i);
+    var inp=document.getElementById('fm-'+i);
+    var monto=cb&&cb.checked&&inp?parseSaldo(inp.value):0;
+    var diasCubre=presup>0&&monto>0?Math.floor(monto/presup):0;
+    return{'Página':p.pagina,'Abreviatura':p.abbr,'Ad Account ID':p.adId||'—',
+      'Saldo actual':saldo>0?'$'+saldo.toLocaleString('es-MX'):'—',
+      'Presupuesto/día':presup>0?'$'+presup.toLocaleString('es-MX'):'—',
+      'Días restantes':dias!==null?dias:'—',
+      'Monto a fondear':monto>0?'$'+monto.toLocaleString('es-MX'):'—',
+      'Días que cubre':diasCubre>0?diasCubre:'—',
+      'Fondear':monto>0?'SÍ':''};
+  });
+  var ws=XLSX.utils.json_to_sheet(filas);
+  ws['!cols']=[{wch:32},{wch:10},{wch:20},{wch:14},{wch:15},{wch:13},{wch:16},{wch:14},{wch:8}];
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Fondeo');
+  var wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  var blob=new Blob([wbout],{type:'application/octet-stream'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='Fondeo_'+semana.replace(/[^a-zA-Z0-9]/g,'_')+'.xlsx';
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+  toast('✅ Excel descargado');
 }
 
 // INIT
