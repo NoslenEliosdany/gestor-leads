@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v4.5</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v4.7</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -976,7 +976,7 @@ function renderFondeoTabla(){
     var rowBg=p.actualizado?'background:var(--green-bg)':'';
     html+='<tr id="frow-'+i+'" style="border-bottom:1px solid var(--border);'+rowBg+'">';
     html+='<td style="padding:8px;text-align:center"><input type="checkbox" id="fc-'+i+'" onchange="toggleFondeoRow('+i+')" style="width:15px;height:15px;accent-color:var(--vino);cursor:pointer"></td>';
-    html+='<td style="padding:8px;white-space:normal;word-break:break-word"><strong>'+p.pagina+'</strong><span class="page-abbr">'+p.abbr+'</span>'+(p.adId?'<div style="font-size:10px;color:var(--text3)">'+p.adId+'</div>':'')+'</td>';
+    html+='<td style="padding:8px;min-width:180px"><strong>'+p.pagina+'</strong><span class="page-abbr">'+p.abbr+'</span>'+(p.fbCuenta?'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+p.fbCuenta+'</div>':'')+'</td>';
     html+='<td style="padding:8px;font-weight:600;color:'+(saldo>0?'var(--green)':'var(--text3)')+'">'+(saldo>0?'$'+saldo.toLocaleString('es-MX'):'—')+'</td>';
     html+='<td style="padding:8px"><div style="display:flex;gap:5px;align-items:center"><input type="number" id="fs-'+i+'" placeholder="Nuevo saldo" value="'+(p.saldo||'')+'" style="width:100px;padding:5px 7px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:inherit"><button onclick="guardarSaldoFondeo('+i+')" style="padding:4px 8px;background:var(--vino);color:var(--cream);border:none;border-radius:var(--radius-sm);font-size:11px;cursor:pointer">✓</button></div></td>';
     html+='<td style="padding:8px;font-weight:600;color:'+diasColor+'">'+(dias!==null?dias+' días':'—')+'</td>';
@@ -1083,10 +1083,8 @@ async function registrarFondeo(){
     var ok=await sheetsFondeosAppend(registros);
     if(!ok)toast('⚠️ Falló guardar en Sheets');
   }
-  var opcion=await preguntarDescarga();
-  if(opcion==='imagen'||opcion==='ambos')generarImagenFondeo();
-  if(opcion==='excel'||opcion==='ambos')generarExcelFondeo();
-  toast('✅ Fondeo registrado');
+  generarExcelFondeo();
+  toast('✅ Fondeo registrado — Excel descargado');
 }
 
 function preguntarDescarga(){
