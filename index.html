@@ -106,7 +106,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v4.0</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v4.1</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -963,13 +963,8 @@ function renderFondeoTabla(){
   document.getElementById('fondeo-semana').textContent='Semana: '+semana;
   var html='<table style="width:100%;border-collapse:collapse;font-size:13px">';
   html+='<thead><tr style="background:var(--surface2)">';
-  html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">Fondear</th>';
-  html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">Página</th>';
-  html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">Saldo actual</th>';
-  html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">Días rest.</th>';
-  html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">Presup/día</th>';
-  html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">Monto a fondear</th>';
-  html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">Sugerido (7d)</th>';
+  var ths=['Fondear','Página','Saldo actual','Actualizar saldo','Días rest.','Presup/día','Monto a fondear','Sugerido (7d)'];
+  ths.forEach(function(t){html+='<th style="padding:8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">'+t+'</th>';});
   html+='</tr></thead><tbody>';
 
   PAGES.forEach(function(p,i){
@@ -982,12 +977,24 @@ function renderFondeoTabla(){
     var bg=urgente?'background:var(--red-bg)':'';
 
     html+='<tr style="border-bottom:1px solid var(--border);'+bg+'">';
+    // Checkbox
     html+='<td style="padding:8px;text-align:center"><input type="checkbox" id="fc-'+i+'" '+(urgente?'checked':'')+' style="width:15px;height:15px;accent-color:var(--vino);cursor:pointer" onchange="toggleFondeoRow('+i+')"></td>';
+    // Página
     html+='<td style="padding:8px"><strong>'+p.pagina+'</strong><span class="page-abbr">'+p.abbr+'</span>'+(p.adId?'<div style="font-size:10px;color:var(--text3)">'+p.adId+'</div>':'')+'</td>';
+    // Saldo actual
     html+='<td style="padding:8px;font-weight:600;color:'+(saldo>0?'var(--green)':'var(--text3)')+'">'+(saldo>0?'$'+saldo.toLocaleString('es-MX'):'—')+'</td>';
+    // Actualizar saldo
+    html+='<td style="padding:8px"><div style="display:flex;gap:5px;align-items:center">';
+    html+='<input type="number" id="fs-'+i+'" placeholder="Nuevo saldo" value="'+(p.saldo||'')+'" style="width:100px;padding:5px 7px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:inherit">';
+    html+='<button onclick="guardarSaldoFondeo('+i+')" style="padding:4px 8px;background:var(--vino);color:var(--cream);border:none;border-radius:var(--radius-sm);font-size:11px;cursor:pointer;white-space:nowrap">✓</button>';
+    html+='</div></td>';
+    // Días restantes
     html+='<td style="padding:8px;font-weight:600;color:'+dc+'">'+(dias!==null?dias+' días':'—')+'</td>';
+    // Presupuesto
     html+='<td style="padding:8px">'+(presup>0?'$'+presup.toLocaleString('es-MX'):'<span style="color:var(--text3)">—</span>')+'</td>';
+    // Monto a fondear
     html+='<td style="padding:8px"><input type="number" id="fm-'+i+'" placeholder="$0" value="'+(urgente&&sugerido>0?sugerido:'')+'" style="width:110px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit"></td>';
+    // Sugerido
     html+='<td style="padding:8px;color:var(--text3);font-size:12px">'+(sugerido>0?'$'+sugerido.toLocaleString('es-MX'):'—')+'</td>';
     html+='</tr>';
   });
