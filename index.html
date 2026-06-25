@@ -518,8 +518,8 @@ function renderAccounts(){
     var dias=pN>0?Math.floor(sN/pN):null;
     var dc=dias===null?'var(--text3)':dias<=2?'var(--red)':dias<=5?'var(--amber)':'var(--green)';
     var sc=!a.saldo?'var(--text3)':sN<threshold?'var(--red)':'var(--green)';
-    return'<tr style="background:'+(rowBg[a.estado]||'#fff')+';cursor:pointer" onclick="openModal('+i+')">'+
-      '<td><strong>'+a.pagina+'</strong><span class="page-abbr">'+a.abbr+'</span></td>'+
+    var rowColor=a.actualizado?'#EAF4EE':(rowBg[a.estado]||'#fff');return'<tr style="background:'+rowColor+';cursor:pointer" onclick="openModal('+i+')">'+
+      '<td><strong>'+a.pagina+'</strong><span class="page-abbr">'+a.abbr+'</span>'+(a.fbCuenta?'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+a.fbCuenta+'</div>':'')+' </td>'+
       '<td style="font-size:12px;color:var(--text2)">'+(a.fbCuenta||'\u2014')+'</td>'+
       '<td><span style="font-weight:700;color:'+sc+'">'+(a.saldo?'$'+a.saldo:'\u2014')+'</span>'+(a.saldoFecha?'<div style="font-size:9px;color:var(--text3)">'+a.saldoFecha+'</div>':'')+'</td>'+
       '<td style="font-weight:600;color:'+dc+'">'+(dias!==null?dias+' d\u00edas':'\u2014')+'</td>'+
@@ -582,7 +582,7 @@ function renderModalBody(i){
   html+='<button class="btn-ghost" style="width:100%" onclick="closeModal();openFieldEditor('+i+')">\u2699\ufe0f Configurar campos de leads de esta p\u00e1gina</button>';
   document.getElementById('modal-body').innerHTML=html;
 }
-function saveModalSaldo(i){var val=document.getElementById('modal-saldo').value;PAGES[i].saldo=val;var now=new Date();PAGES[i].saldoFecha=now.toLocaleDateString('es-MX',{day:'2-digit',month:'short'})+' '+now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});savePages();renderAccounts();renderFinanzas();renderModalBody(i);toast('Saldo actualizado');}
+function saveModalSaldo(i){var val=document.getElementById('modal-saldo').value;PAGES[i].saldo=val;PAGES[i].actualizado=true;var now=new Date();PAGES[i].saldoFecha=now.toLocaleDateString('es-MX',{day:'2-digit',month:'short'})+' '+now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});savePages();renderAccounts();renderFinanzas();renderModalBody(i);toast('✅ Saldo actualizado');}
 function saveModalField(i,field,value){PAGES[i][field]=value;savePages();renderAccounts();}
 function setEstado(i,estado){PAGES[i].estado=estado;savePages();renderAccounts();renderModalBody(i);toast('Estado: '+estado);}
 function setDospasos(i){PAGES[i].dospasos=!PAGES[i].dospasos;savePages();renderAccounts();renderModalBody(i);toast(PAGES[i].dospasos?'2FA activado':'2FA desactivado');}
@@ -972,7 +972,8 @@ function renderFondeoTabla(){
     var dias=presup>0?Math.floor(saldo/presup):null;
     var sugerido=presup>0?presup*7:0;
     var diasColor=dias===null?'var(--text3)':dias<=2?'var(--red)':dias<=5?'var(--amber)':'var(--green)';
-    html+='<tr id="frow-'+i+'" style="border-bottom:1px solid var(--border)">';
+    var rowBg=p.actualizado?'background:var(--green-bg)':'';
+    html+='<tr id="frow-'+i+'" style="border-bottom:1px solid var(--border);'+rowBg+'">';
     html+='<td style="padding:8px;text-align:center"><input type="checkbox" id="fc-'+i+'" onchange="toggleFondeoRow('+i+')" style="width:15px;height:15px;accent-color:var(--vino);cursor:pointer"></td>';
     html+='<td style="padding:8px"><strong>'+p.pagina+'</strong><span class="page-abbr">'+p.abbr+'</span>'+(p.adId?'<div style="font-size:10px;color:var(--text3)">'+p.adId+'</div>':'')+'</td>';
     html+='<td style="padding:8px;font-weight:600;color:'+(saldo>0?'var(--green)':'var(--text3)')+'">'+(saldo>0?'$'+saldo.toLocaleString('es-MX'):'—')+'</td>';
@@ -1197,6 +1198,26 @@ function generarExcelFondeo(){
   document.body.appendChild(a);a.click();
   setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
   toast('✅ Excel descargado');
+}
+
+function guardarSaldoFondeo(i){
+  var inp=document.getElementById('fs-'+i);
+  if(!inp||!inp.value.trim())return;
+  var val=inp.value.trim();
+  PAGES[i].saldo=val;
+  PAGES[i].actualizado=true;
+  var now=new Date();
+  PAGES[i].saldoFecha=now.toLocaleDateString('es-MX',{day:'2-digit',month:'short'})+' '+now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  savePages();
+  renderAccounts();
+  renderFondeoTabla();
+  toast('✅ Saldo actualizado: $'+val);
+}
+function desmarcarActualizado(i){
+  PAGES[i].actualizado=false;
+  savePages();
+  renderFondeoTabla();
+  toast('Desmarcado');
 }
 
 // INIT
