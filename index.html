@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v5.4</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v5.5</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -1222,92 +1222,97 @@ function renderHistorialFondeos(){
 
 function generarExcelFondeo(){
   var semana=getCurrentWeekLabel();
-  var fecha=new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'});
+  var fecha=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
-  var aoa=[];
-  // Fila 1: título
-  aoa.push(['ACTIVIDAD DE PAGOS','','','','Semana: '+semana]);
-  aoa.push(['Fecha: '+fecha,'','','','']);
-  aoa.push([]); // vacía
-  // Encabezados
-  aoa.push(['Página','Abreviatura','Saldo actual','Presupuesto/día','Monto a fondear']);
-
-  var fondear=[];
-  var resto=[];
-
-  PAGES.forEach(function(p,i){
+  var sorted=PAGES.map(function(p,i){
     var saldo=parseSaldo(p.saldo);
     var presup=parseSaldo(p.presupuestoDiario);
+    var dias=presup>0?Math.floor(saldo/presup):null;
     var cb=document.getElementById('fc-'+i);
     var inp=document.getElementById('fm-'+i);
     var monto=cb&&cb.checked&&inp?parseSaldo(inp.value):0;
-    var row=[p.pagina, p.abbr, saldo>0?saldo:0, presup>0?presup:0, monto>0?monto:0];
-    if(monto>0) fondear.push(row);
-    else resto.push(row);
+    var sugerido=presup>0?presup*7:0;
+    return{pagina:p.pagina,abbr:p.abbr,saldo:saldo,saldoFecha:p.saldoFecha||'',
+      dias:dias,presup:presup,monto:monto,sugerido:sugerido,fondeada:monto>0};
+  }).sort(function(a,b){
+    if(a.dias===null&&b.dias===null)return 0;
+    if(a.dias===null)return 1;
+    if(b.dias===null)return -1;
+    return a.dias-b.dias;
   });
 
-  // Primero las que se fondean, luego el resto
-  fondear.concat(resto).forEach(function(r){aoa.push(r);});
+  var fmt=function(n){return n>0?'$'+n.toLocaleString('es-MX',{minimumFractionDigits:2}):'—';};
 
+  var rows=sorted.map(function(f,i){
+    var diasColor=f.dias===null?'#9E8E7E':f.dias<=2?'#A33030':f.dias<=5?'#8A5A00':'#2D6A4F';
+    var bg=f.fondeada?'#EAF4EE':(i%2===0?'#fff':'#F8F4EE');
+    var nameColor=f.fondeada?'#2D6A4F':'#1A1410';
+    return '<tr style="background:'+bg+';border-bottom:1px solid #E8E0D0">'+
+      '<td style="padding:9px 14px;font-weight:600;color:'+nameColor+'">'+
+        f.pagina+
+        '<br><span style="background:#3A0F17;color:#F0D080;border-radius:20px;font-size:9px;font-weight:700;padding:1px 6px">'+f.abbr+'</span>'+
+      '</td>'+
+      '<td style="padding:9px 14px;color:'+(f.saldo>0?'#2D6A4F':'#9E8E7E')+';font-weight:600">'+
+        (f.saldo>0?'$'+f.saldo.toLocaleString('es-MX',{minimumFractionDigits:2}):'—')+
+        (f.saldoFecha?'<br><span style="font-size:10px;color:#9E8E7E;font-weight:400">'+f.saldoFecha+'</span>':'')+
+      '</td>'+
+      '<td style="padding:9px 14px;text-align:center;font-weight:700;color:'+diasColor+'">'+(f.dias!==null?f.dias+' d':'—')+'</td>'+
+      '<td style="padding:9px 14px;color:#6B5D50">'+fmt(f.presup)+'</td>'+
+      '<td style="padding:9px 14px;text-align:right;font-weight:700;color:'+(f.fondeada?'#2D6A4F':'#C8C2B8')+'">'+fmt(f.monto)+'</td>'+
+      '<td style="padding:9px 14px;text-align:right;color:#9E8E7E">'+fmt(f.sugerido)+'</td>'+
+    '</tr>';
+  }).join('');
 
+  var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">'+
+    '<title>Fondeo '+semana+'</title>'+
+    '<style>'+
+    '*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,Helvetica,Arial,sans-serif}'+
+    'body{background:#F5F0E8;padding:24px}'+
+    '.wrap{max-width:820px;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 24px rgba(92,26,36,.12)}'+
+    '.hdr{background:linear-gradient(135deg,#3A0F17,#5C1A24);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #C9A84C}'+
+    '.hdr-left{display:flex;align-items:center;gap:12px}'+
+    '.seal{width:40px;height:40px;background:#C9A84C;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}'+
+    '.titulo{font-size:17px;font-weight:800;color:#F5F0E8}'+
+    '.sub{font-size:10px;color:#C9A84C;text-transform:uppercase;letter-spacing:.08em;margin-top:2px}'+
+    '.hdr-right{text-align:right}'+
+    '.semana{font-size:13px;font-weight:700;color:#F0D080}'+
+    '.fecha{font-size:11px;color:rgba(245,240,232,.5);margin-top:3px}'+
+    'table{width:100%;border-collapse:collapse;font-size:12px}'+
+    'thead tr{background:#5C1A24}'+
+    'th{padding:9px 14px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#F5F0E8}'+
+    'th.r{text-align:right}th.c{text-align:center}'+
+    '.footer{background:#F8F4EE;border-top:1px solid #E8E0D0;padding:10px 24px;display:flex;justify-content:space-between;font-size:10px;color:#9E8E7E}'+
+    '.print-btn{position:fixed;bottom:20px;right:20px;background:#5C1A24;color:#F5F0E8;border:none;border-radius:30px;padding:10px 20px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(92,26,36,.3)}'+
+    '@media print{.print-btn{display:none}body{background:#fff;padding:0}.wrap{box-shadow:none;border-radius:0}}'+
+    '</style></head><body>'+
+    '<div class="wrap">'+
+      '<div class="hdr">'+
+        '<div class="hdr-left">'+
+          '<div class="seal">⚖️</div>'+
+          '<div><div class="titulo">ACTIVIDAD DE PAGOS</div><div class="sub">Facturación y pagos</div></div>'+
+        '</div>'+
+        '<div class="hdr-right"><div class="semana">'+semana+'</div><div class="fecha">'+fecha+'</div></div>'+
+      '</div>'+
+      '<table>'+
+        '<thead><tr>'+
+          '<th>Página</th>'+
+          '<th>Saldo · Fecha</th>'+
+          '<th class="c">Días</th>'+
+          '<th>Presup/día</th>'+
+          '<th class="r">A fondear</th>'+
+          '<th class="r">Sugerido 7d</th>'+
+        '</tr></thead>'+
+        '<tbody>'+rows+'</tbody>'+
+      '</table>'+
+      '<div class="footer"><span>'+fecha+'</span><span>Panel de Registros</span></div>'+
+    '</div>'+
+    '<button class="print-btn" onclick="window.print()">🖨️ Imprimir / PDF</button>'+
+    '</body></html>';
 
-  var ws=XLSX.utils.aoa_to_sheet(aoa);
-
-  // Anchos
-  ws['!cols']=[{wch:34},{wch:10},{wch:16},{wch:16},{wch:16}];
-
-  // Merge título
-  ws['!merges']=[
-    {s:{r:0,c:0},e:{r:0,c:3}},
-    {s:{r:1,c:0},e:{r:1,c:3}}
-  ];
-
-  // Estilos
-  var vinoH={font:{bold:true,sz:14,color:{rgb:'F0D080'}},fill:{fgColor:{rgb:'3A0F17'}},alignment:{horizontal:'left'}};
-  var vinoS={font:{bold:true,sz:10,color:{rgb:'C9A84C'}},fill:{fgColor:{rgb:'3A0F17'}}};
-  var hdrS={font:{bold:true,color:{rgb:'F5F0E8'}},fill:{fgColor:{rgb:'5C1A24'}},alignment:{horizontal:'center'}};
-  var fondS={fill:{fgColor:{rgb:'EAF4EE'}},font:{color:{rgb:'2D6A4F'},bold:true}};
-  var normS={fill:{fgColor:{rgb:'FFFFFF'}}};
-  var altS={fill:{fgColor:{rgb:'F8F4EE'}}};
-  var totS={font:{bold:true,sz:12,color:{rgb:'2D6A4F'}},fill:{fgColor:{rgb:'EAF4EE'}}};
-  var cols=['A','B','C','D','E'];
-
-  // Título filas 1-2
-  cols.forEach(function(c){
-    if(!ws[c+'1'])ws[c+'1']={t:'s',v:''};
-    if(!ws[c+'2'])ws[c+'2']={t:'s',v:''};
-    ws[c+'1'].s=vinoH;
-    ws[c+'2'].s=vinoS;
-  });
-  // Encabezados fila 4
-  cols.forEach(function(c){if(ws[c+'4'])ws[c+'4'].s=hdrS;});
-
-  // Datos desde fila 5
-  var fi=fondear.length;
-  fondear.concat(resto).forEach(function(r,i){
-    var row=i+5;
-    var s=i<fi?fondS:(i%2===0?normS:altS);
-    cols.forEach(function(c){if(ws[c+row])ws[c+row].s=s;});
-    // Formato moneda C, D, E
-    ['C','D','E'].forEach(function(c){
-      var cell=ws[c+row];
-      if(cell&&typeof cell.v==='number')cell.z='"$"#,##0.00';
-    });
-  });
-
-
-
-  var wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Fondeo');
-  var wbout=XLSX.write(wb,{bookType:'xlsx',type:'array',cellStyles:true});
-  var blob=new Blob([wbout],{type:'application/octet-stream'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;
-  a.download='Fondeo_'+semana.replace(/[^a-zA-Z0-9]/g,'_')+'.xlsx';
-  document.body.appendChild(a);a.click();
-  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
-  toast('✅ Excel descargado');
+  var win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  toast('✅ Listo para captura');
 }
 
 function guardarSaldoFondeo(i){
