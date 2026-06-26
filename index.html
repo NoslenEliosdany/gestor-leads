@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v4.9</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v5.0</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -254,6 +254,14 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
     </div>
   </div>
   <div class="card"><p class="card-title">Páginas configuradas</p><div id="pages-list"></div></div>
+  <div class="card" style="border:1px solid var(--border2)">
+    <p class="card-title">🔧 Herramientas de mantenimiento</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-ghost" onclick="resetActualizado()" style="flex:1">🔄 Limpiar estados de fondeo</button>
+      <button class="btn-ghost danger" onclick="resetLocalStorage()" style="flex:1">🗑️ Limpiar caché del navegador</button>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:8px">Usa estos botones si ves datos incorrectos o estados que no corresponden.</p>
+  </div>
 </div></div>
 <div class="view" id="view-fondeos"><div class="layout">
 
@@ -1294,6 +1302,22 @@ function desmarcarActualizado(i){
   savePages();
   renderFondeoTabla();
   toast('Desmarcado');
+}
+
+function resetActualizado(){
+  PAGES.forEach(function(p){p.actualizado=false;});
+  savePages();
+  renderFondeoTabla();
+  renderAccounts();
+  toast('✅ Estados de fondeo limpiados');
+}
+function resetLocalStorage(){
+  if(!confirm('¿Limpiar caché? Se borrarán configuraciones locales (no afecta Google Sheets).'))return;
+  ['panel_pages','panel_threshold','panel_notas','panel_checklist'].forEach(function(k){
+    localStorage.removeItem(k);
+  });
+  toast('✅ Caché limpiado — recargando...');
+  setTimeout(function(){location.reload();},1000);
 }
 
 // INIT
