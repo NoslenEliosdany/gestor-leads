@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v5.3</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v5.4</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -1222,108 +1222,92 @@ function renderHistorialFondeos(){
 
 function generarExcelFondeo(){
   var semana=getCurrentWeekLabel();
-  var fecha=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  var filas=PAGES.map(function(p,i){
+  var fecha=new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'});
+
+  var aoa=[];
+  // Fila 1: título
+  aoa.push(['ACTIVIDAD DE PAGOS','','','','Semana: '+semana]);
+  aoa.push(['Fecha: '+fecha,'','','','']);
+  aoa.push([]); // vacía
+  // Encabezados
+  aoa.push(['Página','Abreviatura','Saldo actual','Presupuesto/día','Monto a fondear']);
+
+  var fondear=[];
+  var resto=[];
+
+  PAGES.forEach(function(p,i){
     var saldo=parseSaldo(p.saldo);
     var presup=parseSaldo(p.presupuestoDiario);
-    var dias=presup>0?Math.floor(saldo/presup):null;
     var cb=document.getElementById('fc-'+i);
     var inp=document.getElementById('fm-'+i);
     var monto=cb&&cb.checked&&inp?parseSaldo(inp.value):0;
-    var diasCubre=presup>0&&monto>0?Math.floor(monto/presup):0;
-    return{pagina:p.pagina,abbr:p.abbr,adId:p.adId||'',fbCuenta:p.fbCuenta||'',
-      saldo:saldo,presup:presup,dias:dias,monto:monto,diasCubre:diasCubre,fondeada:monto>0};
+    var row=[p.pagina, p.abbr, saldo>0?saldo:0, presup>0?presup:0, monto>0?monto:0];
+    if(monto>0) fondear.push(row);
+    else resto.push(row);
   });
-  var totalFondeo=filas.reduce(function(a,f){return a+f.monto;},0);
-  var totalPages=filas.filter(function(f){return f.fondeada;}).length;
-  var fmt=function(n){return n>0?'$'+n.toLocaleString('es-MX',{minimumFractionDigits:2}):'—';};
 
-  var rows=filas.map(function(f,i){
-    var bg=f.fondeada?'#EAF4EE':(i%2===0?'#fff':'#F8F4EE');
-    var nameColor=f.fondeada?'#2D6A4F':'#1A1410';
-    var diasColor=f.dias===null?'#9E8E7E':f.dias<=2?'#A33030':f.dias<=5?'#8A5A00':'#2D6A4F';
-    return '<tr style="background:'+bg+';border-bottom:1px solid #E8E0D0">'+
-      '<td style="padding:11px 16px">'+
-        '<div style="font-weight:700;font-size:13px;color:'+nameColor+'">'+f.pagina+'</div>'+
-        '<span style="background:#3A0F17;color:#F0D080;border-radius:20px;font-size:9px;font-weight:700;padding:2px 7px;display:inline-block;margin-top:4px">'+f.abbr+'</span>'+
-      '</td>'+
-      '<td style="padding:11px 16px;text-align:right;font-weight:600;color:'+(f.saldo>0?'#2D6A4F':'#9E8E7E')+'">'+fmt(f.saldo)+'</td>'+
-      '<td style="padding:11px 16px;text-align:right;color:#6B5D50">'+fmt(f.presup)+'</td>'+
-      '<td style="padding:11px 16px;text-align:center;font-weight:700;color:'+diasColor+'">'+(f.dias!==null?f.dias+' días':'—')+'</td>'+
-      '<td style="padding:11px 16px;text-align:right;font-size:15px;font-weight:800;color:'+(f.fondeada?'#2D6A4F':'#C8C2B8')+'">'+fmt(f.monto)+'</td>'+
-      '<td style="padding:11px 16px;text-align:center;color:#9E8E7E">'+(f.diasCubre>0?f.diasCubre+' días':'—')+'</td>'+
-      '</tr>';
-  }).join('');
+  // Primero las que se fondean, luego el resto
+  fondear.concat(resto).forEach(function(r){aoa.push(r);});
 
-  var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">'+
-    '<title>Fondeo '+semana+'</title>'+
-    '<style>'+
-    '*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,Helvetica,Arial,sans-serif}'+
-    'body{background:#F5F0E8;padding:0;min-height:100vh}'+
-    '.wrap{max-width:860px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 40px rgba(92,26,36,.1)}'+
-    '.hdr{background:linear-gradient(135deg,#3A0F17 0%,#5C1A24 100%);padding:28px 32px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #C9A84C}'+
-    '.hdr-left{display:flex;align-items:center;gap:14px}'+
-    '.seal{width:46px;height:46px;background:#C9A84C;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}'+
-    '.titulo{font-size:22px;font-weight:800;color:#F5F0E8;letter-spacing:.03em}'+
-    '.subtitulo{font-size:11px;color:#C9A84C;margin-top:3px;text-transform:uppercase;letter-spacing:.1em}'+
-    '.hdr-right{text-align:right}'+
-    '.semana{font-size:14px;font-weight:700;color:#F0D080}'+
-    '.fecha{font-size:11px;color:rgba(245,240,232,.55);margin-top:4px}'+
-    '.resumen{display:flex;gap:0;border-bottom:1px solid #E8E0D0}'+
-    '.res-item{flex:1;padding:16px 20px;border-right:1px solid #E8E0D0;text-align:center}'+
-    '.res-item:last-child{border-right:none}'+
-    '.res-val{font-size:22px;font-weight:800;color:#5C1A24;letter-spacing:-1px}'+
-    '.res-val.green{color:#2D6A4F}'+
-    '.res-lbl{font-size:10px;color:#9E8E7E;text-transform:uppercase;letter-spacing:.06em;margin-top:3px}'+
-    'table{width:100%;border-collapse:collapse}'+
-    'thead tr{background:#5C1A24}'+
-    'th{padding:10px 16px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#F5F0E8}'+
-    'th.r{text-align:right}th.c{text-align:center}'+
-    '.total-bar{background:#EAF4EE;border-top:2px solid #B7DFC7;padding:16px 32px;display:flex;justify-content:space-between;align-items:center}'+
-    '.total-label{font-size:13px;color:#6B5D50}'+
-    '.total-val{font-size:20px;font-weight:800;color:#2D6A4F}'+
-    '.footer{background:#F8F4EE;border-top:1px solid #E8E0D0;padding:12px 32px;display:flex;justify-content:space-between;font-size:11px;color:#9E8E7E}'+
-    '.print-btn{position:fixed;bottom:24px;right:24px;background:#5C1A24;color:#F5F0E8;border:none;border-radius:30px;padding:12px 24px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(92,26,36,.35);display:flex;align-items:center;gap:8px}'+
-    '.print-btn:hover{background:#7A2535}'+
-    '@media print{.print-btn{display:none}body{background:#fff}.wrap{box-shadow:none}}'+
-    '</style></head><body>'+
-    '<div class="wrap">'+
-      '<div class="hdr">'+
-        '<div class="hdr-left">'+
-          '<div class="seal">⚖️</div>'+
-          '<div><div class="titulo">SOLICITUD DE FONDEO</div><div class="subtitulo">Control de cuentas publicitarias</div></div>'+
-        '</div>'+
-        '<div class="hdr-right"><div class="semana">'+semana+'</div><div class="fecha">'+fecha+'</div></div>'+
-      '</div>'+
-      '<div class="resumen">'+
-        '<div class="res-item"><div class="res-val">'+filas.length+'</div><div class="res-lbl">Páginas totales</div></div>'+
-        '<div class="res-item"><div class="res-val green">'+totalPages+'</div><div class="res-lbl">A fondear</div></div>'+
-        '<div class="res-item"><div class="res-val green">$'+totalFondeo.toLocaleString('es-MX',{minimumFractionDigits:2})+'</div><div class="res-lbl">Total a fondear</div></div>'+
-      '</div>'+
-      '<table>'+
-        '<thead><tr>'+
-          '<th>Página / Cuenta</th>'+
-          '<th class="r">Saldo actual</th>'+
-          '<th class="r">Presup/día</th>'+
-          '<th class="c">Días rest.</th>'+
-          '<th class="r">Monto a fondear</th>'+
-          '<th class="c">Días que cubre</th>'+
-        '</tr></thead>'+
-        '<tbody>'+rows+'</tbody>'+
-      '</table>'+
-      '<div class="total-bar">'+
-        '<div class="total-label">'+totalPages+' páginas seleccionadas para fondeo</div>'+
-        '<div class="total-val">TOTAL $'+totalFondeo.toLocaleString('es-MX',{minimumFractionDigits:2})+'</div>'+
-      '</div>'+
-      '<div class="footer"><span>Generado el '+fecha+'</span><span>Panel de Registros</span></div>'+
-    '</div>'+
-    '<button class="print-btn" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>'+
-    '</body></html>';
 
-  var win=window.open('','_blank');
-  win.document.write(html);
-  win.document.close();
-  toast('✅ Fondeo generado');
+
+  var ws=XLSX.utils.aoa_to_sheet(aoa);
+
+  // Anchos
+  ws['!cols']=[{wch:34},{wch:10},{wch:16},{wch:16},{wch:16}];
+
+  // Merge título
+  ws['!merges']=[
+    {s:{r:0,c:0},e:{r:0,c:3}},
+    {s:{r:1,c:0},e:{r:1,c:3}}
+  ];
+
+  // Estilos
+  var vinoH={font:{bold:true,sz:14,color:{rgb:'F0D080'}},fill:{fgColor:{rgb:'3A0F17'}},alignment:{horizontal:'left'}};
+  var vinoS={font:{bold:true,sz:10,color:{rgb:'C9A84C'}},fill:{fgColor:{rgb:'3A0F17'}}};
+  var hdrS={font:{bold:true,color:{rgb:'F5F0E8'}},fill:{fgColor:{rgb:'5C1A24'}},alignment:{horizontal:'center'}};
+  var fondS={fill:{fgColor:{rgb:'EAF4EE'}},font:{color:{rgb:'2D6A4F'},bold:true}};
+  var normS={fill:{fgColor:{rgb:'FFFFFF'}}};
+  var altS={fill:{fgColor:{rgb:'F8F4EE'}}};
+  var totS={font:{bold:true,sz:12,color:{rgb:'2D6A4F'}},fill:{fgColor:{rgb:'EAF4EE'}}};
+  var cols=['A','B','C','D','E'];
+
+  // Título filas 1-2
+  cols.forEach(function(c){
+    if(!ws[c+'1'])ws[c+'1']={t:'s',v:''};
+    if(!ws[c+'2'])ws[c+'2']={t:'s',v:''};
+    ws[c+'1'].s=vinoH;
+    ws[c+'2'].s=vinoS;
+  });
+  // Encabezados fila 4
+  cols.forEach(function(c){if(ws[c+'4'])ws[c+'4'].s=hdrS;});
+
+  // Datos desde fila 5
+  var fi=fondear.length;
+  fondear.concat(resto).forEach(function(r,i){
+    var row=i+5;
+    var s=i<fi?fondS:(i%2===0?normS:altS);
+    cols.forEach(function(c){if(ws[c+row])ws[c+row].s=s;});
+    // Formato moneda C, D, E
+    ['C','D','E'].forEach(function(c){
+      var cell=ws[c+row];
+      if(cell&&typeof cell.v==='number')cell.z='"$"#,##0.00';
+    });
+  });
+
+
+
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Fondeo');
+  var wbout=XLSX.write(wb,{bookType:'xlsx',type:'array',cellStyles:true});
+  var blob=new Blob([wbout],{type:'application/octet-stream'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='Fondeo_'+semana.replace(/[^a-zA-Z0-9]/g,'_')+'.xlsx';
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+  toast('✅ Excel descargado');
 }
 
 function guardarSaldoFondeo(i){
