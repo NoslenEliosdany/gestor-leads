@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v4.8</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v4.9</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -973,8 +973,7 @@ function renderFondeoTabla(){
     var dias=presup>0?Math.floor(saldo/presup):null;
     var sugerido=presup>0?presup*7:0;
     var diasColor=dias===null?'var(--text3)':dias<=2?'var(--red)':dias<=5?'var(--amber)':'var(--green)';
-    var rowBg=p.actualizado?'background:var(--green-bg)':'';
-    html+='<tr id="frow-'+i+'" style="border-bottom:1px solid var(--border);'+rowBg+'">';
+    html+='<tr id="frow-'+i+'" style="border-bottom:1px solid var(--border)">'; 
     html+='<td style="padding:8px;text-align:center"><input type="checkbox" id="fc-'+i+'" onchange="toggleFondeoRow('+i+')" style="width:15px;height:15px;accent-color:var(--vino);cursor:pointer"></td>';
     html+='<td style="padding:8px;min-width:180px"><strong>'+p.pagina+'</strong><span class="page-abbr">'+p.abbr+'</span>'+(p.fbCuenta?'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+p.fbCuenta+'</div>':'')+'</td>';
     html+='<td style="padding:8px;font-weight:600;color:'+(saldo>0?'var(--green)':'var(--text3)')+'">'+(saldo>0?'$'+saldo.toLocaleString('es-MX'):'—')+'</td>';
@@ -1301,6 +1300,8 @@ function desmarcarActualizado(i){
 async function init(){
   document.getElementById('hdr-date').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   PAGES=await loadKey('pages',null)||JSON.parse(JSON.stringify(DEFAULT_PAGES));
+  // Limpiar flag actualizado al abrir el panel
+  PAGES.forEach(function(p){p.actualizado=false;});
   // v3.5: la base YA NO se carga de localStorage; se carga siempre desde Google Sheets
   base=[];
   threshold=await loadKey('threshold',300);
