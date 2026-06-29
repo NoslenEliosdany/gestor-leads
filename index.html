@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v5.6</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v5.8</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -185,6 +185,14 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
   <div id="results" style="display:none">
     <div class="ultimos-row" id="ultimos-hoy"></div>
     <div class="stats" id="stats-row"></div>
+    <div class="card" style="padding:14px">
+    <div class="card" style="padding:12px 14px;background:var(--blue-bg);border:1px solid #C0D8F0;margin-bottom:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div><div style="font-size:13px;font-weight:600;color:var(--blue)">↔️ Redistribuir leads</div>
+        <div style="font-size:11px;color:var(--text3)">Mueve leads de una página a otra antes de descargar</div></div>
+        <button onclick="abrirRedistribucion()" style="padding:8px 16px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer">Redistribuir</button>
+      </div>
+    </div>
     <div class="card" style="padding:14px">
       <div id="hint-ndup" class="hint-bar" style="display:none">Registros amarillos = duplicados entre páginas del mismo día. Marca ☑ el que quieres conservar.</div>
       <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap">
@@ -308,6 +316,54 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
   </div>
 
 </div></div>
+<div id="redis-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;overflow-y:auto;padding:20px">
+  <div style="max-width:960px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.2)">
+    <div style="background:var(--vino-dark);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--gold)">
+      <div style="font-size:15px;font-weight:700;color:var(--cream)">↔️ Redistribuir leads del día</div>
+      <button onclick="cerrarRedistribucion()" style="background:transparent;border:none;color:var(--cream);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div style="padding:16px 20px">
+      <p style="font-size:12px;color:var(--text3);margin-bottom:14px">Arrastra leads de izquierda a derecha — o usa checkboxes y "Mover seleccionados".</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px">
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Origen</div>
+            <select id="redis-origen" onchange="renderRedisOrigen()" style="padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:inherit"></select>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px">
+            <span id="redis-origen-count">0</span> leads —
+            <span onclick="selectAllRedis(true)" style="color:var(--vino);cursor:pointer;font-weight:600">Todos</span> ·
+            <span onclick="selectAllRedis(false)" style="color:var(--text3);cursor:pointer">Ninguno</span>
+          </div>
+          <div id="redis-origen-lista" style="min-height:200px;max-height:360px;overflow-y:auto;border:2px dashed var(--border2);border-radius:var(--radius-sm);background:var(--surface2)"></div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-size:11px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.06em">Destino</div>
+            <select id="redis-destino" onchange="renderDestinoLista()" style="padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:inherit"></select>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px"><span id="redis-destino-count">0</span> leads a recibir</div>
+          <div id="redis-destino-lista"
+            style="min-height:200px;max-height:360px;overflow-y:auto;border:2px dashed var(--green-border);border-radius:var(--radius-sm);background:var(--green-bg)"
+            ondragover="event.preventDefault();this.style.borderColor='var(--green)'"
+            ondragleave="this.style.borderColor='var(--green-border)'"
+            ondrop="onDropDestino(event)">
+            <div id="redis-drop-hint" style="padding:32px;text-align:center;color:var(--text3);font-size:13px">
+              Arrastra leads aqui o usa checkboxes
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap">
+        <button onclick="moverSeleccionados()" style="padding:9px 16px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;cursor:pointer">☑ Mover seleccionados</button>
+        <div style="display:flex;gap:8px">
+          <button onclick="cerrarRedistribucion()" class="btn-ghost">Cancelar</button>
+          <button onclick="confirmarRedistribucion()" style="padding:9px 20px;background:var(--vino);color:var(--cream);border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer">✅ Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-overlay" onclick="closeModal()"></div>
 <div class="modal-panel" id="modal-panel">
   <div class="modal-header">
@@ -1355,6 +1411,152 @@ function resetLocalStorage(){
   });
   toast('✅ Caché limpiado — recargando...');
   setTimeout(function(){location.reload();},1000);
+}
+
+// ============ REDISTRIBUCION ============
+var redisMovidos=[];
+var dragIdx=-1;
+
+function abrirRedistribucion(){
+  redisMovidos=[];
+  var conLeads=PAGES.filter(function(p){
+    return allResults.some(function(r){return r._source===p.abbr&&(r._status==='ok'||r._keep);});
+  });
+  if(!conLeads.length){toast('Analiza los archivos del día primero');return;}
+  var origenSel=document.getElementById('redis-origen');
+  var destinoSel=document.getElementById('redis-destino');
+  origenSel.innerHTML=conLeads.map(function(p){
+    var cnt=allResults.filter(function(r){return r._source===p.abbr&&(r._status==='ok'||r._keep);}).length;
+    return'<option value="'+p.abbr+'">'+p.pagina+' ('+cnt+')</option>';
+  }).join('');
+  destinoSel.innerHTML=PAGES.map(function(p){
+    return'<option value="'+p.abbr+'">'+p.pagina+'</option>';
+  }).join('');
+  var diff=PAGES.find(function(p){return p.abbr!==origenSel.value;});
+  if(diff)destinoSel.value=diff.abbr;
+  renderRedisOrigen();
+  document.getElementById('redis-overlay').style.display='block';
+}
+
+function cerrarRedistribucion(){
+  redisMovidos=[];
+  document.getElementById('redis-overlay').style.display='none';
+}
+
+function getOrigenLeads(){
+  var abbr=document.getElementById('redis-origen').value;
+  return allResults.map(function(r,i){return{r:r,i:i};})
+    .filter(function(x){return x.r._source===abbr&&(x.r._status==='ok'||x.r._keep)&&redisMovidos.indexOf(x.i)===-1;});
+}
+
+function renderRedisOrigen(){
+  redisMovidos=[];
+  renderDestinoLista();
+  renderOrigenLista();
+}
+
+function renderOrigenLista(){
+  var leads=getOrigenLeads();
+  document.getElementById('redis-origen-count').textContent=leads.length;
+  var html=leads.map(function(item){
+    return'<div class="redis-item" id="ritem-'+item.i+'" draggable="true"'+
+      ' ondragstart="onDragStart(event,'+item.i+')"'+
+      ' ondragend="onDragEnd('+item.i+')"'+
+      ' style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border);font-size:12px;cursor:grab;background:#fff"'+
+      ' onmouseenter="this.style.background=\"var(--surface2)\"" onmouseleave="this.style.background=\"#fff\"">'+
+      '<input type="checkbox" id="redis-cb-'+item.i+'" style="accent-color:var(--vino);cursor:pointer;flex-shrink:0">'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+item.r.nombre+'</div>'+
+        '<div style="color:var(--text3);font-size:11px">'+item.r.telefono+'</div>'+
+      '</div>'+
+      '<span style="font-size:14px;color:var(--border2)">⠿</span>'+
+    '</div>';
+  }).join('')||'<div style="padding:20px;text-align:center;color:var(--text3);font-size:12px">Sin leads disponibles</div>';
+  document.getElementById('redis-origen-lista').innerHTML=html;
+}
+
+function renderDestinoLista(){
+  document.getElementById('redis-destino-count').textContent=redisMovidos.length;
+  if(!redisMovidos.length){
+    document.getElementById('redis-destino-lista').innerHTML='<div style="padding:32px;text-align:center;color:var(--text3);font-size:13px">Arrastra leads aqui o usa checkboxes</div>';
+    return;
+  }
+  var html=redisMovidos.map(function(idx){
+    var r=allResults[idx];
+    return'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-bottom:1px solid var(--green-border);font-size:12px">'+
+      '<div><div style="font-weight:500;color:var(--green)">'+r.nombre+'</div><div style="color:var(--text3);font-size:11px">'+r.telefono+'</div></div>'+
+      '<span onclick="devolverLead('+idx+')" style="cursor:pointer;color:var(--red);font-weight:700;padding:0 6px">←</span>'+
+    '</div>';
+  }).join('');
+  document.getElementById('redis-destino-lista').innerHTML=html;
+}
+
+function selectAllRedis(val){
+  getOrigenLeads().forEach(function(item){
+    var cb=document.getElementById('redis-cb-'+item.i);
+    if(cb)cb.checked=val;
+  });
+}
+
+function onDragStart(event,idx){
+  dragIdx=idx;
+  event.dataTransfer.effectAllowed='move';
+  setTimeout(function(){
+    var el=document.getElementById('ritem-'+idx);
+    if(el)el.style.opacity='0.3';
+  },0);
+}
+
+function onDragEnd(idx){
+  var el=document.getElementById('ritem-'+idx);
+  if(el)el.style.opacity='1';
+}
+
+function onDropDestino(event){
+  event.preventDefault();
+  document.getElementById('redis-destino-lista').style.borderColor='var(--green-border)';
+  if(dragIdx===-1)return;
+  moverLead(dragIdx);
+  dragIdx=-1;
+}
+
+function moverLead(idx){
+  if(redisMovidos.indexOf(idx)>-1)return;
+  redisMovidos.push(idx);
+  renderOrigenLista();
+  renderDestinoLista();
+}
+
+function moverSeleccionados(){
+  var leads=getOrigenLeads();
+  var sel=leads.filter(function(item){
+    var cb=document.getElementById('redis-cb-'+item.i);
+    return cb&&cb.checked;
+  });
+  if(!sel.length){toast('Selecciona al menos un lead');return;}
+  sel.forEach(function(item){moverLead(item.i);});
+}
+
+function devolverLead(idx){
+  redisMovidos=redisMovidos.filter(function(i){return i!==idx;});
+  renderOrigenLista();
+  renderDestinoLista();
+}
+
+function confirmarRedistribucion(){
+  var origenAbbr=document.getElementById('redis-origen').value;
+  var destinoAbbr=document.getElementById('redis-destino').value;
+  if(origenAbbr===destinoAbbr){toast('Origen y destino no pueden ser iguales');return;}
+  if(!redisMovidos.length){toast('No hay leads para mover');return;}
+  redisMovidos.forEach(function(idx){
+    allResults[idx]._source=destinoAbbr;
+    if(allResults[idx]._raw)allResults[idx]._raw._source=destinoAbbr;
+  });
+  var n=redisMovidos.length;
+  cerrarRedistribucion();
+  renderTable();
+  updateDlGrid();
+  toast('\u2705 '+n+' leads movidos a '+destinoAbbr);
 }
 
 // INIT
