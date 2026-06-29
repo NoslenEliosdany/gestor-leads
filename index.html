@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v5.5</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v5.6</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -974,7 +974,8 @@ function renderFondeoTabla(){
     var presup=parseSaldo(p.presupuestoDiario);
     var dias=presup>0?Math.floor(saldo/presup):null;
     return{p:p,i:i,dias:dias,saldo:saldo,presup:presup};
-  }).sort(function(a,b){
+  }).filter(function(item){return item.p.estado!=='pausada';})
+  .sort(function(a,b){
     if(a.dias===null&&b.dias===null)return 0;
     if(a.dias===null)return 1;
     if(b.dias===null)return -1;
@@ -1224,12 +1225,14 @@ function generarExcelFondeo(){
   var semana=getCurrentWeekLabel();
   var fecha=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
-  var sorted=PAGES.map(function(p,i){
+  var sorted=PAGES.filter(function(p){return p.estado!=='pausada';})
+  .map(function(p,i){
+    var realIdx=PAGES.indexOf(p);
     var saldo=parseSaldo(p.saldo);
     var presup=parseSaldo(p.presupuestoDiario);
     var dias=presup>0?Math.floor(saldo/presup):null;
-    var cb=document.getElementById('fc-'+i);
-    var inp=document.getElementById('fm-'+i);
+    var cb=document.getElementById('fc-'+realIdx);
+    var inp=document.getElementById('fm-'+realIdx);
     var monto=cb&&cb.checked&&inp?parseSaldo(inp.value):0;
     var sugerido=presup>0?presup*7:0;
     return{pagina:p.pagina,abbr:p.abbr,saldo:saldo,saldoFecha:p.saldoFecha||'',
