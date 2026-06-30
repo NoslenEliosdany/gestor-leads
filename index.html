@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v6.2</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v6.4</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -118,6 +118,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
   <div class="nav-tab" onclick="switchView('finanzas',this)">📊 Finanzas</div>
   <div class="nav-tab" onclick="switchView('paginas',this)">⚙️ Páginas</div>
   <div class="nav-tab" onclick="switchView('fondeos',this)">💰 Fondeos</div>
+  <div class="nav-tab" onclick="switchView('archivadas',this)">📦 Archivadas</div>
 </div>
 <div class="view active" id="view-cuentas"><div class="layout">
   <div class="stats" id="stats-cuentas"></div>
@@ -306,6 +307,16 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
     </div>
   </div>
 
+  <!-- SIMULACION DE PRESUPUESTO -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <p class="card-title" style="margin:0">📈 Simulación de presupuesto diario</p>
+      <button class="btn-ghost" onclick="abrirSeleccionSim()" style="font-size:11px;padding:5px 10px">⚙️ Elegir páginas a simular</button>
+    </div>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Cada día se descuenta automáticamente el presupuesto (con variación aproximada). Tú puedes fondear manualmente para sumar dinero a la simulación.</p>
+    <div id="sim-tabla"></div>
+  </div>
+
   <!-- HISTORIAL SEMANAL -->
   <div class="card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
@@ -366,6 +377,25 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
           <button onclick="confirmarRedistribucion()" style="padding:9px 20px;background:var(--vino);color:var(--cream);border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer">✅ Confirmar</button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+<div class="view" id="view-archivadas"><div class="layout">
+  <div class="card">
+    <p class="card-title">📦 Páginas archivadas (pausadas)</p>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:14px">Estas páginas están pausadas y no aparecen en Cuentas, Registros Diarios ni Fondeos. Reactívalas desde aquí cuando las necesites de nuevo.</p>
+    <div id="archivadas-list"></div>
+  </div>
+</div></div>
+<div id="sim-select-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:12px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.2);overflow:hidden">
+    <div style="background:var(--vino-dark);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--gold)">
+      <div style="font-size:14px;font-weight:700;color:var(--cream)">📈 Elegir páginas a simular</div>
+      <button onclick="cerrarSeleccionSim()" style="background:transparent;border:none;color:var(--cream);font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <div style="padding:16px 18px">
+      <div id="sim-select-list" style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto"></div>
+      <button onclick="cerrarSeleccionSim()" style="width:100%;margin-top:14px;padding:9px;background:var(--vino);color:var(--cream);border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer">Listo</button>
     </div>
   </div>
 </div>
@@ -587,13 +617,15 @@ function switchView(name,el){
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
   document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active')});
   document.getElementById('view-'+name).classList.add('active');el.classList.add('active');
-  if(name==='base')renderBase();if(name==='finanzas')renderFinanzas();if(name==='paginas'){renderPagesView();renderGruposConfig();}if(name==='fondeos'){renderFondeoTabla();renderHistorialFondeos();syncFondeos();}
+  if(name==='base')renderBase();if(name==='finanzas')renderFinanzas();if(name==='paginas'){renderPagesView();renderGruposConfig();}if(name==='fondeos'){renderFondeoTabla();renderHistorialFondeos();syncFondeos();actualizarSimulacionDiaria();renderSimTabla();}if(name==='archivadas')renderArchivadas();
 }
 
 // CUENTAS
 function renderAccounts(){
   var rowBg={activa:'#f0faf5',pausada:'#fdf6e3',pendiente:'#fdf0f0'};
-  document.getElementById('accounts-body').innerHTML=PAGES.map(function(a,i){
+  var visibles=PAGES.map(function(a,i){return{a:a,i:i};}).filter(function(x){return x.a.estado!=='pausada';});
+  document.getElementById('accounts-body').innerHTML=visibles.map(function(x){
+    var a=x.a,i=x.i;
     var sN=parseSaldo(a.saldo),pN=parseSaldo(a.presupuestoDiario);
     var dias=pN>0?Math.floor(sN/pN):null;
     var dc=dias===null?'var(--text3)':dias<=2?'var(--red)':dias<=5?'var(--amber)':'var(--green)';
@@ -738,8 +770,9 @@ function removeField(fi){PAGES[currentPageEditIdx].fields.splice(fi,1);savePages
 function buildUploadZones(){
   var hist=document.getElementById('hist-upload-grid');
   var nuevo=document.getElementById('new-upload-grid');
-  hist.innerHTML=PAGES.map(function(p){var idl=p.abbr.toLowerCase();return'<div class="uzone" id="zh-'+idl+'" onclick="document.getElementById(\'fh-'+idl+'\').click()"><span class="uz-label">'+p.pagina+'</span><span class="uz-sub">'+p.abbr+'</span><span class="uz-ok" id="sh-'+idl+'"></span><input type="file" id="fh-'+idl+'" accept=".xls,.xlsx,.csv" onchange="handleHist(this,\''+p.abbr+'\')"></div>';}).join('')||'<div style="color:var(--text3);font-size:13px;grid-column:1/-1">No hay p\u00e1ginas configuradas.</div>';
-  nuevo.innerHTML=PAGES.map(function(p){var idl=p.abbr.toLowerCase();var done=newFiles[p.abbr]?' done':'';return'<div class="uzone'+done+'" id="zn-'+idl+'" onclick="document.getElementById(\'fn-'+idl+'\').click()"><span class="uz-label">'+p.pagina+'</span><span class="uz-sub">'+p.abbr+' \u00b7 hoy</span><span class="uz-ok" id="sn-'+idl+'" style="'+(newFiles[p.abbr]?'display:block':'')+'">'+(newFiles[p.abbr]?'\u2713 '+newFiles[p.abbr].name:'')+'</span><input type="file" id="fn-'+idl+'" accept=".xls,.xlsx,.csv" onchange="handleNew(this,\''+p.abbr+'\')"></div>';}).join('')||'<div style="color:var(--text3);font-size:13px;grid-column:1/-1">No hay p\u00e1ginas configuradas.</div>';
+  var activas=PAGES.filter(function(p){return p.estado!=='pausada';});
+  hist.innerHTML=activas.map(function(p){var idl=p.abbr.toLowerCase();return'<div class="uzone" id="zh-'+idl+'" onclick="document.getElementById(\'fh-'+idl+'\').click()"><span class="uz-label">'+p.pagina+'</span><span class="uz-sub">'+p.abbr+'</span><span class="uz-ok" id="sh-'+idl+'"></span><input type="file" id="fh-'+idl+'" accept=".xls,.xlsx,.csv" onchange="handleHist(this,\''+p.abbr+'\')"></div>';}).join('')||'<div style="color:var(--text3);font-size:13px;grid-column:1/-1">No hay p\u00e1ginas configuradas.</div>';
+  nuevo.innerHTML=activas.map(function(p){var idl=p.abbr.toLowerCase();var done=newFiles[p.abbr]?' done':'';return'<div class="uzone'+done+'" id="zn-'+idl+'" onclick="document.getElementById(\'fn-'+idl+'\').click()"><span class="uz-label">'+p.pagina+'</span><span class="uz-sub">'+p.abbr+' \u00b7 hoy</span><span class="uz-ok" id="sn-'+idl+'" style="'+(newFiles[p.abbr]?'display:block':'')+'">'+(newFiles[p.abbr]?'\u2713 '+newFiles[p.abbr].name:'')+'</span><input type="file" id="fn-'+idl+'" accept=".xls,.xlsx,.csv" onchange="handleNew(this,\''+p.abbr+'\')"></div>';}).join('')||'<div style="color:var(--text3);font-size:13px;grid-column:1/-1">No hay p\u00e1ginas configuradas.</div>';
 }
 
 // THRESHOLD / NOTAS / CHECKLIST
@@ -1732,6 +1765,152 @@ function toggleGrupoPagina(grp,abbr,checked){
   saveKey('groups',GROUPS);
   renderGruposConfig();
   toast('Grupos actualizados');
+}
+
+function renderArchivadas(){
+  var c=document.getElementById('archivadas-list');
+  if(!c)return;
+  var pausadas=PAGES.map(function(p,i){return{p:p,i:i};}).filter(function(x){return x.p.estado==='pausada';});
+  if(!pausadas.length){
+    c.innerHTML='<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No hay páginas archivadas. Las que pauses desde Cuentas aparecerán aquí.</div>';
+    return;
+  }
+  c.innerHTML=pausadas.map(function(x){
+    var p=x.p,i=x.i;
+    var count=base.filter(function(r){return r._source===p.abbr;}).length;
+    return'<div class="ultimo-card" style="display:flex;align-items:center;justify-content:space-between;min-width:auto;margin-bottom:8px;flex-wrap:wrap;gap:8px;opacity:.75">'+
+      '<div><div class="ultimo-name">'+p.pagina+'<span class="page-abbr">'+p.abbr+'</span></div>'+
+      '<div class="ultimo-date">'+(p.fbCuenta||'Sin cuenta FB')+' \u00b7 '+count+' registros en base</div></div>'+
+      '<button class="btn-ghost" style="border-color:var(--green-border);color:var(--green)" onclick="reactivarPagina('+i+')">\u25b6\ufe0f Reactivar</button>'+
+    '</div>';
+  }).join('');
+}
+function reactivarPagina(i){
+  PAGES[i].estado='activa';
+  savePages();
+  renderArchivadas();
+  renderAccounts();
+  buildUploadZones();
+  toast('\u2705 '+PAGES[i].pagina+' reactivada');
+}
+
+// ============ SIMULACION DE PRESUPUESTO ============
+// Genera un factor de variación pseudoaleatorio pero determinístico por
+// página+fecha, para que recalcular el mismo día no cambie el resultado.
+function factorVariacion(seedStr){
+  var hash=0;
+  for(var i=0;i<seedStr.length;i++){hash=(hash*31+seedStr.charCodeAt(i))|0;}
+  var r=Math.abs(Math.sin(hash))%1; // 0..1 pseudoaleatorio estable
+  return 0.85+r*0.30; // entre 0.85x y 1.15x del presupuesto diario
+}
+
+function diasEntre(d1,d2){
+  var a=new Date(d1+'T00:00:00'),b=new Date(d2+'T00:00:00');
+  return Math.round((b-a)/86400000);
+}
+
+function hoyISO(){
+  var d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+// Al abrir el panel: avanzar la simulación de cada página simulando los días que pasaron
+function actualizarSimulacionDiaria(){
+  var hoy=hoyISO();
+  var cambiado=false;
+  PAGES.forEach(function(p){
+    if(!p.simulando)return;
+    if(p.simSaldo===undefined||p.simSaldo===null){
+      p.simSaldo=parseSaldo(p.saldo)||0;
+      p.simFecha=hoy;
+      cambiado=true;
+      return;
+    }
+    if(p.simFecha===hoy)return; // ya se calculó hoy
+    var dias=diasEntre(p.simFecha,hoy);
+    if(dias<=0){p.simFecha=hoy;return;}
+    var presup=parseSaldo(p.presupuestoDiario)||0;
+    for(var i=1;i<=dias;i++){
+      var fechaDia=new Date(p.simFecha+'T00:00:00');
+      fechaDia.setDate(fechaDia.getDate()+i);
+      var fechaStr=fechaDia.getFullYear()+'-'+String(fechaDia.getMonth()+1).padStart(2,'0')+'-'+String(fechaDia.getDate()).padStart(2,'0');
+      var factor=factorVariacion(p.abbr+fechaStr);
+      p.simSaldo=Math.max(0,p.simSaldo-presup*factor);
+    }
+    p.simFecha=hoy;
+    cambiado=true;
+  });
+  if(cambiado)savePages();
+}
+
+function abrirSeleccionSim(){
+  var c=document.getElementById('sim-select-list');
+  c.innerHTML=PAGES.filter(function(p){return p.estado!=='pausada';}).map(function(p,realIdx){
+    var idx=PAGES.indexOf(p);
+    var checked=!!p.simulando;
+    return'<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid '+(checked?'var(--vino)':'var(--border)')+';background:'+(checked?'var(--green-bg)':'#fff')+';cursor:pointer;font-size:13px">'+
+      '<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleSimPagina('+idx+',this.checked)" style="accent-color:var(--vino);cursor:pointer">'+
+      '<div><div style="font-weight:600">'+p.pagina+'</div><div style="font-size:11px;color:var(--text3)">'+p.abbr+' \u00b7 presup: '+(p.presupuestoDiario?'$'+p.presupuestoDiario:'sin definir')+'/d\u00eda</div></div>'+
+    '</label>';
+  }).join('');
+  document.getElementById('sim-select-overlay').style.display='flex';
+}
+function cerrarSeleccionSim(){
+  document.getElementById('sim-select-overlay').style.display='none';
+  savePages();
+  actualizarSimulacionDiaria();
+  renderSimTabla();
+}
+function toggleSimPagina(idx,checked){
+  PAGES[idx].simulando=checked;
+  if(checked&&(PAGES[idx].simSaldo===undefined||PAGES[idx].simSaldo===null)){
+    PAGES[idx].simSaldo=parseSaldo(PAGES[idx].saldo)||0;
+    PAGES[idx].simFecha=hoyISO();
+  }
+}
+
+function renderSimTabla(){
+  var c=document.getElementById('sim-tabla');
+  if(!c)return;
+  var simuladas=PAGES.map(function(p,i){return{p:p,i:i};}).filter(function(x){return x.p.simulando;});
+  if(!simuladas.length){
+    c.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">No hay páginas en simulación. Da clic en "⚙️ Elegir páginas a simular" para empezar.</div>';
+    return;
+  }
+  var html='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
+  html+='<thead><tr style="background:var(--surface2)">';
+  ['Página','Saldo simulado','Presup/día','Días proyectados','Última actualización',''].forEach(function(t){
+    html+='<th style="padding:7px 10px;text-align:left;font-size:9px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">'+t+'</th>';
+  });
+  html+='</tr></thead><tbody>';
+  simuladas.forEach(function(x){
+    var p=x.p,i=x.i;
+    var presup=parseSaldo(p.presupuestoDiario)||0;
+    var saldo=p.simSaldo||0;
+    var dias=presup>0?Math.floor(saldo/presup):null;
+    var diasColor=dias===null?'var(--text3)':dias<=2?'var(--red)':dias<=5?'var(--amber)':'var(--green)';
+    html+='<tr style="border-bottom:1px solid var(--border)">';
+    html+='<td style="padding:7px 10px"><strong>'+p.pagina+'</strong><span class="page-abbr">'+p.abbr+'</span></td>';
+    html+='<td style="padding:7px 10px;font-weight:700;color:'+(saldo>0?'var(--green)':'var(--red)')+'">$'+saldo.toLocaleString('es-MX',{minimumFractionDigits:2})+'</td>';
+    html+='<td style="padding:7px 10px">'+(presup>0?'$'+presup.toLocaleString('es-MX'):'<span style="color:var(--text3)">—</span>')+'</td>';
+    html+='<td style="padding:7px 10px;font-weight:700;color:'+diasColor+'">'+(dias!==null?dias+' días':'—')+'</td>';
+    html+='<td style="padding:7px 10px;font-size:11px;color:var(--text3)">'+(p.simFecha||'—')+'</td>';
+    html+='<td style="padding:7px 10px"><button onclick="fondearSimulado('+i+')" style="padding:4px 10px;background:var(--vino);color:var(--cream);border:none;border-radius:var(--radius-sm);font-size:11px;cursor:pointer;white-space:nowrap">+ Fondear</button></td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+  c.innerHTML=html;
+}
+
+function fondearSimulado(i){
+  var monto=prompt('¿Cuánto vas a agregar a la simulación de '+PAGES[i].pagina+'?');
+  if(!monto)return;
+  var n=parseSaldo(monto);
+  if(!n||n<=0){toast('Monto inválido');return;}
+  PAGES[i].simSaldo=(PAGES[i].simSaldo||0)+n;
+  savePages();
+  renderSimTabla();
+  toast('✅ +$'+n.toLocaleString('es-MX')+' agregado a la simulación');
 }
 
 // INIT
