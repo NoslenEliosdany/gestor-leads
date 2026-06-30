@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v6.1</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v6.2</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -252,6 +252,11 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
   <div class="card"><p class="card-title" style="margin-bottom:14px">Saldo actual por página</p><div id="finanzas-bars"></div></div>
 </div></div>
 <div class="view" id="view-paginas"><div class="layout">
+  <div class="card">
+    <p class="card-title">👥 Grupos de entrega y deduplicación</p>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Cada grupo se compara solo contra sí mismo al buscar duplicados. Un mismo teléfono puede llegar a páginas de grupos distintos sin marcarse como duplicado entre ellas.</p>
+    <div id="grupos-config"></div>
+  </div>
   <div class="card">
     <p class="card-title">Agregar página nueva</p>
     <p style="font-size:12px;color:var(--text3);margin-bottom:10px">Crea una página nueva y luego usa "Editar campos" para configurar las columnas del Excel/CSV de Meta.</p>
@@ -546,6 +551,17 @@ var DEFAULT_PAGES=[
   {key:'full_name',label:'Nombre',role:'nombre',export:true},{key:'phone_number',label:'Tel\u00e9fono',role:'telefono',export:true},
   {key:'\u00bfqu\u00e9_tipo_de_fraude_sufriste?_cu\u00e9ntanos_brevemente_tu_caso.',label:'Descripci\u00f3n',role:'descripcion',export:true}]}
 ];
+// GRUPOS DE DEDUPLICACION — cada grupo solo se compara contra sí mismo
+var DEFAULT_GROUPS={
+  'JUAN':['SPC','IFPC','SNCF','ALF'],
+  'HECTOR':['AVF'],
+  'LIC':['SSN','AJN','CL','INAL']
+};
+var GROUPS=DEFAULT_GROUPS;
+function getGroupForAbbr(abbr){
+  for(var g in GROUPS){if(GROUPS[g].indexOf(abbr)>-1)return g;}
+  return null; // si una página no está en ningún grupo, se compara contra TODA la base
+}
 var CHECKLIST_ITEMS=['Descargar registros de todas las p\u00e1ginas','Analizar duplicados en la herramienta','Descargar archivos limpios','Mandar reporte a Amix','Revisar saldos de todas las cuentas','Revisar anuncios activos','Guardar registros en la base','Exportar base de datos','Revisar mensajes de p\u00e1ginas'];
 var PAGES=[],base=[],threshold=300,notas='';
 
@@ -571,7 +587,7 @@ function switchView(name,el){
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
   document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active')});
   document.getElementById('view-'+name).classList.add('active');el.classList.add('active');
-  if(name==='base')renderBase();if(name==='finanzas')renderFinanzas();if(name==='paginas')renderPagesView();if(name==='fondeos'){renderFondeoTabla();renderHistorialFondeos();syncFondeos();}
+  if(name==='base')renderBase();if(name==='finanzas')renderFinanzas();if(name==='paginas'){renderPagesView();renderGruposConfig();}if(name==='fondeos'){renderFondeoTabla();renderHistorialFondeos();syncFondeos();}
 }
 
 // CUENTAS
@@ -857,15 +873,51 @@ function loadHist(){
 }
 function run(){
   var btn=document.getElementById('btn-run');btn.disabled=true;btn.textContent='Procesando...';
-  var basePhones=new Set(base.map(function(r){return normalize(getPhoneFromRow(r,findPage(r._source)));}));
+
+  // Construir un set de teléfonos por GRUPO (no global) para que la deduplicación
+  // solo compare páginas dentro del mismo grupo (Juan / Héctor / Lic).
+  var basePhonesByGroup={}; // {grupoKey: Set(telefonos)}
+  var basePhonesUngrouped=new Set(); // páginas sin grupo asignado: comparan contra toda la base
+  base.forEach(function(r){
+    var page=findPage(r._source);
+    var n=normalize(getPhoneFromRow(r,page));
+    if(!n)return;
+    var grp=getGroupForAbbr(r._source);
+    if(grp){
+      if(!basePhonesByGroup[grp])basePhonesByGroup[grp]=new Set();
+      basePhonesByGroup[grp].add(n);
+    }else{
+      basePhonesUngrouped.add(n);
+    }
+  });
+  function isDupInBase(n,abbr){
+    var grp=getGroupForAbbr(abbr);
+    if(grp)return basePhonesByGroup[grp]&&basePhonesByGroup[grp].has(n);
+    return basePhonesUngrouped.has(n);
+  }
+
   var todayRows=[];var pages=PAGES.slice();var idx=0;
   function next(){if(idx>=pages.length){process();return}var page=pages[idx];idx++;if(!newFiles[page.abbr]){next();return}parseFile(newFiles[page.abbr]).then(function(rows){rows.forEach(function(row){todayRows.push({_raw:row,_page:page});});next();});}
   function process(){
-    var seenToday=new Map();
-    todayRows.forEach(function(item){var n=normalize(getPhoneFromRow(item._raw,item._page)||'');if(!n)return;if(!seenToday.has(n))seenToday.set(n,[]);seenToday.get(n).push(item);});
+    // "Duplicado entre hoy" también debe respetar grupos: dos páginas de grupos
+    // distintos pueden recibir el mismo teléfono sin marcarse como duplicado entre sí.
+    var seenTodayByGroupKey=new Map(); // key = grupo (o 'UNGROUPED:abbr') + teléfono
+    function seenKey(item){
+      var grp=getGroupForAbbr(item._page.abbr);
+      return (grp||('UNGROUPED:'+item._page.abbr))+'|'+normalize(getPhoneFromRow(item._raw,item._page)||'');
+    }
+    todayRows.forEach(function(item){
+      var n=normalize(getPhoneFromRow(item._raw,item._page)||'');
+      if(!n)return;
+      var key=seenKey(item);
+      if(!seenTodayByGroupKey.has(key))seenTodayByGroupKey.set(key,[]);
+      seenTodayByGroupKey.get(key).push(item);
+    });
     allResults=todayRows.map(function(item){
       var row=item._raw,page=item._page,src=page.abbr;var n=normalize(getPhoneFromRow(row,page)||'');
-      var status='ok';if(n&&basePhones.has(n))status='dup';else if(n&&seenToday.get(n)&&seenToday.get(n).length>1)status='ndup';
+      var status='ok';
+      if(n&&isDupInBase(n,src))status='dup';
+      else if(n){var k=seenKey(item);var grp=seenTodayByGroupKey.get(k);if(grp&&grp.length>1)status='ndup';}
       return{_status:status,_source:src,_phone_norm:n,_keep:false,fecha:fmtDate(getFechaFromRow(row,page)),nombre:getNameFromRow(row,page),telefono:getPhoneFromRow(row,page)||'',descripcion:getDescFromRow(row,page),_raw:row};
     });
     var total=allResults.length,dups=allResults.filter(function(r){return r._status==='dup'}).length;
@@ -915,8 +967,36 @@ function downloadPage(src){
 // v3.5: saveToBase ya NO guarda nada en localStorage, manda directo a Sheets
 async function saveToBase(){
   var unique=allResults.filter(function(r){return r._status==='ok'||r._keep;});if(!unique.length){alert('No hay registros \u00fanicos.');return}
-  var phones=new Set(base.map(function(r){return normalize(getPhoneFromRow(r,findPage(r._source)));}));var added=0;var newRecords=[];
-  unique.forEach(function(r){var n=normalize(r.telefono);if(n&&!phones.has(n)){phones.add(n);var slim=slimRecord(Object.assign({},r._raw,{_source:r._source}));base.push(slim);newRecords.push(slim);added++;}});
+  // Igual que en el análisis: el chequeo de "ya existe" respeta grupos
+  // (Juan / Héctor / Lic), así un mismo teléfono puede guardarse una vez
+  // por grupo sin bloquearse entre sí.
+  var phonesByGroup={};var phonesUngrouped=new Set();
+  base.forEach(function(r){
+    var n=normalize(getPhoneFromRow(r,findPage(r._source)));
+    if(!n)return;
+    var grp=getGroupForAbbr(r._source);
+    if(grp){if(!phonesByGroup[grp])phonesByGroup[grp]=new Set();phonesByGroup[grp].add(n);}
+    else phonesUngrouped.add(n);
+  });
+  function existsInBase(n,abbr){
+    var grp=getGroupForAbbr(abbr);
+    if(grp)return phonesByGroup[grp]&&phonesByGroup[grp].has(n);
+    return phonesUngrouped.has(n);
+  }
+  function markSaved(n,abbr){
+    var grp=getGroupForAbbr(abbr);
+    if(grp){if(!phonesByGroup[grp])phonesByGroup[grp]=new Set();phonesByGroup[grp].add(n);}
+    else phonesUngrouped.add(n);
+  }
+  var added=0;var newRecords=[];
+  unique.forEach(function(r){
+    var n=normalize(r.telefono);
+    if(n&&!existsInBase(n,r._source)){
+      markSaved(n,r._source);
+      var slim=slimRecord(Object.assign({},r._raw,{_source:r._source}));
+      base.push(slim);newRecords.push(slim);added++;
+    }
+  });
   updateDbInfo(); // actualizar pantalla inmediatamente con datos en memoria
   if(SHEETS_URL&&newRecords.length){
     toast('Guardando '+added+' registros en Google Sheets...');
@@ -1611,12 +1691,56 @@ function confirmarRedistribucion(){
   toast('\u2705 '+n+' leads movidos y normalizados a '+destinoAbbr);
 }
 
+function renderGruposConfig(){
+  var c=document.getElementById('grupos-config');
+  if(!c)return;
+  var html='';
+  Object.keys(GROUPS).forEach(function(grp){
+    var pagesInGroup=GROUPS[grp];
+    html+='<div style="margin-bottom:14px;padding:12px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border)">';
+    html+='<div style="font-size:12px;font-weight:700;color:var(--vino);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">'+grp+'</div>';
+    html+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    PAGES.forEach(function(p){
+      var checked=pagesInGroup.indexOf(p.abbr)>-1;
+      html+='<label style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1px solid '+(checked?'var(--vino)':'var(--border)')+';background:'+(checked?'var(--vino)':'#fff')+';color:'+(checked?'#fff':'var(--text)')+';cursor:pointer;font-size:12px">'+
+        '<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleGrupoPagina(\''+grp+'\',\''+p.abbr+'\',this.checked)" style="display:none">'+
+        p.abbr+
+        '</label>';
+    });
+    html+='</div></div>';
+  });
+  // Páginas sin grupo asignado
+  var asignadas=[].concat.apply([],Object.values(GROUPS));
+  var sinGrupo=PAGES.filter(function(p){return asignadas.indexOf(p.abbr)===-1;});
+  if(sinGrupo.length){
+    html+='<div style="padding:10px 12px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--radius-sm);font-size:12px;color:var(--amber)">⚠️ Sin grupo asignado (se comparan contra TODA la base): '+sinGrupo.map(function(p){return p.abbr;}).join(', ')+'</div>';
+  }
+  c.innerHTML=html;
+}
+function toggleGrupoPagina(grp,abbr,checked){
+  if(checked){
+    // Quitar de cualquier otro grupo primero (una página solo puede estar en un grupo)
+    Object.keys(GROUPS).forEach(function(g){
+      var i=GROUPS[g].indexOf(abbr);
+      if(i>-1)GROUPS[g].splice(i,1);
+    });
+    GROUPS[grp].push(abbr);
+  }else{
+    var i=GROUPS[grp].indexOf(abbr);
+    if(i>-1)GROUPS[grp].splice(i,1);
+  }
+  saveKey('groups',GROUPS);
+  renderGruposConfig();
+  toast('Grupos actualizados');
+}
+
 // INIT
 async function init(){
   document.getElementById('hdr-date').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   PAGES=await loadKey('pages',null)||JSON.parse(JSON.stringify(DEFAULT_PAGES));
   // Limpiar flag actualizado al abrir el panel
   PAGES.forEach(function(p){p.actualizado=false;});
+  GROUPS=await loadKey('groups',null)||JSON.parse(JSON.stringify(DEFAULT_GROUPS));
   // v3.5: la base YA NO se carga de localStorage; se carga siempre desde Google Sheets
   base=[];
   threshold=await loadKey('threshold',300);
