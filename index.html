@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v5.9</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v6.0</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -1543,20 +1543,66 @@ function devolverLead(idx){
   renderDestinoLista();
 }
 
+// Normaliza un registro para que sus datos (nombre, teléfono, fecha, anuncio, descripción)
+// sean legibles sin importar qué nombres de columna use la página de origen o destino.
+function normalizarRegistroParaMover(item,origenPage,destinoAbbr){
+  var raw=item._raw||{};
+  var nombre=getNameFromRow(raw,origenPage)||item.nombre||'';
+  var telefono=getPhoneFromRow(raw,origenPage)||item.telefono||'';
+  var descripcion=getDescFromRow(raw,origenPage)||item.descripcion||'';
+  var fechaRaw=getFechaFromRow(raw,origenPage)||raw.created_time||'';
+
+  // Construir un objeto con TODAS las variantes de nombre de campo conocidas
+  // para que cualquier página (sin importar su configuración de columnas) lo lea bien.
+  var normalizado=Object.assign({},raw,{
+    _source:destinoAbbr,
+    // Variantes de nombre
+    full_name:nombre,
+    nombre_completo:nombre,
+    first_name:nombre,
+    // Variantes de teléfono
+    phone_number:telefono,
+    'n\u00famero_de_tel\u00e9fono':telefono,
+    telefono:telefono,
+    // Fecha
+    created_time:fechaRaw,
+    // Anuncio (se reasigna al nuevo destino para que el reporte sea coherente)
+    ad_name:destinoAbbr
+  });
+  // Descripción: copiarla a cualquier campo de texto libre que la página destino use
+  if(descripcion){
+    Object.keys(raw).forEach(function(k){
+      if(/describe|fraude|sucedio|sucedi\u00f3|delito|caso|situacion|situaci\u00f3n|mensaje/i.test(k)){
+        normalizado[k]=descripcion;
+      }
+    });
+    // También como respaldo genérico
+    normalizado._descripcion_normalizada=descripcion;
+  }
+  return normalizado;
+}
+
 function confirmarRedistribucion(){
   var origenAbbr=document.getElementById('redis-origen').value;
   var destinoAbbr=document.getElementById('redis-destino').value;
   if(origenAbbr===destinoAbbr){toast('Origen y destino no pueden ser iguales');return;}
   if(!redisMovidos.length){toast('No hay leads para mover');return;}
+  var origenPage=findPage(origenAbbr);
   redisMovidos.forEach(function(idx){
-    allResults[idx]._source=destinoAbbr;
-    if(allResults[idx]._raw)allResults[idx]._raw._source=destinoAbbr;
+    var item=allResults[idx];
+    item._raw=normalizarRegistroParaMover(item,origenPage,destinoAbbr);
+    item._source=destinoAbbr;
+    // Refrescar también los campos visibles en la tabla de resultados
+    var destinoPage=findPage(destinoAbbr);
+    item.nombre=getNameFromRow(item._raw,destinoPage)||item.nombre;
+    item.telefono=getPhoneFromRow(item._raw,destinoPage)||item.telefono;
+    item.descripcion=getDescFromRow(item._raw,destinoPage)||item.descripcion;
   });
   var n=redisMovidos.length;
   cerrarRedistribucion();
   renderTable();
   updateDlGrid();
-  toast('\u2705 '+n+' leads movidos a '+destinoAbbr);
+  toast('\u2705 '+n+' leads movidos y normalizados a '+destinoAbbr);
 }
 
 // INIT
