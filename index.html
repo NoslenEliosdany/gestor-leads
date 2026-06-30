@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v6.0</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v6.1</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -1588,15 +1588,21 @@ function confirmarRedistribucion(){
   if(origenAbbr===destinoAbbr){toast('Origen y destino no pueden ser iguales');return;}
   if(!redisMovidos.length){toast('No hay leads para mover');return;}
   var origenPage=findPage(origenAbbr);
+  var destinoPage=findPage(destinoAbbr);
   redisMovidos.forEach(function(idx){
     var item=allResults[idx];
+    var descripcionOriginal=item.descripcion||getDescFromRow(item._raw||{},origenPage)||'';
     item._raw=normalizarRegistroParaMover(item,origenPage,destinoAbbr);
+    // Forzar la descripción directamente en el campo que usa la página destino,
+    // sin depender de que el regex de detección la encuentre sola.
+    var descField=fieldByRole(destinoPage,'descripcion');
+    if(descField&&descField.key&&descripcionOriginal){
+      item._raw[descField.key]=descripcionOriginal;
+    }
     item._source=destinoAbbr;
-    // Refrescar también los campos visibles en la tabla de resultados
-    var destinoPage=findPage(destinoAbbr);
     item.nombre=getNameFromRow(item._raw,destinoPage)||item.nombre;
     item.telefono=getPhoneFromRow(item._raw,destinoPage)||item.telefono;
-    item.descripcion=getDescFromRow(item._raw,destinoPage)||item.descripcion;
+    item.descripcion=descripcionOriginal||getDescFromRow(item._raw,destinoPage)||item.descripcion;
   });
   var n=redisMovidos.length;
   cerrarRedistribucion();
