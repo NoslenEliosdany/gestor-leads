@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v6.4</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v6.7</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -1143,7 +1143,7 @@ function renderFondeoTabla(){
     var presup=parseSaldo(p.presupuestoDiario);
     var dias=presup>0?Math.floor(saldo/presup):null;
     return{p:p,i:i,dias:dias,saldo:saldo,presup:presup};
-  }).filter(function(item){return item.p.estado!=='pausada';})
+  }).filter(function(item){return item.p.estado!=='pausada'&&!item.p.simulando;})
   .sort(function(a,b){
     if(a.dias===null&&b.dias===null)return 0;
     if(a.dias===null)return 1;
@@ -1397,15 +1397,17 @@ function generarExcelFondeo(){
   var sorted=PAGES.filter(function(p){return p.estado!=='pausada';})
   .map(function(p,i){
     var realIdx=PAGES.indexOf(p);
-    var saldo=parseSaldo(p.saldo);
+    // Si la página está en simulación, usar su saldo simulado en vez del real
+    var saldo=p.simulando?(p.simSaldo||0):parseSaldo(p.saldo);
+    var saldoFecha=p.simulando?(p.simFecha||''):(p.saldoFecha||'');
     var presup=parseSaldo(p.presupuestoDiario);
     var dias=presup>0?Math.floor(saldo/presup):null;
     var cb=document.getElementById('fc-'+realIdx);
     var inp=document.getElementById('fm-'+realIdx);
     var monto=cb&&cb.checked&&inp?parseSaldo(inp.value):0;
     var sugerido=presup>0?presup*7:0;
-    return{pagina:p.pagina,abbr:p.abbr,saldo:saldo,saldoFecha:p.saldoFecha||'',
-      dias:dias,presup:presup,monto:monto,sugerido:sugerido,fondeada:monto>0};
+    return{pagina:p.pagina,abbr:p.abbr,saldo:saldo,saldoFecha:saldoFecha,
+      dias:dias,presup:presup,monto:monto,sugerido:sugerido,fondeada:monto>0,simulando:!!p.simulando};
   }).sort(function(a,b){
     if(a.dias===null&&b.dias===null)return 0;
     if(a.dias===null)return 1;
@@ -1879,7 +1881,7 @@ function renderSimTabla(){
   }
   var html='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
   html+='<thead><tr style="background:var(--surface2)">';
-  ['Página','Saldo simulado','Presup/día','Días proyectados','Última actualización',''].forEach(function(t){
+  ['Página','Saldo simulado','Presup/día','Días proyectados','Última actualización','Editar saldo'].forEach(function(t){
     html+='<th style="padding:7px 10px;text-align:left;font-size:9px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">'+t+'</th>';
   });
   html+='</tr></thead><tbody>';
@@ -1895,22 +1897,22 @@ function renderSimTabla(){
     html+='<td style="padding:7px 10px">'+(presup>0?'$'+presup.toLocaleString('es-MX'):'<span style="color:var(--text3)">—</span>')+'</td>';
     html+='<td style="padding:7px 10px;font-weight:700;color:'+diasColor+'">'+(dias!==null?dias+' días':'—')+'</td>';
     html+='<td style="padding:7px 10px;font-size:11px;color:var(--text3)">'+(p.simFecha||'—')+'</td>';
-    html+='<td style="padding:7px 10px"><button onclick="fondearSimulado('+i+')" style="padding:4px 10px;background:var(--vino);color:var(--cream);border:none;border-radius:var(--radius-sm);font-size:11px;cursor:pointer;white-space:nowrap">+ Fondear</button></td>';
+    html+='<td style="padding:7px 10px"><div style="display:flex;gap:5px;align-items:center"><input type="number" id="sim-input-'+i+'" placeholder="0" style="width:90px;padding:5px 7px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:inherit"><button onclick="guardarSaldoSimulado('+i+')" style="padding:5px 10px;background:var(--vino);color:var(--cream);border:none;border-radius:var(--radius-sm);font-size:11px;cursor:pointer;white-space:nowrap">Guardar</button></div></td>';
     html+='</tr>';
   });
   html+='</tbody></table></div>';
   c.innerHTML=html;
 }
 
-function fondearSimulado(i){
-  var monto=prompt('¿Cuánto vas a agregar a la simulación de '+PAGES[i].pagina+'?');
-  if(!monto)return;
-  var n=parseSaldo(monto);
-  if(!n||n<=0){toast('Monto inválido');return;}
-  PAGES[i].simSaldo=(PAGES[i].simSaldo||0)+n;
+function guardarSaldoSimulado(i){
+  var inp=document.getElementById('sim-input-'+i);
+  if(!inp||!inp.value.trim())return;
+  var n=parseSaldo(inp.value);
+  PAGES[i].simSaldo=n;
+  PAGES[i].simFecha=hoyISO();
   savePages();
   renderSimTabla();
-  toast('✅ +$'+n.toLocaleString('es-MX')+' agregado a la simulación');
+  toast('✅ Saldo simulado actualizado: $'+n.toLocaleString('es-MX'));
 }
 
 // INIT
