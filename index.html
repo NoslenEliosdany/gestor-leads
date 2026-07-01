@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v7.1</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v7.2</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -1859,16 +1859,16 @@ function actualizarSimulacionDiaria(){
     if(!p.simulando)return;
     if(p.simSaldo===undefined||p.simSaldo===null){
       p.simSaldo=parseSaldo(p.saldo)||0;
-      p.simFecha=hoy;
+      p.simFecha=hoyConHora();
       cambiado=true;
       return;
     }
-    if(p.simFecha===hoy)return; // ya se calculó hoy
+    if(p.simFecha&&p.simFecha.slice(0,10)===hoy)return; // ya se calculó hoy
     var dias=diasEntre(p.simFecha,hoy);
-    if(dias<=0){p.simFecha=hoy;return;}
+    if(dias<=0){p.simFecha=hoyConHora();return;}
     var presup=parseSaldo(p.presupuestoDiario)||0;
     for(var i=1;i<=dias;i++){
-      var fechaDia=new Date(p.simFecha+'T00:00:00');
+      var fechaDia=new Date(p.simFecha.slice(0,10)+'T00:00:00');
       fechaDia.setDate(fechaDia.getDate()+i);
       var fechaStr=fechaDia.getFullYear()+'-'+String(fechaDia.getMonth()+1).padStart(2,'0')+'-'+String(fechaDia.getDate()).padStart(2,'0');
       var factor=factorVariacion(p.abbr+fechaStr);
@@ -1902,7 +1902,7 @@ function toggleSimPagina(idx,checked){
   PAGES[idx].simulando=checked;
   if(checked&&(PAGES[idx].simSaldo===undefined||PAGES[idx].simSaldo===null)){
     PAGES[idx].simSaldo=parseSaldo(PAGES[idx].saldo)||0;
-    PAGES[idx].simFecha=hoyISO();
+    PAGES[idx].simFecha=hoyConHora();
   }
 }
 
@@ -1944,7 +1944,7 @@ function guardarSaldoSimulado(i){
   if(!inp||!inp.value.trim())return;
   var n=parseSaldo(inp.value);
   PAGES[i].simSaldo=n;
-  PAGES[i].simFecha=hoyISO();
+  PAGES[i].simFecha=hoyConHora();
   savePages();
   renderSimTabla();
   toast('✅ Saldo simulado actualizado: $'+n.toLocaleString('es-MX'));
