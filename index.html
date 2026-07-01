@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v6.7</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v6.9</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -1189,7 +1189,7 @@ function renderFondeoTabla(){
     '</td>';
     // Saldo + fecha
     html+='<td style="padding:6px 8px">'+
-      '<div style="font-weight:600;color:'+(saldo>0?'var(--green)':'var(--text3)')+'">'+(saldo>0?'$'+saldo.toLocaleString('es-MX'):'—')+'</div>'+
+      '<div style="font-weight:600;color:'+(saldo>0?'var(--green)':'var(--text3)')+'">'+(saldo>0?'$'+saldo.toLocaleString('es-MX',{minimumFractionDigits:2}):'—')+'</div>'+
       (p.saldoFecha?'<div style="font-size:9px;color:var(--text3)">'+p.saldoFecha+'</div>':'')+
     '</td>';
     // Nuevo saldo
@@ -1200,14 +1200,38 @@ function renderFondeoTabla(){
     // Días
     html+='<td style="padding:6px 8px;font-weight:700;font-size:12px;color:'+diasColor+'">'+(dias!==null?dias+' d':'—')+'</td>';
     // Presup/día
-    html+='<td style="padding:6px 8px;font-size:11px">'+(presup>0?'$'+presup.toLocaleString('es-MX'):'<span style="color:var(--text3)">—</span>')+'</td>';
+    html+='<td style="padding:6px 8px;font-size:11px">'+(presup>0?'$'+presup.toLocaleString('es-MX',{minimumFractionDigits:2}):'<span style="color:var(--text3)">—</span>')+'</td>';
     // Monto a fondear
     html+='<td style="padding:6px 8px"><input type="number" id="fm-'+i+'" placeholder="0" style="width:100%;padding:4px 6px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:inherit" onchange="toggleFondeoRow('+i+')"></td>';
     // Sugerido
-    html+='<td style="padding:6px 8px;color:var(--text3);font-size:11px">'+(sugerido>0?'$'+sugerido.toLocaleString('es-MX'):'—')+'</td>';
+    html+='<td style="padding:6px 8px;color:var(--text3);font-size:11px">'+(sugerido>0?'$'+sugerido.toLocaleString('es-MX',{minimumFractionDigits:2}):'—')+'</td>';
     html+='</tr>';
   });
 
+  // Agregar páginas simuladas al final de la tabla real
+  var simuladas=PAGES.map(function(p,i){return{p:p,i:i};})
+    .filter(function(x){return x.p.simulando&&x.p.estado!=='pausada';});
+  if(simuladas.length){
+    html+='<tr><td colspan="8" style="padding:6px 10px;background:var(--blue-bg);font-size:10px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;border-top:2px solid #C0D8F0;border-bottom:1px solid var(--border)">📈 Páginas en simulación</td></tr>';
+    simuladas.forEach(function(x){
+      var p=x.p,i=x.i;
+      var saldo=p.simSaldo||0;
+      var presup=parseSaldo(p.presupuestoDiario)||0;
+      var dias=presup>0?Math.floor(saldo/presup):null;
+      var sugerido=presup>0?presup*7:0;
+      var diasColor=dias===null?'var(--text3)':dias<=2?'var(--red)':dias<=5?'var(--amber)':'var(--green)';
+      html+='<tr id="frow-'+i+'" style="border-bottom:1px solid var(--border);background:var(--blue-bg)">';
+      html+='<td style="padding:8px;text-align:center"><input type="checkbox" id="fc-'+i+'" onchange="toggleFondeoRow('+i+')" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer"></td>';
+      html+='<td style="padding:8px;min-width:160px"><strong>'+p.pagina+'</strong><span class="page-abbr">'+p.abbr+'</span>'+(p.fbCuenta?'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+p.fbCuenta+'</div>':'')+'</td>';
+      html+='<td style="padding:8px"><div style="font-weight:600;color:'+(saldo>0?'var(--green)':'var(--text3)')+'">'+(saldo>0?'$'+saldo.toLocaleString('es-MX',{minimumFractionDigits:2}):'—')+'</div>'+(p.simFecha?'<div style="font-size:10px;color:var(--text3)">'+p.simFecha+'</div>':'')+'</td>';
+      html+='<td style="padding:8px"><div style="display:flex;gap:5px;align-items:center"><input type="number" id="fs-'+i+'" placeholder="0" style="width:90px;padding:5px 7px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:inherit"><button onclick="guardarSaldoFondeo('+i+')" style="padding:5px 10px;background:var(--vino);color:var(--cream);border:none;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;white-space:nowrap">Guardar</button></div></td>';
+      html+='<td style="padding:8px;font-weight:600;color:'+diasColor+'">'+(dias!==null?dias+' d':'—')+'</td>';
+      html+='<td style="padding:8px">'+(presup>0?'$'+presup.toLocaleString('es-MX',{minimumFractionDigits:2}):'<span style="color:var(--text3)">—</span>')+'</td>';
+      html+='<td style="padding:8px"><input type="number" id="fm-'+i+'" placeholder="0" style="width:100px;padding:4px 6px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:inherit" onchange="toggleFondeoRow('+i+')"></td>';
+      html+='<td style="padding:8px;color:var(--text3);font-size:11px">'+(sugerido>0?'$'+sugerido.toLocaleString('es-MX',{minimumFractionDigits:2}):'—')+'</td>';
+      html+='</tr>';
+    });
+  }
   html+='</tbody></table></div>';
   document.getElementById('fondeo-tabla').innerHTML=html;
 }
@@ -1493,17 +1517,24 @@ function guardarSaldoFondeo(i){
   var inp=document.getElementById('fs-'+i);
   if(!inp||!inp.value.trim())return;
   var val=inp.value.trim();
-  PAGES[i].saldo=val;
+  var n=parseSaldo(val);
   var now=new Date();
-  PAGES[i].saldoFecha=now.toLocaleDateString('es-MX',{day:'2-digit',month:'short'})+' '+now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  var fechaStr=now.toLocaleDateString('es-MX',{day:'2-digit',month:'short'})+' '+now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  if(PAGES[i].simulando){
+    PAGES[i].simSaldo=n;
+    PAGES[i].simFecha=hoyISO();
+  }else{
+    PAGES[i].saldo=val;
+    PAGES[i].actualizado=true;
+    PAGES[i].saldoFecha=fechaStr;
+  }
   savePages();
   renderAccounts();
-  // Actualizar saldo mostrado en la fila sin rerenderizar toda la tabla
-  var cell=document.querySelector('#frow-'+i+' td:nth-child(3)');
-  if(cell){cell.textContent='$'+parseSaldo(val).toLocaleString('es-MX');cell.style.color='var(--green);font-weight:600';}
+  renderFondeoTabla();
+  renderSimTabla();
   inp.value='';
-  inp.placeholder='✓ $'+parseSaldo(val).toLocaleString('es-MX');
-  toast('✅ Saldo guardado: $'+parseSaldo(val).toLocaleString('es-MX'));
+  inp.placeholder='✓ $'+n.toLocaleString('es-MX');
+  toast('✅ Saldo actualizado: $'+n.toLocaleString('es-MX'));
 }
 function desmarcarActualizado(i){
   PAGES[i].actualizado=false;
@@ -1894,7 +1925,7 @@ function renderSimTabla(){
     html+='<tr style="border-bottom:1px solid var(--border)">';
     html+='<td style="padding:7px 10px"><strong>'+p.pagina+'</strong><span class="page-abbr">'+p.abbr+'</span></td>';
     html+='<td style="padding:7px 10px;font-weight:700;color:'+(saldo>0?'var(--green)':'var(--red)')+'">$'+saldo.toLocaleString('es-MX',{minimumFractionDigits:2})+'</td>';
-    html+='<td style="padding:7px 10px">'+(presup>0?'$'+presup.toLocaleString('es-MX'):'<span style="color:var(--text3)">—</span>')+'</td>';
+    html+='<td style="padding:7px 10px">'+(presup>0?'$'+presup.toLocaleString('es-MX',{minimumFractionDigits:2}):'<span style="color:var(--text3)">—</span>')+'</td>';
     html+='<td style="padding:7px 10px;font-weight:700;color:'+diasColor+'">'+(dias!==null?dias+' días':'—')+'</td>';
     html+='<td style="padding:7px 10px;font-size:11px;color:var(--text3)">'+(p.simFecha||'—')+'</td>';
     html+='<td style="padding:7px 10px"><div style="display:flex;gap:5px;align-items:center"><input type="number" id="sim-input-'+i+'" placeholder="0" style="width:90px;padding:5px 7px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:inherit"><button onclick="guardarSaldoSimulado('+i+')" style="padding:5px 10px;background:var(--vino);color:var(--cream);border:none;border-radius:var(--radius-sm);font-size:11px;cursor:pointer;white-space:nowrap">Guardar</button></div></td>';
