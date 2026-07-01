@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v7.0</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v7.1</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -1215,7 +1215,7 @@ function renderFondeoTabla(){
     html+='<tr><td colspan="8" style="padding:6px 10px;background:var(--blue-bg);font-size:10px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;border-top:2px solid #C0D8F0;border-bottom:1px solid var(--border)">📈 Páginas en simulación</td></tr>';
     simuladas.forEach(function(x){
       var p=x.p,i=x.i;
-      var saldo=p.simSaldo||0;
+      var saldo=Math.round((p.simSaldo||0)*100)/100;
       var presup=parseSaldo(p.presupuestoDiario)||0;
       var dias=presup>0?Math.floor(saldo/presup):null;
       var sugerido=presup>0?presup*7:0;
@@ -1423,9 +1423,7 @@ function generarExcelFondeo(){
     var realIdx=PAGES.indexOf(p);
     // Si la página está en simulación, usar su saldo simulado en vez del real
     var saldo=p.simulando?(p.simSaldo||0):parseSaldo(p.saldo);
-    var saldoFecha=p.simulando?
-      (p.simFecha?new Date(p.simFecha+'T00:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}):'')
-      :(p.saldoFecha||'');
+    var saldoFecha=p.simulando?(p.simFecha||''):(p.saldoFecha||'');
     var presup=parseSaldo(p.presupuestoDiario);
     var dias=presup>0?Math.floor(saldo/presup):null;
     var cb=document.getElementById('fc-'+realIdx);
@@ -1524,7 +1522,7 @@ function guardarSaldoFondeo(i){
   var fechaStr=now.toLocaleDateString('es-MX',{day:'2-digit',month:'short'})+' '+now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
   if(PAGES[i].simulando){
     PAGES[i].simSaldo=n;
-    PAGES[i].simFecha=hoyISO();
+    PAGES[i].simFecha=hoyConHora();
   }else{
     PAGES[i].saldo=val;
     PAGES[i].actualizado=true;
@@ -1848,6 +1846,10 @@ function hoyISO(){
   var d=new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
+function hoyConHora(){
+  var d=new Date();
+  return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+}
 
 // Al abrir el panel: avanzar la simulación de cada página simulando los días que pasaron
 function actualizarSimulacionDiaria(){
@@ -1872,7 +1874,7 @@ function actualizarSimulacionDiaria(){
       var factor=factorVariacion(p.abbr+fechaStr);
       p.simSaldo=Math.round(Math.max(0,p.simSaldo-presup*factor)*100)/100;
     }
-    p.simFecha=hoy;
+    p.simFecha=hoyConHora();
     cambiado=true;
   });
   if(cambiado)savePages();
