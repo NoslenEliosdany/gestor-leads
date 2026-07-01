@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v6.9</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v7.0</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -1423,7 +1423,9 @@ function generarExcelFondeo(){
     var realIdx=PAGES.indexOf(p);
     // Si la página está en simulación, usar su saldo simulado en vez del real
     var saldo=p.simulando?(p.simSaldo||0):parseSaldo(p.saldo);
-    var saldoFecha=p.simulando?(p.simFecha||''):(p.saldoFecha||'');
+    var saldoFecha=p.simulando?
+      (p.simFecha?new Date(p.simFecha+'T00:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}):'')
+      :(p.saldoFecha||'');
     var presup=parseSaldo(p.presupuestoDiario);
     var dias=presup>0?Math.floor(saldo/presup):null;
     var cb=document.getElementById('fc-'+realIdx);
@@ -1868,7 +1870,7 @@ function actualizarSimulacionDiaria(){
       fechaDia.setDate(fechaDia.getDate()+i);
       var fechaStr=fechaDia.getFullYear()+'-'+String(fechaDia.getMonth()+1).padStart(2,'0')+'-'+String(fechaDia.getDate()).padStart(2,'0');
       var factor=factorVariacion(p.abbr+fechaStr);
-      p.simSaldo=Math.max(0,p.simSaldo-presup*factor);
+      p.simSaldo=Math.round(Math.max(0,p.simSaldo-presup*factor)*100)/100;
     }
     p.simFecha=hoy;
     cambiado=true;
