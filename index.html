@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v7.2</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v7.4</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -626,14 +626,15 @@ function renderAccounts(){
   var visibles=PAGES.map(function(a,i){return{a:a,i:i};}).filter(function(x){return x.a.estado!=='pausada';});
   document.getElementById('accounts-body').innerHTML=visibles.map(function(x){
     var a=x.a,i=x.i;
-    var sN=parseSaldo(a.saldo),pN=parseSaldo(a.presupuestoDiario);
+    var sN=a.simulando?Math.round((a.simSaldo||0)*100)/100:parseSaldo(a.saldo);
+    var pN=parseSaldo(a.presupuestoDiario);
     var dias=pN>0?Math.floor(sN/pN):null;
     var dc=dias===null?'var(--text3)':dias<=2?'var(--red)':dias<=5?'var(--amber)':'var(--green)';
     var sc=!a.saldo?'var(--text3)':sN<threshold?'var(--red)':'var(--green)';
     var rowColor=a.actualizado?'#EAF4EE':(rowBg[a.estado]||'#fff');return'<tr style="background:'+rowColor+';cursor:pointer" onclick="openModal('+i+')">'+
       '<td><strong>'+a.pagina+'</strong><span class="page-abbr">'+a.abbr+'</span>'+(a.fbCuenta?'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+a.fbCuenta+'</div>':'')+' </td>'+
       '<td style="font-size:12px;color:var(--text2)">'+(a.fbCuenta||'\u2014')+'</td>'+
-      '<td><span style="font-weight:700;color:'+sc+'">'+(a.saldo?'$'+a.saldo:'\u2014')+'</span>'+(a.saldoFecha?'<div style="font-size:9px;color:var(--text3)">'+a.saldoFecha+'</div>':'')+'</td>'+
+      '<td><span style="font-weight:700;color:'+sc+'">'+(a.simulando?('$'+(Math.round((a.simSaldo||0)*100)/100).toLocaleString('es-MX',{minimumFractionDigits:2})+'&nbsp;<span style="font-size:9px;background:#1A4F8A;color:#fff;border-radius:20px;padding:1px 5px">SIM</span>'):( a.saldo?'$'+a.saldo:'\u2014'))+'</span>'+(a.simulando?(a.simFecha?'<div style="font-size:9px;color:var(--text3)">'+a.simFecha+'</div>':''):(a.saldoFecha?'<div style="font-size:9px;color:var(--text3)">'+a.saldoFecha+'</div>':''))+'</td>'+
       '<td style="font-weight:600;color:'+dc+'">'+(dias!==null?dias+' d\u00edas':'\u2014')+'</td>'+
       '<td style="text-align:center"><span style="font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;'+(a.dospasos?'background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)':'background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)')+'">'+( a.dospasos?'SI':'NO')+'</span></td>'+
       '<td><span class="badge b-'+a.estado+'">'+a.estado+'</span></td>'+
@@ -1955,7 +1956,16 @@ async function init(){
   document.getElementById('hdr-date').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   PAGES=await loadKey('pages',null)||JSON.parse(JSON.stringify(DEFAULT_PAGES));
   // Limpiar flag actualizado al abrir el panel
-  PAGES.forEach(function(p){p.actualizado=false;});
+  PAGES.forEach(function(p){
+    p.actualizado=false;
+    // Migrar simFecha de formato ISO (2026-07-01) a formato con hora
+    if(p.simFecha&&/^\d{4}-\d{2}-\d{2}$/.test(p.simFecha)){
+      var d=new Date(p.simFecha+'T00:00:00');
+      if(!isNaN(d)){
+        p.simFecha=d.toLocaleDateString('es-MX',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+      }
+    }
+  });
   GROUPS=await loadKey('groups',null)||JSON.parse(JSON.stringify(DEFAULT_GROUPS));
   // v3.5: la base YA NO se carga de localStorage; se carga siempre desde Google Sheets
   base=[];
