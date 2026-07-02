@@ -107,7 +107,7 @@ input[type=text],input[type=number]{font-size:13px;padding:6px 10px;border:1px s
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-seal">⚖️</div>
-    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v7.4</div></div>
+    <div><div class="hdr-title">Panel de Registros</div><div class="hdr-sub">Grupo MX · v7.5</div></div>
   </div>
   <div class="hdr-date" id="hdr-date"></div>
 </div>
@@ -1975,6 +1975,26 @@ async function init(){
   document.getElementById('notas-dia').value=notas;
   buildUploadZones();renderAccounts();updateDbInfo();updateBaseFilterOptions();
   renderFondeoTabla();
+  // Descuento en tiempo real cada minuto (1/1440 del presupuesto diario)
+  setInterval(function(){
+    var cambiado=false;
+    PAGES.forEach(function(p){
+      if(!p.simulando)return;
+      var presup=parseSaldo(p.presupuestoDiario)||0;
+      if(!presup)return;
+      var gastoMinuto=presup/1440; // presupuesto diario ÷ 1440 minutos
+      var factor=factorVariacion(p.abbr+new Date().toISOString().slice(0,16)); // varía por minuto
+      var descuento=gastoMinuto*(0.85+factor*0.30);
+      p.simSaldo=Math.round(Math.max(0,(p.simSaldo||0)-descuento)*100)/100;
+      cambiado=true;
+    });
+    if(cambiado){
+      savePages();
+      renderSimTabla();
+      renderAccounts();
+      renderFondeoTabla();
+    }
+  },60000); // cada 60 segundos
   if(SHEETS_URL){
     var inp=document.getElementById('sheets-url-input');
     if(inp)inp.value=SHEETS_URL;
